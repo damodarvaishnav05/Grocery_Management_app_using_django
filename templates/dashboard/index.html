@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <h2 class="mb-4">
+        Dashboard
+    </h2>
+
+    <!-- Manage Orders Button -->
+    <div class="mb-4">
+
+        <a
+            href="{% url 'dashboard:orders' %}"
+            class="btn btn-primary"
+        >
+            Manage Orders
+        </a>
+
+    </div>
+
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Products -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h3>
+                        {{ total_products }}
+                    </h3>
+
+                    <small>
+                        Products
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Total Customers -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h3>
+                        {{ total_customers }}
+                    </h3>
+
+                    <small>
+                        Customers
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Total Orders -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h3>
+                        {{ total_orders }}
+                    </h3>
+
+                    <small>
+                        Orders
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Revenue -->
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h3>
+                        ₹{{ revenue }}
+                    </h3>
+
+                    <small>
+                        Revenue
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Low Stock -->
+        <div class="col-md-3">
+
+            <div class="card text-center shadow-sm">
+
+                <div class="card-body">
+
+                    <h3 class="text-danger">
+                        {{ low_stock_count }}
+                    </h3>
+
+                    <p>
+                        Low Stock
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Orders -->
+    <div class="row g-3 mb-4">
+
+        <!-- Pending Orders -->
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h4>
+                        {{ pending_orders }}
+                    </h4>
+
+                    <small>
+                        Pending Orders
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Delivered Orders -->
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h4>
+                        {{ delivered_orders }}
+                    </h4>
+
+                    <small>
+                        Delivered Orders
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Orders -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            Recent Orders
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for order in recent_orders %}
+
+                    <tr>
+
+                        <td>
+                            #{{ order.id }}
+                        </td>
+
+                        <td>
+                            {{ order.user.username }}
+                        </td>
+
+                        <td>
+                            ₹{{ order.total_amount }}
+                        </td>
+
+                        <td>
+                            {{ order.status }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="4">
+                            No Orders Found
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Low Stock Products -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            Low Stock Products
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+
+                <thead>
+
+                    <tr>
+                        <th>Product</th>
+                        <th>Stock</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for product in low_stock_products %}
+
+                    <tr>
+
+                        <td>
+                            {{ product.name }}
+                        </td>
+
+                        <td>
+                            {{ product.stock }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="2">
+                            No Low Stock Products
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile | FreshMart{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- PROFILE HEADER -->
+
+    <div class="card border-0 shadow-lg rounded-4 mb-4 profile-header">
+
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-2 text-center">
+
+                    {% if request.user.profile_picture %}
+
+                    <img
+                        src="{{ request.user.profile_picture.url }}"
+                        class="profile-avatar"
+                        alt="{{ request.user.username }}"
+                    >
+
+                    {% else %}
+
+                    <img
+                        src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=198754&color=fff&size=256"
+                        class="profile-avatar"
+                        alt="{{ request.user.username }}"
+                    >
+
+                    {% endif %}
+
+                </div>
+
+                <div class="col-lg-7">
+
+                    <h2 class="fw-bold mb-1">
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </h2>
+
+                    <p class="text-muted mb-2">
+                        {{ request.user.email }}
+                    </p>
+
+                    <span class="badge bg-success px-3 py-2">
+                        {{ request.user.role }}
+                    </span>
+
+                </div>
+
+                <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
+
+                    <a
+                        href="{% url 'accounts:edit_profile' %}"
+                        class="btn btn-success mb-2"
+                    >
+                        <i class="bi bi-pencil-square me-1"></i>
+                        Edit Profile
+                    </a>
+
+                    <br>
+
+                    <a
+                        href="{% url 'accounts:logout' %}"
+                        class="btn btn-outline-danger"
+                    >
+                        <i class="bi bi-box-arrow-right me-1"></i>
+                        Logout
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card stat-card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-bag-check stat-icon text-success"></i>
+
+                    <h3 class="fw-bold mt-3">
+                        {{ total_orders }}
+                    </h3>
+
+                    <p class="text-muted mb-0">
+                        Total Orders
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card stat-card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-currency-rupee stat-icon text-primary"></i>
+
+                    <h3 class="fw-bold mt-3">
+                        ₹{{ total_spent }}
+                    </h3>
+
+                    <p class="text-muted mb-0">
+                        Total Spent
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card stat-card border-0 shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-heart stat-icon text-danger"></i>
+
+                    <h3 class="fw-bold mt-3">
+                        0
+                    </h3>
+
+                    <p class="text-muted mb-0">
+                        Wishlist Items
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACCOUNT DETAILS -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-header bg-success text-white">
+
+            <h5 class="mb-0">
+                Account Information
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="text-muted small">
+                        Username
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ request.user.username }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="text-muted small">
+                        Full Name
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ request.user.get_full_name }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="text-muted small">
+                        Email Address
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ request.user.email }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="text-muted small">
+                        Phone Number
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ request.user.phone_number }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="text-muted small">
+                        Role
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ request.user.role }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="text-muted small">
+                        Joined
+                    </label>
+
+                    <div class="fw-semibold">
+                        {{ request.user.date_joined|date:"d M Y" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

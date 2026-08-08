@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Failed{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+<div class="alert alert-danger text-center">
+
+<h2>
+
+Payment Failed
+
+</h2>
+
+<p>
+
+Please try again.
+
+</p>
+
+<a
+href="{% url 'orders:index' %}"
+class="btn btn-primary">
+
+My Orders
+
+</a>
+
+</div>
+
+</div>
+
+{% endblock %}

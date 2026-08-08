@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Account | FreshMart{% endblock %}
+
+{% block extra_css %}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+
+<style>
+
+.register-section{
+    min-height:90vh;
+    display:flex;
+    align-items:center;
+    padding:50px 0;
+}
+
+.register-card{
+    background:#fff;
+    border:none;
+    border-radius:25px;
+    overflow:hidden;
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+.left-side{
+    background:linear-gradient(
+        135deg,
+        #2d6a4f,
+        #52b788
+    );
+    color:white;
+    padding:60px;
+    height:100%;
+}
+
+.left-side h2{
+    font-size:2.8rem;
+    font-weight:700;
+}
+
+.left-side p{
+    font-size:18px;
+    opacity:.95;
+    line-height:1.8;
+}
+
+.feature{
+    margin-bottom:18px;
+    font-size:17px;
+}
+
+.feature i{
+    margin-right:10px;
+}
+
+.right-side{
+    padding:50px;
+}
+
+.logo{
+    font-size:2rem;
+    font-weight:700;
+    color:#2d6a4f;
+}
+
+.subtitle{
+    color:#6c757d;
+    margin-bottom:25px;
+}
+
+.form-label{
+    font-weight:600;
+}
+
+.form-control{
+    height:50px;
+    border-radius:12px;
+}
+
+.form-control:focus{
+    border-color:#52b788;
+    box-shadow:none;
+}
+
+.btn-register{
+    height:52px;
+    border-radius:12px;
+    background:#2d6a4f;
+    border:none;
+    color:white;
+    font-weight:600;
+}
+
+.btn-register:hover{
+    background:#1b4332;
+    color:white;
+}
+
+.password-meter{
+    height:8px;
+    background:#e9ecef;
+    border-radius:50px;
+    overflow:hidden;
+    margin-top:8px;
+}
+
+.password-meter span{
+    display:block;
+    height:100%;
+    width:0;
+    transition:.3s;
+}
+
+.login-link{
+    text-align:center;
+    margin-top:20px;
+}
+
+.login-link a{
+    color:#2d6a4f;
+    font-weight:600;
+    text-decoration:none;
+}
+
+@media(max-width:991px){
+
+    .left-side{
+        display:none;
+    }
+
+    .right-side{
+        padding:30px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<section class="register-section">
+
+    <div class="container">
+
+        <div class="card register-card">
+
+            <div class="row g-0">
+
+                <!-- LEFT -->
+
+                <div class="col-lg-5">
+
+                    <div class="left-side">
+
+                        <h2>Join FreshMart</h2>
+
+                        <p class="mt-4">
+                            Fresh groceries delivered to your doorstep within minutes.
+                            Create your account and enjoy exclusive offers,
+                            cashback rewards and lightning-fast delivery.
+                        </p>
+
+                        <div class="mt-5">
+
+                            <div class="feature">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Fresh Vegetables & Fruits
+                            </div>
+
+                            <div class="feature">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Daily Essentials
+                            </div>
+
+                            <div class="feature">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Fast Delivery
+                            </div>
+
+                            <div class="feature">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Secure Payments
+                            </div>
+
+                        </div>
+
+                        <div class="text-center mt-5">
+                            <i class="fa-solid fa-cart-shopping fa-8x opacity-50"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+
+                <div class="col-lg-7">
+
+                    <div class="right-side">
+
+                        <div class="logo">
+                            <i class="fa-solid fa-basket-shopping me-2"></i>
+                            FreshMart
+                        </div>
+
+                        <p class="subtitle">
+                            Create your account
+                        </p>
+
+                        <form method="POST">
+
+                            {% csrf_token %}
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">First Name</label>
+                                    {{ form.first_name }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Last Name</label>
+                                    {{ form.last_name }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Username</label>
+                                    {{ form.username }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    {{ form.email }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    {{ form.phone_number }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Password</label>
+                                    {{ form.password1 }}
+
+                                    <div class="password-meter">
+                                        <span id="meter"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">
+                                        Confirm Password
+                                    </label>
+                                    {{ form.password2 }}
+                                </div>
+
+                                <div class="col-12 mb-4">
+
+                                    <div class="form-check">
+
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            required
+                                        >
+
+                                        <label class="form-check-label">
+                                            I agree to the Terms &
+                                            Conditions
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-12">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-register w-100"
+                                    >
+                                        Create Account
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                        <div class="login-link">
+
+                            Already have an account?
+
+                            <a href="{% url 'accounts:login' %}">
+                                Login Here
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<script>
+
+const password =
+document.getElementById("id_password1");
+
+const meter =
+document.getElementById("meter");
+
+if(password){
+
+    password.addEventListener(
+        "keyup",
+        function(){
+
+            let strength =
+            password.value.length;
+
+            if(strength < 4){
+
+                meter.style.width="25%";
+                meter.style.background="#dc3545";
+
+            }
+
+            else if(strength < 8){
+
+                meter.style.width="60%";
+                meter.style.background="#ffc107";
+
+            }
+
+            else{
+
+                meter.style.width="100%";
+                meter.style.background="#198754";
+
+            }
+
+        }
+    );
+
+}
+
+</script>
+
+{% endblock %}

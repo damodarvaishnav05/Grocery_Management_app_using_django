@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+{% load static %}
+{% load socialaccount %}
+{% block title %}
+Login | FreshMart
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* =====================================================
+   LOGIN PAGE BACKGROUND
+   ===================================================== */
+
+body {
+    background: linear-gradient(
+        135deg,
+        #eaf7ef 0%,
+        #f7faf8 50%,
+        #e8f5ec 100%
+    );
+}
+
+
+/* =====================================================
+   MAIN AUTH SECTION
+   ===================================================== */
+
+.auth-section {
+    min-height: calc(100vh - 180px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 45px 0;
+}
+
+
+/* =====================================================
+   LEFT PANEL
+   ===================================================== */
+
+.left-panel {
+    background: linear-gradient(
+        135deg,
+        #198754,
+        #28a745
+    );
+
+    color: white;
+
+    padding: 50px;
+
+    min-height: 600px;
+
+    border-radius: 25px 0 0 25px;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+/* Decorative circle */
+
+.left-panel::before {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border-radius: 50%;
+
+    top: -120px;
+    right: -120px;
+}
+
+
+/* Decorative circle */
+
+.left-panel::after {
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border-radius: 50%;
+
+    bottom: -100px;
+    left: -100px;
+}
+
+
+/* =====================================================
+   LEFT CONTENT
+   ===================================================== */
+
+.left-panel h1 {
+    font-size: 3.5rem;
+
+    font-weight: 800;
+
+    margin-bottom: 10px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.left-panel h4 {
+    font-weight: 600;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.left-panel p {
+    font-size: 17px;
+
+    line-height: 1.7;
+
+    opacity: 0.95;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =====================================================
+   FEATURES
+   ===================================================== */
+
+.feature-item {
+    font-size: 18px;
+
+    margin-bottom: 18px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =====================================================
+   GROCERY IMAGE
+   ===================================================== */
+
+.auth-image {
+    width: 100%;
+
+    max-width: 320px;
+
+    display: block;
+
+    margin: 30px auto 0;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =====================================================
+   RIGHT PANEL
+   ===================================================== */
+
+.right-panel {
+    background: rgba(255, 255, 255, 0.92);
+
+    padding: 50px;
+
+    min-height: 600px;
+
+    border-radius: 0 25px 25px 0;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+}
+
+
+/* =====================================================
+   LOGIN HEADING
+   ===================================================== */
+
+.right-panel h2 {
+    font-size: 2.3rem;
+
+    font-weight: 700;
+
+    color: #212529;
+}
+
+
+/* =====================================================
+   INPUTS
+   ===================================================== */
+
+.right-panel .form-control {
+    height: 52px;
+
+    border-radius: 12px;
+
+    border: 1px solid #dce3df;
+
+    padding: 12px 15px;
+
+    transition: 0.2s ease;
+}
+
+
+.right-panel .form-control:focus {
+    border-color: #198754;
+
+    box-shadow:
+        0 0 0 3px rgba(25, 135, 84, 0.12);
+}
+
+
+/* =====================================================
+   LINKS
+   ===================================================== */
+
+.right-panel a {
+    color: #198754;
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+
+.right-panel a:hover {
+    color: #146c43;
+}
+
+
+/* =====================================================
+   LOGIN BUTTON
+   ===================================================== */
+
+.btn-login {
+    height: 55px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    background: #198754;
+
+    border: none;
+
+    transition: 0.3s ease;
+}
+
+
+.btn-login:hover {
+    background: #146c43;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(25, 135, 84, 0.25);
+}
+
+
+/* =====================================================
+   GOOGLE BUTTON
+   ===================================================== */
+
+.google-btn {
+    height: 55px;
+
+    border-radius: 12px;
+
+    font-weight: 600;
+
+    background: white;
+
+    transition: 0.3s ease;
+}
+
+
+.google-btn:hover {
+    background: #f8f9fa;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   REMEMBER ME
+   ===================================================== */
+
+#remember {
+    accent-color: #198754;
+}
+
+
+/* =====================================================
+   ERROR MESSAGE
+   ===================================================== */
+
+.alert {
+    border-radius: 12px;
+}
+
+
+/* =====================================================
+   MOBILE / TABLET
+   ===================================================== */
+
+@media (max-width: 991px) {
+
+    .auth-section {
+        min-height: auto;
+
+        padding: 30px 15px;
+    }
+
+
+    .left-panel {
+        display: none;
+    }
+
+
+    .right-panel {
+        min-height: auto;
+
+        padding: 40px 30px;
+
+        border-radius: 25px;
+    }
+
+
+    .right-panel h2 {
+        font-size: 2rem;
+    }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+   ===================================================== */
+
+@media (max-width: 576px) {
+
+    .auth-section {
+        padding: 20px 12px;
+    }
+
+
+    .right-panel {
+        padding: 30px 22px;
+    }
+
+
+    .right-panel h2 {
+        font-size: 1.8rem;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<section class="auth-section">
+
+    <div class="container">
+
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-10">
+
+                <div class="row g-0">
+
+
+                    <!-- =================================================
+                         LEFT PANEL
+                         ================================================= -->
+
+                    <div class="col-lg-6">
+
+                        <div class="left-panel">
+
+                            <h1>
+                                FreshMart
+                            </h1>
+
+                            <h4 class="mb-4">
+                                Grocery Shopping Made Easy
+                            </h4>
+
+
+                            <p>
+                                Get fresh vegetables, fruits,
+                                dairy products and daily essentials
+                                delivered directly to your doorstep.
+                            </p>
+
+
+                            <!-- FEATURES -->
+
+                            <div class="mt-5">
+
+                                <div class="feature-item">
+                                    🚚 10 Minute Delivery
+                                </div>
+
+                                <div class="feature-item">
+                                    🥬 100% Fresh Products
+                                </div>
+
+                                <div class="feature-item">
+                                    💸 Daily Discounts
+                                </div>
+
+                                <div class="feature-item">
+                                    🔒 Secure Payments
+                                </div>
+
+                            </div>
+
+
+                            <!-- IMAGE -->
+
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/3724/3724788.png"
+                                class="auth-image"
+                                alt="FreshMart Grocery"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         RIGHT PANEL
+                         ================================================= -->
+
+                    <div class="col-lg-6">
+
+                        <div class="right-panel">
+
+                            <h2>
+                                Welcome Back 👋
+                            </h2>
+
+                            <p class="text-muted mb-4">
+                                Login to continue shopping.
+                            </p>
+
+
+                            <!-- LOGIN FORM -->
+
+                            <form method="POST">
+
+                                {% csrf_token %}
+
+
+                                <!-- FORM ERRORS -->
+
+                                {% if form.non_field_errors %}
+
+                                    <div class="alert alert-danger">
+
+                                        {{ form.non_field_errors }}
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <!-- USERNAME -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        class="form-label"
+                                        for="{{ form.username.id_for_label }}"
+                                    >
+                                        Username / Email
+                                    </label>
+
+                                    {{ form.username }}
+
+                                    {% if form.username.errors %}
+
+                                        <div class="text-danger small mt-1">
+
+                                            {{ form.username.errors }}
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- PASSWORD -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        class="form-label"
+                                        for="{{ form.password.id_for_label }}"
+                                    >
+                                        Password
+                                    </label>
+
+                                    {{ form.password }}
+
+                                    {% if form.password.errors %}
+
+                                        <div class="text-danger small mt-1">
+
+                                            {{ form.password.errors }}
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- REMEMBER + FORGOT PASSWORD -->
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                                    <div>
+
+                                        <input
+                                            type="checkbox"
+                                            id="remember"
+                                        >
+
+                                        <label
+                                            for="remember"
+                                            class="ms-1"
+                                        >
+                                            Remember Me
+                                        </label>
+
+                                    </div>
+
+
+                                    <a href="#">
+                                        Forgot Password?
+                                    </a>
+
+                                </div>
+
+
+                                <!-- LOGIN BUTTON -->
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-success w-100 btn-login"
+                                >
+                                    Login
+                                </button>
+
+                            </form>
+
+
+                            <!-- DIVIDER -->
+
+                            <div class="d-flex align-items-center my-4">
+
+                                <hr class="flex-grow-1">
+
+                                <span class="mx-3 text-muted">
+                                    OR
+                                </span>
+
+                                <hr class="flex-grow-1">
+
+                            </div>
+
+
+                            <!-- GOOGLE -->
+
+                            {% load socialaccount %}
+
+                        
+
+                           <div class="google-login-wrapper">
+
+                            {% load socialaccount %}
+
+                            <a href="{% provider_login_url 'google' %}"
+                            class="google-login-btn">
+
+                                <img
+                                    src="https://developers.google.com/identity/images/g-logo.png"
+                                    alt="Google"
+                                >
+
+                                <span>Continue with Google</span>
+
+                            </a>
+
+                        </div>
+                            
+
+
+                            <!-- REGISTER -->
+
+                            <p class="text-center mt-4 mb-0">
+
+                                New to FreshMart?
+
+                                <a href="{% url 'accounts:register' %}">
+                                    Create Account
+                                </a>
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

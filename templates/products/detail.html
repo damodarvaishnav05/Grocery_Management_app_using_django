@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ product.name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row g-5">
+
+        <!-- PRODUCT IMAGE -->
+
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow-sm">
+
+                {% if product.image %}
+
+                <img
+                    src="{{ product.image.url }}"
+                    class="img-fluid rounded"
+                    alt="{{ product.name }}"
+                    style="height:500px; object-fit:cover;"
+                >
+
+                {% else %}
+
+                <div
+                    class="d-flex justify-content-center align-items-center bg-light"
+                    style="height:500px;"
+                >
+                    <i class="bi bi-image fs-1 text-muted"></i>
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- PRODUCT DETAILS -->
+
+        <div class="col-lg-7">
+
+            <span class="badge bg-success mb-3">
+                {{ product.category.name }}
+            </span>
+
+            <h1 class="fw-bold mb-3">
+                {{ product.name }}
+            </h1>
+
+            <!-- Rating -->
+
+            <div class="mb-3">
+
+                {% if average_rating %}
+
+                <span class="text-warning fs-5">
+                    ⭐ {{ average_rating|floatformat:1 }}
+                </span>
+
+                <span class="text-muted">
+                    ({{ reviews.count }} Reviews)
+                </span>
+
+                {% else %}
+
+                <span class="text-muted">
+                    No Reviews Yet
+                </span>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Price -->
+
+            <div class="mb-4">
+
+                {% if product.discount_price %}
+
+                <h2 class="text-success fw-bold">
+
+                    ₹{{ product.discount_price }}
+
+                    <small class="text-muted text-decoration-line-through ms-2">
+
+                        ₹{{ product.price }}
+
+                    </small>
+
+                </h2>
+
+                {% else %}
+
+                <h2 class="text-success fw-bold">
+
+                    ₹{{ product.price }}
+
+                </h2>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Stock -->
+
+            <div class="mb-4">
+
+                {% if product.stock > 0 %}
+
+                <span class="badge bg-success fs-6 p-2">
+
+                    In Stock ({{ product.stock }})
+
+                </span>
+
+                {% else %}
+
+                <span class="badge bg-danger fs-6 p-2">
+
+                    Out Of Stock
+
+                </span>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Description -->
+
+            <div class="card border-0 bg-light mb-4">
+
+                <div class="card-body">
+
+                    <h5>Description</h5>
+
+                    <p class="mb-0 text-muted">
+
+                        {{ product.description }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- Buttons -->
+
+            <div class="d-flex flex-wrap gap-3">
+
+                {% if product.stock > 0 %}
+
+                <a
+                    href="{% url 'cart:add' product.id %}"
+                    class="btn btn-success btn-lg"
+                >
+
+                    <i class="bi bi-cart-plus"></i>
+
+                    Add To Cart
+
+                </a>
+
+                {% endif %}
+
+                <a
+                    href="{% url 'wishlist:add' product.id %}"
+                    class="btn btn-outline-danger btn-lg"
+                >
+
+                    <i class="bi bi-heart"></i>
+
+                    Wishlist
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- REVIEWS -->
+
+    <div class="mt-5">
+
+        <h3 class="fw-bold mb-4">
+
+            Customer Reviews
+
+        </h3>
+
+        {% for review in reviews %}
+
+        <div class="card border-0 shadow-sm mb-3">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between">
+
+                    <h6 class="fw-bold">
+
+                        {{ review.user.username }}
+
+                    </h6>
+
+                    <small class="text-muted">
+
+                        {{ review.created_at|date:"d M Y" }}
+
+                    </small>
+
+                </div>
+
+                <div class="text-warning mb-2">
+
+                    {% for i in "12345" %}
+
+                        {% if forloop.counter <= review.rating %}
+                        ⭐
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                <p class="mb-0">
+
+                    {{ review.comment }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="alert alert-info">
+
+            No reviews yet.
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- REVIEW FORM -->
+
+    {% if user.is_authenticated %}
+
+    <div class="mt-5">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <h4 class="fw-bold mb-4">
+
+                    Write A Review
+
+                </h4>
+
+                <form
+                    method="POST"
+                    action="{% url 'reviews:add' product.slug %}"
+                >
+
+                    {% csrf_token %}
+
+                    {{ form.as_p }}
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+
+                        Submit Review
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <!-- RELATED PRODUCTS -->
+
+    <div class="mt-5">
+
+        <h3 class="fw-bold mb-4">
+
+            Related Products
+
+        </h3>
+
+        <div class="row">
+
+            {% for item in related_products %}
+
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+
+                <div class="card h-100 border-0 shadow-sm">
+
+                    {% if item.image %}
+
+                    <img
+                        src="{{ item.image.url }}"
+                        class="card-img-top"
+                        style="height:220px; object-fit:cover;"
+                    >
+
+                    {% endif %}
+
+                    <div class="card-body">
+
+                        <h6>
+
+                            {{ item.name }}
+
+                        </h6>
+
+                        <h5 class="text-success">
+
+                            ₹{{ item.final_price }}
+
+                        </h5>
+
+                        <a
+                            href="{% url 'products:detail' item.slug %}"
+                            class="btn btn-success btn-sm"
+                        >
+
+                            View Product
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

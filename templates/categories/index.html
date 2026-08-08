@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h2 class="fw-bold text-center mb-5">
+        Shop by Category
+    </h2>
+
+    <div class="row">
+
+        {% for category in categories %}
+
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                {% if category.image %}
+
+                <img
+                    src="{{ category.image.url }}"
+                    class="card-img-top"
+                    style="height:220px;object-fit:cover;">
+
+                {% else %}
+
+                <img
+                    src="https://via.placeholder.com/400x300?text={{ category.name }}"
+                    class="card-img-top"
+                    style="height:220px;object-fit:cover;">
+
+                {% endif %}
+
+                <div class="card-body text-center">
+
+                    <h5 class="fw-bold">
+
+                        {{ category.name }}
+
+                    </h5>
+
+                    {% if category.description %}
+
+                    <p class="text-muted">
+
+                        {{ category.description|truncatewords:10 }}
+
+                    </p>
+
+                    {% endif %}
+
+                    <a
+                        href="{% url 'products:index' %}?category={{ category.slug }}"
+                        class="btn btn-success w-100">
+
+                        Browse Products
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-warning text-center">
+
+                No categories available.
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
