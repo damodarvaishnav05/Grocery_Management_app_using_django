@@ -1,67 +1,64 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}
-FreshMart | Home
-{% endblock %}
+{% block title %}FreshMart | 10-Minute Grocery Delivery{% endblock %}
 
 {% block content %}
 
 <!-- HERO SECTION -->
-<section class="hero-section text-white py-5 mb-5">
+<section class="hero-section">
     <div class="container">
 
         <div class="row align-items-center">
 
             <div class="col-lg-6">
 
-                <span class="badge bg-warning text-dark mb-3">
-                    🚚 Delivery in 10 Minutes
+                <span class="hero-eyebrow mb-3">
+                    <span class="fm-dot"></span>
+                    ⚡ Lightning Fast 10-Minute Delivery
                 </span>
 
-                <h1 class="display-3 fw-bold mb-3">
-                    Fresh Groceries
-                    Delivered Fast
+                <h1 class="display-3 mb-3 mt-3">
+                    Fresh groceries,<br>
+                    <em>delivered in minutes.</em>
                 </h1>
 
                 <p class="lead mb-4">
-                    Shop fruits, vegetables, dairy, bakery,
-                    beverages and more from the comfort
-                    of your home.
+                    Hand-picked farm fresh fruits, crisp greens, dairy essentials, artisan breads, and daily staples delivered directly to your doorstep.
                 </p>
 
-                <div class="d-flex gap-3 flex-wrap">
+                <div class="d-flex gap-3 flex-wrap mb-4">
 
                     <a
                         href="{% url 'products:index' %}"
-                        class="btn btn-light btn-lg"
+                        class="btn btn-light btn-lg shadow-sm"
                     >
-                        Shop Now
+                        <i class="bi bi-basket2-fill me-1 text-success"></i> Start Shopping
                     </a>
 
                     <a
                         href="{% url 'ai_assistant:index' %}"
                         class="btn btn-outline-light btn-lg"
                     >
-                        Ask AI Assistant
+                        <i class="bi bi-robot me-1 text-warning"></i> Ask AI Assistant
                     </a>
 
                 </div>
 
-                <div class="row mt-5">
+                <div class="row hero-stats">
 
                     <div class="col-4">
-                        <h3>{{customer_count}}+</h3>
-                        <small>Customers</small>
+                        <h3>{{ customer_count }}+</h3>
+                        <small>Happy Shoppers</small>
                     </div>
 
                     <div class="col-4">
-                        <h3>{{product_count}}+</h3>
-                        <small>Products</small>
+                        <h3>{{ product_count }}+</h3>
+                        <small>Fresh Items</small>
                     </div>
 
                     <div class="col-4">
-                        <h3>{{ category_count}}+</h3>
+                        <h3>{{ category_count }}+</h3>
                         <small>Categories</small>
                     </div>
 
@@ -71,12 +68,20 @@ FreshMart | Home
 
             <div class="col-lg-6 text-center d-none d-lg-block">
 
-                <img
-                    src="https://cdn-icons-png.flaticon.com/512/3081/3081967.png"
-                    class="img-fluid"
-                    style="max-height:420px;"
-                    alt="FreshMart"
-                >
+                <div class="produce-crate" aria-hidden="true">
+
+                    <span class="fm-crate-tag">Farm Fresh Today</span>
+
+                    <div class="fm-grid">
+                        <span>🥑</span>
+                        <span>🍅</span>
+                        <span>🥦</span>
+                        <span>🍓</span>
+                        <span>🥕</span>
+                        <span>🍋</span>
+                    </div>
+
+                </div>
 
             </div>
 
@@ -85,58 +90,112 @@ FreshMart | Home
     </div>
 </section>
 
+<!-- Awning edge -->
+<div class="fm-scallop" aria-hidden="true"></div>
+
+
+<!-- VALUE PROPOSITIONS STRIP -->
+<section class="py-4 bg-white border-bottom shadow-sm">
+    <div class="container">
+        <div class="row g-3 text-center text-md-start">
+            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
+                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0">10-Minute Delivery</h6>
+                    <small class="text-muted">Direct from local dark stores</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
+                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0">100% Farm Fresh</h6>
+                    <small class="text-muted">Zero artificial ripeners</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
+                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
+                    <i class="bi bi-tag-fill"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0">Best Price Promise</h6>
+                    <small class="text-muted">Daily deals & coupons</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
+                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0">No Questions Return</h6>
+                    <small class="text-muted">Instant refund at doorstep</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 
 <!-- CATEGORIES -->
-<section class="py-5 bg-light">
+<section class="py-5">
 
     <div class="container">
 
-        <div class="text-center mb-5">
-
-            <h2 class="fw-bold">
-                Shop By Category
-            </h2>
-
-            <p class="text-muted">
-                Everything you need in one place
-            </p>
-
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="fm-kicker">Explore Fresh</span>
+                <h2 class="fw-bold mb-0">Shop By Category</h2>
+            </div>
+            <a href="{% url 'categories:index' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+                All Categories <i class="bi bi-arrow-right"></i>
+            </a>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-3 g-md-4">
 
             {% for category in categories %}
 
-            <div class="col-lg-2 col-md-3 col-6">
+            <div class="col-lg-3 col-md-4 col-6">
 
                 <a
                     href="{% url 'products:index' %}?category={{ category.slug }}"
                     class="text-decoration-none"
                 >
 
-                    <div class="card category-card h-100 text-center p-4 shadow-sm">
+                    <div class="card category-card h-100 text-center p-3 p-md-4 shadow-sm">
 
-                        {% if category.image %}
+                        <div class="category-icon-wrap mb-3">
 
-                            <img
-                                src="{{ category.image.url }}"
-                                class="img-fluid mx-auto mb-3"
-                                style="height:70px;width:70px;object-fit:cover;"
-                            >
+                            {% if category.image %}
 
-                        {% elif category.icon %}
+                                <img
+                                    src="{{ category.image.url }}"
+                                    class="img-fluid rounded-circle"
+                                    style="height:48px;width:48px;object-fit:cover;"
+                                    alt="{{ category.name }}"
+                                >
 
-                            <i class="bi {{ category.icon }} fs-1 text-success"></i>
+                            {% elif category.icon %}
 
-                        {% else %}
+                                <i class="bi {{ category.icon }} fs-3 text-success"></i>
 
-                            <i class="bi bi-grid fs-1 text-success"></i>
+                            {% else %}
 
-                        {% endif %}
+                                <i class="bi bi-grid fs-3 text-success"></i>
 
-                        <h6 class="mt-3 text-dark">
+                            {% endif %}
+
+                        </div>
+
+                        <h6 class="fw-bold mb-1 text-dark">
                             {{ category.name }}
                         </h6>
+                        <small class="text-muted d-none d-md-block">
+                            {{ category.description|truncatewords:6 }}
+                        </small>
 
                     </div>
 
@@ -147,10 +206,123 @@ FreshMart | Home
             {% empty %}
 
             <div class="col-12">
-
                 <div class="alert alert-warning text-center">
-
                     No categories found.
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FEATURED & POPULAR PRODUCTS -->
+{% if featured_products %}
+<section class="py-5 bg-white border-top border-bottom">
+
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="fm-kicker">Trending Now</span>
+                <h2 class="fw-bold mb-0">Featured Fresh Picks</h2>
+            </div>
+            <a href="{% url 'products:index' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+                Explore All Products <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="row g-2 g-md-4">
+
+            {% for product in featured_products %}
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-6">
+
+                <div class="card product-card h-100 shadow-sm border">
+
+                    <!-- Image & Floating Controls -->
+                    <div class="product-img-container">
+
+                        {% if product.discount_price and product.price > product.discount_price %}
+                        <span class="discount-pill">
+                            {{ product.discount_percent }}% OFF
+                        </span>
+                        {% endif %}
+
+                        <a
+                            href="{% url 'wishlist:add' product.id %}"
+                            class="wishlist-heart-btn"
+                            title="Add to Wishlist"
+                            aria-label="Wishlist"
+                        >
+                            <i class="bi bi-heart"></i>
+                        </a>
+
+                        {% if product.image %}
+                        <img
+                            src="{{ product.image.url }}"
+                            alt="{{ product.name }}"
+                            loading="lazy"
+                        >
+                        {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-basket text-success fs-1 opacity-50"></i>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body p-3 d-flex flex-column">
+
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-success fw-bold">{{ product.category.name }}</small>
+                            <span class="small text-warning fw-semibold">
+                                ⭐ {{ product.average_rating|default:"4.8"|floatformat:1 }}
+                            </span>
+                        </div>
+
+                        <h6 class="fw-bold mb-1 text-truncate" title="{{ product.name }}">
+                            <a href="{% url 'products:detail' product.slug %}" class="text-dark text-decoration-none">
+                                {{ product.name }}
+                            </a>
+                        </h6>
+
+                        <p class="text-muted small mb-2 flex-grow-1" style="line-height: 1.4;">
+                            {{ product.description|truncatewords:8 }}
+                        </p>
+
+                        <!-- Price Row -->
+                        <div class="d-flex align-items-baseline gap-2 mb-3">
+                            <span class="fs-5 fw-bold text-success">
+                                ₹{{ product.final_price }}
+                            </span>
+                            {% if product.discount_price %}
+                            <small class="text-muted text-decoration-line-through">
+                                ₹{{ product.price }}
+                            </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- CTA -->
+                        {% if product.stock > 0 %}
+                        <a
+                            href="{% url 'cart:add' product.id %}"
+                            class="btn btn-success w-100 rounded-pill fw-bold"
+                        >
+                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                        </a>
+                        {% else %}
+                        <button class="btn btn-secondary w-100 rounded-pill fw-bold" disabled>
+                            Out of Stock
+                        </button>
+                        {% endif %}
+
+                    </div>
 
                 </div>
 
@@ -163,62 +335,64 @@ FreshMart | Home
     </div>
 
 </section>
+{% endif %}
 
 
-<!-- OFFER -->
+<!-- TODAY'S COUPON SPECIAL BANNER -->
 <section class="py-5">
 
-{% if user.is_authenticated %}
+    <div class="container">
 
-<div class="container my-5">
+        <div class="card fm-offer-card border-0 overflow-hidden shadow-lg">
 
-    <div class="card border-0 shadow-lg">
+            <div class="card-body text-center p-4 p-md-5">
 
-        <div
-            class="card-body text-center p-5"
-            style="
-                background: linear-gradient(135deg,#F7C600,#FFD93D);
-                border-radius:20px;
-            "
-        >
+                <span class="badge bg-dark text-warning px-3 py-2 rounded-pill fw-bold text-uppercase mb-3">
+                    🔥 Daily Deal Alert
+                </span>
 
-            <h2 class="fw-bold text-dark">
-                🎉 Today's Special Offer
-            </h2>
+                <h2 class="display-6 fw-bold mb-2">
+                    Get Flat 10% OFF on Your Entire Order!
+                </h2>
 
-            <p class="mb-3 text-dark">
-                Use Today's Coupon Code
-            </p>
+                <p class="lead mb-4" style="max-width: 550px; margin: 0 auto;">
+                    Apply today's fresh voucher at checkout to enjoy automatic savings on fresh produce and essentials.
+                </p>
 
-            <h1 class="fw-bold text-dark">
-                {{ today_coupon }}
-            </h1>
+                <div class="d-inline-flex align-items-center gap-2 bg-dark p-2 px-4 rounded-pill shadow">
+                    <span class="text-white fw-bold fs-4 font-monospace tracking-wide">
+                        {{ today_coupon }}
+                    </span>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-warning rounded-pill px-3 fw-bold"
+                        onclick="navigator.clipboard.writeText('{{ today_coupon }}'); this.innerText='COPIED!';"
+                    >
+                        Copy Code
+                    </button>
+                </div>
 
-            <span class="badge bg-dark fs-6 mt-3">
-                10% OFF on All Orders
-            </span>
+            </div>
 
         </div>
 
     </div>
 
-</div>
-
-{% endif %}
-
 </section>
 
 
-<!-- FEATURES -->
-<section class="py-5">
+<!-- WHY FRESHMART FEATURES -->
+<section class="py-5 bg-white border-top">
 
     <div class="container">
 
-        <div class="text-center mb-5">
+        <div class="text-center fm-section-head">
 
-            <h2 class="fw-bold">
-                Why Choose FreshMart?
-            </h2>
+            <span class="fm-kicker">Why Shop With Us</span>
+
+            <h2>Built For Fast, Fresh Everyday Living</h2>
+
+            <p class="text-muted">Here is why thousands of households choose FreshMart every morning</p>
 
         </div>
 
@@ -226,16 +400,16 @@ FreshMart | Home
 
             <div class="col-md-4">
 
-                <div class="feature-box text-center">
+                <div class="feature-box">
 
-                    <i class="bi bi-truck fs-1 text-success"></i>
+                    <div class="feature-icon-wrap">
+                        <i class="bi bi-truck text-success"></i>
+                    </div>
 
-                    <h4 class="mt-3">
-                        Fast Delivery
-                    </h4>
+                    <h4>10-Minute Express</h4>
 
                     <p>
-                        Get groceries delivered within minutes.
+                        Our micro-fulfillment centers are situated within 2 km of your home for blazing fast delivery.
                     </p>
 
                 </div>
@@ -244,16 +418,16 @@ FreshMart | Home
 
             <div class="col-md-4">
 
-                <div class="feature-box text-center">
+                <div class="feature-box">
 
-                    <i class="bi bi-shield-check fs-1 text-success"></i>
+                    <div class="feature-icon-wrap">
+                        <i class="bi bi-shield-check text-success"></i>
+                    </div>
 
-                    <h4 class="mt-3">
-                        Quality Products
-                    </h4>
+                    <h4>Strict Quality Grading</h4>
 
                     <p>
-                        Fresh and trusted products every day.
+                        Every batch of fruits, vegetables, and milk is quality-checked daily for guaranteed freshness.
                     </p>
 
                 </div>
@@ -262,16 +436,16 @@ FreshMart | Home
 
             <div class="col-md-4">
 
-                <div class="feature-box text-center">
+                <div class="feature-box">
 
-                    <i class="bi bi-robot fs-1 text-success"></i>
+                    <div class="feature-icon-wrap">
+                        <i class="bi bi-robot text-success"></i>
+                    </div>
 
-                    <h4 class="mt-3">
-                        AI Assistant
-                    </h4>
+                    <h4>AI Nutrition Assistant</h4>
 
                     <p>
-                        Personalized shopping recommendations.
+                        Instant guidance on healthy meal plans, protein goals, weight loss diets, and storage tips.
                     </p>
 
                 </div>

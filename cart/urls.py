@@ -29,4 +29,15 @@ urlpatterns = [
         views.remove_item,
         name="remove_item"
     ),
+
+    path(
+        "scan/",
+        views.smart_scanner,
+        name="smart_scan"
+    ),
+    path(
+        "batch-add/",
+        views.batch_add_to_cart,
+        name="batch_add"
+    ),
 ]

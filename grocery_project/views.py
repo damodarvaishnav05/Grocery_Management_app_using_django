@@ -9,10 +9,19 @@ User = get_user_model()
 
 def home(request):
 
-    categories = Category.objects.all()
+    if Product.objects.count() < 10:
+        try:
+            from products.seed import seed_all_groceries
+            seed_all_groceries()
+        except Exception:
+            pass
+
+    categories = Category.objects.filter(is_active=True)
+    featured_products = Product.objects.filter(available=True)[:8]
 
     context = {
         "categories": categories,
+        "featured_products": featured_products,
         "product_count": Product.objects.count(),
         "category_count": categories.count(),
         "customer_count": User.objects.filter(is_staff=False).count(),

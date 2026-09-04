@@ -1,161 +1,168 @@
 {% extends "base.html" %}
 
-{% block title %}My Orders{% endblock %}
+{% block title %}My Orders | FreshMart{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <h2 class="fw-bold mb-4">
-        My Orders
-    </h2>
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-bag-check text-success me-2"></i> My Order History
+            </h2>
+            <p class="text-muted mb-0">Track live orders, download invoices, and review past deliveries</p>
+        </div>
+        <a href="{% url 'products:index' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+            <i class="bi bi-cart-plus me-1"></i> Order More
+        </a>
+    </div>
 
     {% if orders %}
 
-    <table class="table table-hover shadow">
+    <div class="row g-4">
 
-        <thead class="table-success">
+        {% for order in orders %}
 
-            <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Items</th>
-                <th>Action</th>
-            </tr>
+        <div class="col-12">
 
-        </thead>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
 
-        <tbody>
+                <!-- CARD HEADER -->
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-bold fs-6">
+                            Order #{{ order.id }}
+                        </span>
+                        <small class="text-muted">
+                            Placed on {{ order.created_at|date:"d M Y, h:i A" }}
+                        </small>
+                    </div>
 
-            {% for order in orders %}
+                    <div class="d-flex align-items-center gap-2">
+                        {% if order.status == "Pending" %}
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-hourglass-split me-1"></i> Payment Pending
+                        </span>
+                        {% elif order.status == "Confirmed" %}
+                        <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-check2-circle me-1"></i> Confirmed & Packing
+                        </span>
+                        {% elif order.status == "Shipped" %}
+                        <span class="badge bg-info text-dark px-3 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-bicycle me-1"></i> Out for Delivery
+                        </span>
+                        {% elif order.status == "Delivered" %}
+                        <span class="badge bg-success px-3 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-patch-check-fill me-1"></i> Delivered
+                        </span>
+                        {% else %}
+                        <span class="badge bg-danger px-3 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-x-circle me-1"></i> Cancelled
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
 
-            <tr>
+                <!-- CARD BODY -->
+                <div class="card-body p-4">
 
-                <!-- Order ID -->
-                <td>
-                    #{{ order.id }}
-                </td>
+                    <div class="row align-items-center g-4">
 
-                <!-- Date -->
-                <td>
-                    {{ order.created_at|date:"d M Y" }}
-                </td>
+                        <!-- ITEMS THUMBNAILS & NAMES -->
+                        <div class="col-lg-6">
+                            <div class="d-flex flex-column gap-2">
+                                {% for item in order.items.all %}
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.product.image %}
+                                    <img
+                                        src="{{ item.product.image.url }}"
+                                        class="rounded-3 border"
+                                        style="width: 48px; height: 48px; object-fit: contain; background: #fafafa;"
+                                        alt="{{ item.product.name }}"
+                                    >
+                                    {% else %}
+                                    <div class="rounded-3 bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                        <i class="bi bi-basket text-success"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-semibold text-dark">{{ item.product.name }}</div>
+                                        <small class="text-muted">₹{{ item.price }} × {{ item.quantity }}</small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
 
-                <!-- Total -->
-                <td>
-                    ₹{{ order.total_amount }}
-                </td>
+                        <!-- TOTAL & ADDRESS -->
+                        <div class="col-lg-3 border-start border-light-subtle">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Total Bill</small>
+                            <h4 class="fw-bold text-success mb-2">₹{{ order.total_amount }}</h4>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-geo-alt me-1"></i> {{ order.address|truncatewords:6 }}, {{ order.city }}
+                            </small>
+                        </div>
 
-                <!-- Status -->
-                <td>
+                        <!-- ACTION BUTTONS -->
+                        <div class="col-lg-3 text-lg-end">
+                                {% if order.status != "Cancelled" %}
+                                <a href="{% url 'orders:track' order.id %}" class="btn btn-success btn-sm rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Track Live
+                                </a>
+                                {% endif %}
 
-                    {% if order.status == "Pending" %}
+                                <a href="{% url 'orders:detail' order.id %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
+                                    <i class="bi bi-eye me-1"></i> Order Details
+                                </a>
 
-                    <span class="badge bg-warning text-dark">
-                        {{ order.status }}
-                    </span>
+                                <a href="{% url 'orders:download_invoice' order.id %}" class="btn btn-light border btn-sm rounded-pill fw-semibold">
+                                    <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> PDF Invoice
+                                </a>
 
-                    {% elif order.status == "Confirmed" %}
+                                {% if order.status in "Pending Confirmed" %}
+                                <a
+                                    href="{% url 'orders:cancel' order.id %}"
+                                    class="btn btn-outline-danger btn-sm rounded-pill fw-semibold"
+                                    onclick="return confirm('Are you sure you want to cancel Order #{{ order.id }}?');"
+                                >
+                                    <i class="bi bi-x-circle me-1"></i> Cancel Order
+                                </a>
+                                {% endif %}
 
-                    <span class="badge bg-primary">
-                        {{ order.status }}
-                    </span>
+                            </div>
+                        </div>
 
-                    {% elif order.status == "Shipped" %}
+                    </div>
 
-                    <span class="badge bg-info">
-                        {{ order.status }}
-                    </span>
+                </div>
 
-                    {% elif order.status == "Delivered" %}
+            </div>
 
-                    <span class="badge bg-success">
-                        {{ order.status }}
-                    </span>
+        </div>
 
-                    {% else %}
+        {% endfor %}
 
-                    <span class="badge bg-danger">
-                        {{ order.status }}
-                    </span>
-
-                    {% endif %}
-
-                </td>
-
-                <!-- Items -->
-                <td>
-
-                    <ul class="mb-0">
-
-                        {% for item in order.items.all %}
-
-                        <li>
-                            {{ item.product.name }}
-                            × {{ item.quantity }}
-                        </li>
-
-                        {% endfor %}
-
-                    </ul>
-
-                </td>
-
-                <!-- Action -->
-                <td>
-
-                    <!-- View Order -->
-                    <a
-                        href="{% url 'orders:detail' order.id %}"
-                        class="btn btn-success btn-sm"
-                    >
-                        View
-                    </a>
-
-                    <!-- Cancel Order -->
-                    {% if order.status == "Pending" %}
-
-                    <a
-                        href="{% url 'orders:cancel' order.id %}"
-                        class="btn btn-danger btn-sm"
-                    >
-                        Cancel
-                    </a>
-
-                    {% endif %}
-
-                    <!-- Download Invoice -->
-                    <a
-                        href="{% url 'orders:invoice' order.id %}"
-                        class="btn btn-success btn-sm"
-                    >
-                        Download Invoice
-                    </a>
-
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
+    </div>
 
     {% else %}
 
-    <div class="alert alert-warning">
-        You haven't placed any orders yet.
+    <!-- NO ORDERS EMPTY STATE -->
+    <div class="text-center py-5">
+        <div class="p-5 bg-white rounded-4 shadow-sm border col-md-8 col-lg-6 mx-auto">
+            <div class="d-inline-flex align-items-center justify-content-center p-4 rounded-circle bg-success bg-opacity-10 text-success mb-4" style="width: 80px; height: 80px;">
+                <i class="bi bi-bag-x fs-1"></i>
+            </div>
+            <h4 class="fw-bold mb-2">No Orders Placed Yet</h4>
+            <p class="text-muted mb-4">
+                You haven't ordered any fresh groceries yet. Explore today's best deals!
+            </p>
+            <a href="{% url 'products:index' %}" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm">
+                Start Shopping Now
+            </a>
+        </div>
     </div>
-
-    <a
-        href="{% url 'products:index' %}"
-        class="btn btn-success"
-    >
-        Start Shopping
-    </a>
 
     {% endif %}
 

@@ -132,23 +132,25 @@
 
         <div class="col-md-4">
 
-            <div class="card stat-card border-0 shadow-sm">
+            <a href="{% url 'wishlist:index' %}" class="text-decoration-none">
+                <div class="card stat-card border-0 shadow-sm h-100">
 
-                <div class="card-body text-center">
+                    <div class="card-body text-center">
 
-                    <i class="bi bi-heart stat-icon text-danger"></i>
+                        <i class="bi bi-heart stat-icon text-danger"></i>
 
-                    <h3 class="fw-bold mt-3">
-                        0
-                    </h3>
+                        <h3 class="fw-bold mt-3 text-dark">
+                            {{ wishlist_count|default:0 }}
+                        </h3>
 
-                    <p class="text-muted mb-0">
-                        Wishlist Items
-                    </p>
+                        <p class="text-muted mb-0">
+                            Wishlist Items
+                        </p>
+
+                    </div>
 
                 </div>
-
-            </div>
+            </a>
 
         </div>
 

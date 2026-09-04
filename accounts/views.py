@@ -2,9 +2,8 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.contrib.auth import logout
-from django.shortcuts import redirect
 from orders.models import Order
+from wishlist.models import Wishlist
 
 from .forms import (
     LoginForm,
@@ -23,7 +22,8 @@ def register_view(request):
         return redirect("home")
 
     form = RegisterForm(
-        request.POST or None
+        request.POST or None,
+        request.FILES or None
     )
 
     if request.method == "POST":
@@ -123,12 +123,17 @@ def profile(request):
         if order.status != Order.CANCELLED
     )
 
+    wishlist_count = Wishlist.objects.filter(
+        user=request.user
+    ).count()
+
     return render(
         request,
         "accounts/profile.html",
         {
             "total_orders": total_orders,
             "total_spent": total_spent,
+            "wishlist_count": wishlist_count,
         }
     )
 

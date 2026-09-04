@@ -28,3 +28,9 @@ def add_review(request, slug):
             form.save()
 
     return redirect("products:detail", slug=slug)
+
+
+@login_required
+def add_review_by_id(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return add_review(request, product.slug)

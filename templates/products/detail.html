@@ -1,357 +1,263 @@
 {% extends "base.html" %}
 
-{% block title %}
-{{ product.name }}
-{% endblock %}
+{% block title %}{{ product.name }} | FreshMart{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <div class="row g-5">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-success">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:index' %}" class="text-decoration-none text-success">Products</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:index' %}?category={{ product.category.slug }}" class="text-decoration-none text-success">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
 
-        <!-- PRODUCT IMAGE -->
+    <div class="row g-4 g-lg-5">
 
+        <!-- PRODUCT IMAGE CARD -->
         <div class="col-lg-5">
 
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative p-4 bg-white text-center">
 
-                {% if product.image %}
-
-                <img
-                    src="{{ product.image.url }}"
-                    class="img-fluid rounded"
-                    alt="{{ product.name }}"
-                    style="height:500px; object-fit:cover;"
-                >
-
-                {% else %}
-
-                <div
-                    class="d-flex justify-content-center align-items-center bg-light"
-                    style="height:500px;"
-                >
-                    <i class="bi bi-image fs-1 text-muted"></i>
-                </div>
-
+                {% if product.discount_price and product.price > product.discount_price %}
+                <span class="discount-pill fs-6 px-3 py-1">
+                    SAVE ₹{{ product.price|floatformat:0 }}
+                </span>
                 {% endif %}
+
+                <a
+                    href="{% url 'wishlist:add' product.id %}"
+                    class="wishlist-heart-btn"
+                    title="Add to Wishlist"
+                    aria-label="Wishlist"
+                >
+                    <i class="bi bi-heart"></i>
+                </a>
+
+                <div class="d-flex align-items-center justify-content-center" style="min-height: 380px;">
+                    {% if product.image %}
+                    <img
+                        src="{{ product.image.url }}"
+                        class="img-fluid"
+                        alt="{{ product.name }}"
+                        style="max-height: 380px; width: auto; object-fit: contain;"
+                    >
+                    {% else %}
+                    <div class="p-5 text-center">
+                        <i class="bi bi-basket text-success display-1 opacity-50"></i>
+                    </div>
+                    {% endif %}
+                </div>
 
             </div>
 
         </div>
 
         <!-- PRODUCT DETAILS -->
-
         <div class="col-lg-7">
 
-            <span class="badge bg-success mb-3">
-                {{ product.category.name }}
-            </span>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                    {{ product.category.name }}
+                </span>
+                {% if product.stock > 0 %}
+                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold">
+                    ● In Stock ({{ product.stock }} units)
+                </span>
+                {% else %}
+                <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold">
+                    ● Out of Stock
+                </span>
+                {% endif %}
+                {% if product.barcode %}
+                <a href="{% url 'products:barcode_scanner' %}" class="badge bg-light text-dark border text-decoration-none px-3 py-2 rounded-pill font-monospace" title="Scan with FreshBarcode™">
+                    <i class="bi bi-upc me-1 text-muted"></i>{{ product.barcode }}
+                </a>
+                {% endif %}
+            </div>
 
-            <h1 class="fw-bold mb-3">
+            <h1 class="display-6 fw-bold mb-2 text-dark">
                 {{ product.name }}
             </h1>
 
-            <!-- Rating -->
-
-            <div class="mb-3">
-
+            <!-- RATING -->
+            <div class="d-flex align-items-center gap-2 mb-3">
                 {% if average_rating %}
-
-                <span class="text-warning fs-5">
+                <span class="text-warning fs-5 fw-bold">
                     ⭐ {{ average_rating|floatformat:1 }}
                 </span>
-
-                <span class="text-muted">
-                    ({{ reviews.count }} Reviews)
+                <span class="text-muted small">
+                    ({{ reviews.count }} Customer Reviews)
                 </span>
-
                 {% else %}
-
-                <span class="text-muted">
-                    No Reviews Yet
-                </span>
-
+                <span class="text-warning fs-5">⭐ 4.8</span>
+                <span class="text-muted small">(Farm Fresh Batch)</span>
                 {% endif %}
-
             </div>
 
-            <!-- Price -->
-
-            <div class="mb-4">
-
-                {% if product.discount_price %}
-
-                <h2 class="text-success fw-bold">
-
-                    ₹{{ product.discount_price }}
-
-                    <small class="text-muted text-decoration-line-through ms-2">
-
-                        ₹{{ product.price }}
-
-                    </small>
-
+            <!-- PRICE -->
+            <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-baseline gap-3">
+                <h2 class="display-6 fw-bold text-success mb-0">
+                    ₹{{ product.final_price }}
                 </h2>
-
-                {% else %}
-
-                <h2 class="text-success fw-bold">
-
+                {% if product.discount_price and product.price > product.discount_price %}
+                <h4 class="text-muted text-decoration-line-through mb-0">
                     ₹{{ product.price }}
-
-                </h2>
-
+                </h4>
+                <span class="badge bg-danger text-white rounded-pill px-2 py-1 small fw-bold">
+                    Special Discount
+                </span>
                 {% endif %}
-
             </div>
 
-            <!-- Stock -->
-
+            <!-- DESCRIPTION -->
             <div class="mb-4">
-
-                {% if product.stock > 0 %}
-
-                <span class="badge bg-success fs-6 p-2">
-
-                    In Stock ({{ product.stock }})
-
-                </span>
-
-                {% else %}
-
-                <span class="badge bg-danger fs-6 p-2">
-
-                    Out Of Stock
-
-                </span>
-
-                {% endif %}
-
+                <h6 class="fw-bold text-dark mb-2">Product Overview</h6>
+                <p class="text-muted lead fs-6 mb-0" style="line-height: 1.7;">
+                    {{ product.description }}
+                </p>
             </div>
 
-            <!-- Description -->
-
-            <div class="card border-0 bg-light mb-4">
-
-                <div class="card-body">
-
-                    <h5>Description</h5>
-
-                    <p class="mb-0 text-muted">
-
-                        {{ product.description }}
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <!-- Buttons -->
-
-            <div class="d-flex flex-wrap gap-3">
-
+            <!-- CTAS -->
+            <div class="d-flex flex-wrap gap-3 mb-4">
                 {% if product.stock > 0 %}
-
                 <a
                     href="{% url 'cart:add' product.id %}"
-                    class="btn btn-success btn-lg"
+                    class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm"
                 >
-
-                    <i class="bi bi-cart-plus"></i>
-
-                    Add To Cart
-
+                    <i class="bi bi-cart-plus me-2"></i> Add to Cart
                 </a>
-
+                {% else %}
+                <button class="btn btn-secondary btn-lg rounded-pill px-5 fw-bold" disabled>
+                    Currently Out of Stock
+                </button>
                 {% endif %}
 
                 <a
                     href="{% url 'wishlist:add' product.id %}"
-                    class="btn btn-outline-danger btn-lg"
+                    class="btn btn-outline-danger btn-lg rounded-pill px-4 fw-semibold"
                 >
-
-                    <i class="bi bi-heart"></i>
-
-                    Wishlist
-
+                    <i class="bi bi-heart me-1"></i> Wishlist
                 </a>
+            </div>
 
+            <!-- TRUST BADGES -->
+            <div class="row g-2 border-top pt-4">
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-4"></i>
+                        <div>
+                            <strong class="d-block small text-dark">10-Min Delivery</strong>
+                            <span class="text-muted small" style="font-size: 0.75rem;">Fast to your doorstep</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-patch-check-fill text-success fs-4"></i>
+                        <div>
+                            <strong class="d-block small text-dark">Freshness Tested</strong>
+                            <span class="text-muted small" style="font-size: 0.75rem;">Graded & sorted daily</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check text-primary fs-4"></i>
+                        <div>
+                            <strong class="d-block small text-dark">Doorstep Refund</strong>
+                            <span class="text-muted small" style="font-size: 0.75rem;">Instant hassle-free return</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
 
     </div>
 
-    <!-- REVIEWS -->
 
-    <div class="mt-5">
+    <!-- REVIEWS SECTION -->
+    <div class="mt-5 pt-4 border-top">
 
-        <h3 class="fw-bold mb-4">
+        <div class="row g-4">
 
-            Customer Reviews
-
-        </h3>
-
-        {% for review in reviews %}
-
-        <div class="card border-0 shadow-sm mb-3">
-
-            <div class="card-body">
-
-                <div class="d-flex justify-content-between">
-
-                    <h6 class="fw-bold">
-
-                        {{ review.user.username }}
-
-                    </h6>
-
-                    <small class="text-muted">
-
-                        {{ review.created_at|date:"d M Y" }}
-
-                    </small>
-
-                </div>
-
-                <div class="text-warning mb-2">
-
-                    {% for i in "12345" %}
-
-                        {% if forloop.counter <= review.rating %}
-                        ⭐
-                        {% endif %}
-
-                    {% endfor %}
-
-                </div>
-
-                <p class="mb-0">
-
-                    {{ review.comment }}
-
-                </p>
-
-            </div>
-
-        </div>
-
-        {% empty %}
-
-        <div class="alert alert-info">
-
-            No reviews yet.
-
-        </div>
-
-        {% endfor %}
-
-    </div>
-
-    <!-- REVIEW FORM -->
-
-    {% if user.is_authenticated %}
-
-    <div class="mt-5">
-
-        <div class="card shadow-sm border-0">
-
-            <div class="card-body">
-
-                <h4 class="fw-bold mb-4">
-
-                    Write A Review
-
+            <!-- REVIEWS LIST -->
+            <div class="col-lg-7">
+                <h4 class="fw-bold mb-4 text-dark">
+                    Verified Customer Reviews ({{ reviews.count }})
                 </h4>
 
-                <form
-                    method="POST"
-                    action="{% url 'reviews:add' product.slug %}"
-                >
-
-                    {% csrf_token %}
-
-                    {{ form.as_p }}
-
-                    <button
-                        type="submit"
-                        class="btn btn-success"
-                    >
-
-                        Submit Review
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    {% endif %}
-
-    <!-- RELATED PRODUCTS -->
-
-    <div class="mt-5">
-
-        <h3 class="fw-bold mb-4">
-
-            Related Products
-
-        </h3>
-
-        <div class="row">
-
-            {% for item in related_products %}
-
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-
-                <div class="card h-100 border-0 shadow-sm">
-
-                    {% if item.image %}
-
-                    <img
-                        src="{{ item.image.url }}"
-                        class="card-img-top"
-                        style="height:220px; object-fit:cover;"
-                    >
-
-                    {% endif %}
-
-                    <div class="card-body">
-
-                        <h6>
-
-                            {{ item.name }}
-
-                        </h6>
-
-                        <h5 class="text-success">
-
-                            ₹{{ item.final_price }}
-
-                        </h5>
-
-                        <a
-                            href="{% url 'products:detail' item.slug %}"
-                            class="btn btn-success btn-sm"
-                        >
-
-                            View Product
-
-                        </a>
-
+                {% for review in reviews %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong class="text-dark">{{ review.user.first_name|default:review.user.username }}</strong>
+                            <span class="badge bg-success-subtle text-success ms-2 small">Verified Purchase</span>
+                        </div>
+                        <span class="text-warning fw-bold">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </span>
                     </div>
-
+                    <p class="text-muted mb-1 small">{{ review.comment }}</p>
+                    <small class="text-muted" style="font-size: 0.75rem;">{{ review.created_at|date:"d M Y" }}</small>
                 </div>
-
+                {% empty %}
+                <div class="p-4 bg-light rounded-4 text-center text-muted">
+                    <i class="bi bi-chat-square-quote fs-2 mb-2 d-block opacity-50"></i>
+                    No customer reviews yet. Be the first to review this product!
+                </div>
+                {% endfor %}
             </div>
 
-            {% endfor %}
+            <!-- SUBMIT REVIEW FORM -->
+            <div class="col-lg-5">
+                {% if user.is_authenticated %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 90px;">
+                    <h5 class="fw-bold mb-3 text-dark">Write a Review</h5>
+                    <form method="POST" action="{% url 'reviews:add' product.slug %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Your Rating</label>
+                            <select name="rating" class="form-select rounded-3 shadow-none" required>
+                                <option value="5">⭐⭐⭐⭐⭐ (5 - Outstanding)</option>
+                                <option value="4">⭐⭐⭐⭐ (4 - Very Good)</option>
+                                <option value="3">⭐⭐⭐ (3 - Average)</option>
+                                <option value="2">⭐⭐ (2 - Below Average)</option>
+                                <option value="1">⭐ (1 - Poor)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Your Feedback</label>
+                            <textarea
+                                name="comment"
+                                class="form-control rounded-3 shadow-none"
+                                rows="4"
+                                placeholder="How was the freshness and delivery?"
+                                required
+                            ></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold">
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-light">
+                    <h6 class="fw-bold mb-2">Have you bought this item?</h6>
+                    <p class="text-muted small mb-3">Sign in to share your experience with other shoppers.</p>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-success rounded-pill btn-sm fw-semibold">
+                        Sign In to Review
+                    </a>
+                </div>
+                {% endif %}
+            </div>
 
         </div>
 

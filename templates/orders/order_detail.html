@@ -1,114 +1,171 @@
 {% extends "base.html" %}
 
-{% block title %}Order Details{% endblock %}
+{% block title %}Order #{{ order.id }} Details | FreshMart{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <div class="card shadow">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-success">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'orders:my_orders' %}" class="text-decoration-none text-success">My Orders</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Order #{{ order.id }}</li>
+        </ol>
+    </nav>
 
-        <div class="card-body">
-
-            <h2 class="mb-4">
+    <!-- TOP HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">
                 Order #{{ order.id }}
             </h2>
-
-            <p>
-                <strong>Date:</strong>
-                {{ order.created_at|date:"d M Y" }}
+            <p class="text-muted mb-0">
+                Placed on {{ order.created_at|date:"d M Y, h:i A" }}
             </p>
+        </div>
 
-            <p>
-                <strong>Status:</strong>
-
-                {% if order.status == "Pending" %}
-                    <span class="badge bg-warning text-dark">
-                        Pending
-                    </span>
-
-                {% elif order.status == "Confirmed" %}
-                    <span class="badge bg-primary">
-                        Confirmed
-                    </span>
-
-                {% elif order.status == "Shipped" %}
-                    <span class="badge bg-info">
-                        Shipped
-                    </span>
-
-                {% elif order.status == "Delivered" %}
-                    <span class="badge bg-success">
-                        Delivered
-                    </span>
-
-                {% else %}
-                    <span class="badge bg-danger">
-                        Cancelled
-                    </span>
-                {% endif %}
-
-            </p>
-
-            <hr>
-
-            <h4>Products</h4>
-
-            <table class="table">
-
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Qty</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    {% for item in order.items.all %}
-
-                    <tr>
-
-                        <td>
-                            {{ item.product.name }}
-                        </td>
-
-                        <td>
-                            {{ item.quantity }}
-                        </td>
-
-                        <td>
-                            ₹{{ item.price }}
-                        </td>
-
-                        <td>
-                            ₹{{ item.subtotal }}
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-            <hr>
-
-            <h4 class="text-success mb-4">
-                Grand Total:
-                ₹{{ order.total_amount }}
-            </h4>
-
-            <!-- Download Invoice -->
-            <a
-                href="{% url 'orders:invoice' order.id %}"
-                class="btn btn-success"
-            >
-                Download Invoice
+        <div class="d-flex gap-2 flex-wrap">
+            {% if order.status != "Cancelled" %}
+            <a href="{% url 'orders:track' order.id %}" class="btn btn-success rounded-pill px-3 fw-bold shadow-sm">
+                <i class="bi bi-geo-alt-fill me-1"></i> Live GPS Track
             </a>
+            {% endif %}
+            <a href="{% url 'orders:download_invoice' order.id %}" class="btn btn-outline-success rounded-pill fw-semibold">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF Invoice
+            </a>
+            {% if order.status in "Pending Confirmed" %}
+            <a
+                href="{% url 'orders:cancel' order.id %}"
+                class="btn btn-outline-danger rounded-pill fw-semibold"
+                onclick="return confirm('Are you sure you want to cancel Order #{{ order.id }}?');"
+            >
+                <i class="bi bi-x-circle me-1"></i> Cancel Order
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- TIMELINE TRACKER -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <h6 class="fw-bold text-muted text-uppercase small mb-3">Live Order Status</h6>
+        <div class="order-timeline">
+            <div class="timeline-step completed">
+                <div class="timeline-icon"><i class="bi bi-check2"></i></div>
+                <div class="timeline-label">Order Placed</div>
+            </div>
+            <div class="timeline-step {% if order.status != 'Pending' %}completed{% else %}active{% endif %}">
+                <div class="timeline-icon">
+                    {% if order.status != 'Pending' %}<i class="bi bi-check2"></i>{% else %}<i class="bi bi-box-seam"></i>{% endif %}
+                </div>
+                <div class="timeline-label">Confirmed & Packing</div>
+            </div>
+            <div class="timeline-step {% if order.status in 'Shipped Delivered' %}completed{% endif %}">
+                <div class="timeline-icon"><i class="bi bi-bicycle"></i></div>
+                <div class="timeline-label">Out for Delivery</div>
+            </div>
+            <div class="timeline-step {% if order.status == 'Delivered' %}completed{% endif %}">
+                <div class="timeline-icon"><i class="bi bi-house-door"></i></div>
+                <div class="timeline-label">Delivered</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ITEMS TABLE -->
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        Items Purchased ({{ order.items.count }})
+                    </h5>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Item Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if item.product.image %}
+                                        <img
+                                            src="{{ item.product.image.url }}"
+                                            class="rounded-3 border"
+                                            style="width: 50px; height: 50px; object-fit: contain; background: #fafafa;"
+                                            alt="{{ item.product.name }}"
+                                        >
+                                        {% else %}
+                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-basket text-success"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-semibold text-dark">{{ item.product.name }}</div>
+                                            <small class="text-muted">{{ item.product.category.name }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="fw-medium">₹{{ item.price }}</td>
+                                <td class="fw-bold">{{ item.quantity }}</td>
+                                <td class="text-end fw-bold text-success">₹{{ item.subtotal }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT: DELIVERY & BILL SUMMARY -->
+        <div class="col-lg-4">
+
+            <!-- ADDRESS CARD -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-geo-alt-fill text-success me-1"></i> Delivery Information
+                </h6>
+                <strong class="d-block text-dark">{{ order.full_name }}</strong>
+                <p class="text-muted small mb-2">
+                    {{ order.address }}<br>
+                    {{ order.city }}, {{ order.state }} - {{ order.pincode }}
+                </p>
+                <small class="text-muted d-block">
+                    <i class="bi bi-telephone me-1"></i> {{ order.phone }}
+                </small>
+            </div>
+
+            <!-- PAYMENT SUMMARY -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-receipt text-success me-1"></i> Billing Summary
+                </h6>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Order Status</span>
+                    <span class="badge bg-success">{{ order.status }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small text-muted">
+                    <span>Delivery</span>
+                    <span class="text-success fw-bold">FREE</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <span class="fw-bold text-dark">Grand Total</span>
+                    <h4 class="fw-bold text-success mb-0">₹{{ order.total_amount }}</h4>
+                </div>
+            </div>
 
         </div>
 

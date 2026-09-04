@@ -9,4 +9,9 @@ urlpatterns = [
         views.apply_coupon,
         name="apply_coupon"
     ),
+    path(
+        "remove/",
+        views.remove_coupon,
+        name="remove_coupon"
+    ),
 ]

@@ -78,31 +78,27 @@ Manage Orders
 
                                     <select
                                         name="status"
-                                        class="form-select"
+                                        class="form-select form-select-sm"
                                     >
 
-                                        <option value="PLACED">
-                                            PLACED
+                                        <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>
+                                            Pending
                                         </option>
 
-                                        <option value="CONFIRMED">
-                                            CONFIRMED
+                                        <option value="Confirmed" {% if order.status == "Confirmed" %}selected{% endif %}>
+                                            Confirmed
                                         </option>
 
-                                        <option value="PACKED">
-                                            PACKED
+                                        <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>
+                                            Shipped
                                         </option>
 
-                                        <option value="OUT_FOR_DELIVERY">
-                                            OUT FOR DELIVERY
+                                        <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>
+                                            Delivered
                                         </option>
 
-                                        <option value="DELIVERED">
-                                            DELIVERED
-                                        </option>
-
-                                        <option value="CANCELLED">
-                                            CANCELLED
+                                        <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>
+                                            Cancelled
                                         </option>
 
                                     </select>

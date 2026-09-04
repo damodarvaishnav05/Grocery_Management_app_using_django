@@ -1,0 +1,679 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FreshBarcode™ — Instant Grocery Scanner | FreshMart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scanner-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    #reader {
+        width: 100% !important;
+        border: none !important;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #0f172a;
+    }
+
+    #reader video {
+        border-radius: 16px;
+        object-fit: cover;
+    }
+
+    .scan-laser-container {
+        position: relative;
+    }
+
+    .laser-line {
+        position: absolute;
+        top: 25%;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #22c55e, #10b981, transparent);
+        box-shadow: 0 0 14px #10b981;
+        animation: scanMove 2.2s infinite ease-in-out;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    @keyframes scanMove {
+        0%, 100% { top: 20%; opacity: 0.2; }
+        50% { top: 75%; opacity: 1; }
+    }
+
+    .barcode-svg-card {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .barcode-svg-card:hover {
+        background: #ecfdf5;
+        border-color: #10b981;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.12);
+    }
+
+    .barcode-strip {
+        letter-spacing: 4px;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .fake-barcode-lines {
+        display: inline-flex;
+        align-items: center;
+        height: 36px;
+        gap: 2px;
+    }
+
+    .fake-barcode-lines span {
+        display: inline-block;
+        height: 100%;
+        background-color: #1e293b;
+    }
+
+    .pulse-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header Breadcrumb & Title -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small text-muted">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-success">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'products:index' %}" class="text-decoration-none text-success">Groceries</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">FreshBarcode™ Scanner</li>
+                </ol>
+            </nav>
+            <h1 class="h3 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <span>📷</span> FreshBarcode™ Instant Scanner
+            </h1>
+            <p class="text-muted mb-0 small">
+                Point your phone camera or laptop webcam at any grocery packaging barcode (EAN-13 / UPC) to instantly check stock, pricing, or add to cart.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'cart:index' %}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-cart3 me-1"></i> View Cart
+            </a>
+            <a href="{% url 'cart:smart_scan' %}" class="btn btn-outline-dark rounded-pill px-3 py-2 fw-semibold">
+                <i class="bi bi-card-checklist me-1"></i> Smart Grocery List
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT COLUMN: Live Camera Scanner & Match Card -->
+        <div class="col-lg-7">
+
+            <!-- Camera Viewfinder Card -->
+            <div class="scanner-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="camera-status-dot" class="pulse-dot bg-secondary"></span>
+                        <span id="camera-status-text" class="fw-bold text-dark small">Camera Ready</span>
+                    </div>
+
+                    <!-- Audio / Continuous Controls -->
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" id="toggle-sound-btn" class="btn btn-sm btn-light border rounded-pill px-2 py-1" title="Toggle audio chime">
+                            <i id="sound-icon" class="bi bi-volume-up-fill text-success"></i> Sound
+                        </button>
+                        <div class="form-check form-switch mb-0" title="Automatically add matched item to cart">
+                            <input class="form-check-input" type="checkbox" role="switch" id="autoAddSwitch">
+                            <label class="form-check-label small fw-semibold" for="autoAddSwitch">Auto-Add</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera viewport -->
+                <div class="scan-laser-container position-relative rounded-4 overflow-hidden mb-3">
+                    <div id="laser-bar" class="laser-line d-none"></div>
+                    <div id="reader"></div>
+                </div>
+
+                <!-- Camera Action Buttons -->
+                <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
+                    <button type="button" id="start-scan-btn" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="startScanner()">
+                        <i class="bi bi-camera-fill me-1"></i> Start Camera Scan
+                    </button>
+                    <button type="button" id="stop-scan-btn" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-bold d-none" onclick="stopScanner()">
+                        <i class="bi bi-stop-circle-fill me-1"></i> Stop Camera
+                    </button>
+                </div>
+
+                <!-- Manual Barcode Input Fallback -->
+                <div class="border-top pt-3">
+                    <label class="form-label small text-muted fw-bold text-uppercase mb-1">
+                        Or enter barcode manually / USB Scanner:
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted">
+                            <i class="bi bi-upc"></i>
+                        </span>
+                        <input
+                            type="text"
+                            id="manual-barcode-input"
+                            class="form-control border-start-0"
+                            placeholder="e.g. 8901030000001"
+                            onkeypress="if(event.key==='Enter') lookupManualBarcode()"
+                        >
+                        <button class="btn btn-success fw-bold px-3" type="button" onclick="lookupManualBarcode()">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matched Product Card Container -->
+            <div id="product-result-wrapper" class="d-none">
+                <div class="scanner-card p-4 border-success border-2">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-bold">
+                            <i class="bi bi-check-circle-fill me-1"></i> Barcode Matched!
+                        </span>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="dismissResult()"></button>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center">
+                        <img
+                            id="res-img"
+                            src=""
+                            alt="Product"
+                            class="rounded-3 border object-fit-cover shadow-sm"
+                            style="width: 100px; height: 100px;"
+                        >
+                        <div class="flex-grow-1">
+                            <span id="res-category" class="badge bg-light text-muted border rounded-pill mb-1"></span>
+                            <h4 id="res-title" class="h5 fw-bold text-dark mb-1"></h4>
+                            <div class="d-flex align-items-baseline gap-2 mb-1">
+                                <span id="res-final-price" class="fs-4 fw-extrabold text-success"></span>
+                                <span id="res-original-price" class="text-muted text-decoration-line-through small"></span>
+                                <span id="res-savings" class="badge bg-danger-subtle text-danger rounded-pill small"></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span id="res-stock-badge" class="badge bg-success">In Stock</span>
+                                <span class="small text-muted">Barcode: <strong id="res-barcode" class="font-monospace"></strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantity Stepper & Add to Cart -->
+                    <div class="d-flex flex-wrap gap-3 align-items-center mt-4 pt-3 border-top">
+                        <div class="input-group" style="width: 130px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="adjustResultQty(-1)">-</button>
+                            <input type="number" id="res-quantity" class="form-control text-center fw-bold" value="1" min="1" max="50">
+                            <button class="btn btn-outline-secondary" type="button" onclick="adjustResultQty(1)">+</button>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="res-add-cart-btn"
+                            class="btn btn-success fw-bold rounded-pill px-4 flex-grow-1"
+                            onclick="addMatchedItemToCart()"
+                        >
+                            <i class="bi bi-cart-plus-fill me-1"></i> Add to Cart
+                        </button>
+
+                        <a id="res-detail-link" href="#" class="btn btn-outline-dark rounded-pill px-3">
+                            Details <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div id="res-alert" class="alert alert-success mt-3 mb-0 d-none py-2 px-3 small rounded-3">
+                        <i class="bi bi-bag-check-fill me-1"></i> <span id="res-alert-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scanner Error / Not Found Alert -->
+            <div id="scanner-error-card" class="alert alert-warning d-none rounded-4 p-3 mt-3 shadow-sm" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+                    <div>
+                        <strong id="error-title">Item Not Recognized</strong>
+                        <p id="error-msg" class="mb-0 small text-muted"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: 1-Tap Sample Barcodes & Live Scan Tally -->
+        <div class="col-lg-5">
+
+            <!-- 1-Tap Barcode Presets Card -->
+            <div class="scanner-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="h6 fw-bold text-dark mb-0 text-uppercase letter-spacing-1">
+                        🎯 1-Tap Test Barcodes
+                    </h2>
+                    <span class="badge bg-success-subtle text-success rounded-pill small">Click to Test</span>
+                </div>
+                <p class="text-muted small mb-3">
+                    Don't have a camera or physical grocery packaging nearby? Click any simulated retail barcode below to instantly test the lookup & cart engine:
+                </p>
+
+                <div class="d-flex flex-column gap-2" style="max-height: 480px; overflow-y: auto;">
+                    {% for item in sample_products %}
+                    <div
+                        class="barcode-svg-card p-2 p-md-3 d-flex align-items-center justify-content-between gap-2"
+                        onclick="testBarcode('{{ item.barcode }}')"
+                        title="Click to simulate scan: {{ item.name }}"
+                    >
+                        <div class="d-flex align-items-center gap-3">
+                            {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" class="rounded-2 border object-fit-cover" style="width: 48px; height: 48px;">
+                            {% else %}
+                            <div class="rounded-2 bg-light border d-flex align-items-center justify-content-center text-muted" style="width: 48px; height: 48px;">
+                                🥦
+                            </div>
+                            {% endif %}
+                            <div>
+                                <div class="fw-bold text-dark small text-truncate" style="max-width: 180px;">
+                                    {{ item.name }}
+                                </div>
+                                <div class="text-success fw-bold small">
+                                    ₹{{ item.final_price }}
+                                    {% if item.discount_price %}
+                                    <span class="text-muted text-decoration-line-through ms-1" style="font-size: 11px;">₹{{ item.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simulated Barcode Lines & EAN Code -->
+                        <div class="text-end">
+                            <div class="fake-barcode-lines d-none d-sm-inline-flex">
+                                <span style="width: 2px;"></span>
+                                <span style="width: 1px; background: transparent;"></span>
+                                <span style="width: 3px;"></span>
+                                <span style="width: 1px;"></span>
+                                <span style="width: 2px;"></span>
+                                <span style="width: 1px; background: transparent;"></span>
+                                <span style="width: 3px;"></span>
+                                <span style="width: 2px;"></span>
+                                <span style="width: 1px;"></span>
+                                <span style="width: 2px;"></span>
+                                <span style="width: 3px;"></span>
+                                <span style="width: 1px;"></span>
+                                <span style="width: 2px;"></span>
+                            </div>
+                            <div class="barcode-strip text-dark mt-1">
+                                {{ item.barcode }}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small">No sample products available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Scanned Items Session History -->
+            <div class="scanner-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h6 fw-bold text-dark mb-0 text-uppercase letter-spacing-1">
+                        📋 Scanned This Session
+                    </h2>
+                    <span id="session-count-badge" class="badge bg-secondary rounded-pill">0 items</span>
+                </div>
+                <div id="session-scan-list" class="d-flex flex-column gap-2" style="max-height: 220px; overflow-y: auto;">
+                    <div id="empty-session-msg" class="text-center py-4 text-muted small">
+                        <i class="bi bi-upc-scan fs-3 d-block mb-1 opacity-50"></i>
+                        No barcodes scanned yet.<br>Point camera at a barcode or click a sample on the right.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- HTML5-QRCode Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+    let html5QrCode = null;
+    let isScanning = false;
+    let soundEnabled = true;
+    let currentMatchedProduct = null;
+    let lastScannedCode = null;
+    let lastScanTimestamp = 0;
+    const sessionScans = [];
+
+    // Web Audio Synthesizer Beep
+    function playScannerBeep() {
+        if (!soundEnabled) return;
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1850, ctx.currentTime);
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.11);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start();
+            osc.stop(ctx.currentTime + 0.11);
+        } catch (err) {
+            console.warn("Audio chime error:", err);
+        }
+    }
+
+    // Toggle Sound
+    document.getElementById("toggle-sound-btn")?.addEventListener("click", () => {
+        soundEnabled = !soundEnabled;
+        const icon = document.getElementById("sound-icon");
+        if (soundEnabled) {
+            icon.className = "bi bi-volume-up-fill text-success";
+        } else {
+            icon.className = "bi bi-volume-mute-fill text-danger";
+        }
+    });
+
+    // Start Camera Scanner
+    async function startScanner() {
+        hideError();
+        const startBtn = document.getElementById("start-scan-btn");
+        const stopBtn = document.getElementById("stop-scan-btn");
+        const statusDot = document.getElementById("camera-status-dot");
+        const statusText = document.getElementById("camera-status-text");
+        const laserBar = document.getElementById("laser-bar");
+
+        try {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+
+            statusText.innerText = "Requesting Camera...";
+            statusDot.className = "pulse-dot bg-warning";
+
+            const config = {
+                fps: 10,
+                qrbox: { width: 280, height: 160 },
+                aspectRatio: 1.6,
+            };
+
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                onScanFailure
+            );
+
+            isScanning = true;
+            startBtn.classList.add("d-none");
+            stopBtn.classList.remove("d-none");
+            laserBar.classList.remove("d-none");
+            statusText.innerText = "Camera Active (Scanning...)";
+            statusDot.className = "pulse-dot bg-success";
+
+        } catch (err) {
+            console.error("Camera start failed:", err);
+            statusText.innerText = "Camera Unavailable";
+            statusDot.className = "pulse-dot bg-danger";
+            showError("Camera Access Denied / Unavailable", "Could not start video stream. Please ensure camera permissions are granted or use the 1-tap test chips below.");
+        }
+    }
+
+    // Stop Camera Scanner
+    async function stopScanner() {
+        if (html5QrCode && isScanning) {
+            try {
+                await html5QrCode.stop();
+                isScanning = false;
+            } catch (err) {
+                console.error("Camera stop error:", err);
+            }
+        }
+        document.getElementById("start-scan-btn").classList.remove("d-none");
+        document.getElementById("stop-scan-btn").classList.add("d-none");
+        document.getElementById("laser-bar").classList.add("d-none");
+        document.getElementById("camera-status-text").innerText = "Camera Paused";
+        document.getElementById("camera-status-dot").className = "pulse-dot bg-secondary";
+    }
+
+    // Barcode Detection Callback
+    function onScanSuccess(decodedText, decodedResult) {
+        const now = Date.now();
+        // Prevent multi-trigger within 2 seconds for identical barcode
+        if (decodedText === lastScannedCode && (now - lastScanTimestamp < 2000)) {
+            return;
+        }
+
+        lastScannedCode = decodedText;
+        lastScanTimestamp = now;
+
+        playScannerBeep();
+        if (navigator.vibrate) navigator.vibrate(80);
+
+        lookupBarcode(decodedText);
+    }
+
+    function onScanFailure(error) {
+        // Continuous search frame - ignore frame miss
+    }
+
+    // Lookup barcode on backend
+    async function lookupBarcode(barcode) {
+        hideError();
+        try {
+            const response = await fetch(`/products/api/barcode-lookup/?barcode=${encodeURIComponent(barcode)}`);
+            const data = await response.json();
+
+            if (data.status === "success" && data.product) {
+                renderProductMatch(data.product);
+
+                // If Auto-Add switch is active, automatically add 1 to cart!
+                const autoAdd = document.getElementById("autoAddSwitch")?.checked;
+                if (autoAdd) {
+                    addMatchedItemToCart();
+                }
+            } else {
+                showError("Barcode Not Found", data.message || `No grocery product matches barcode '${barcode}'.`);
+            }
+        } catch (err) {
+            console.error("Lookup error:", err);
+            showError("Network Error", "Unable to contact lookup service. Please check your connection.");
+        }
+    }
+
+    // Render Scanned Product Card
+    function renderProductMatch(prod) {
+        currentMatchedProduct = prod;
+
+        document.getElementById("res-img").src = prod.image_url || "/static/images/default.jpg";
+        document.getElementById("res-title").innerText = prod.name;
+        document.getElementById("res-category").innerText = prod.category;
+        document.getElementById("res-final-price").innerText = `₹${prod.final_price.toFixed(2)}`;
+        document.getElementById("res-barcode").innerText = prod.barcode;
+        document.getElementById("res-quantity").value = 1;
+        document.getElementById("res-detail-link").href = prod.detail_url;
+
+        const origPriceEl = document.getElementById("res-original-price");
+        const savingsEl = document.getElementById("res-savings");
+        if (prod.discount_price && prod.savings > 0) {
+            origPriceEl.innerText = `₹${prod.price.toFixed(2)}`;
+            origPriceEl.classList.remove("d-none");
+            savingsEl.innerText = `${prod.discount_percent}% OFF`;
+            savingsEl.classList.remove("d-none");
+        } else {
+            origPriceEl.classList.add("d-none");
+            savingsEl.classList.add("d-none");
+        }
+
+        const stockBadge = document.getElementById("res-stock-badge");
+        const addBtn = document.getElementById("res-add-cart-btn");
+        if (prod.in_stock) {
+            stockBadge.className = "badge bg-success";
+            stockBadge.innerText = `In Stock (${prod.stock})`;
+            addBtn.disabled = false;
+        } else {
+            stockBadge.className = "badge bg-danger";
+            stockBadge.innerText = "Out of Stock";
+            addBtn.disabled = true;
+        }
+
+        document.getElementById("res-alert").classList.add("d-none");
+        document.getElementById("product-result-wrapper").classList.remove("d-none");
+
+        // Record to session scan list
+        addToSessionList(prod);
+    }
+
+    function adjustResultQty(delta) {
+        const input = document.getElementById("res-quantity");
+        let val = parseInt(input.value) || 1;
+        val = Math.max(1, Math.min(50, val + delta));
+        input.value = val;
+    }
+
+    // Add Matched Item to Cart
+    async function addMatchedItemToCart() {
+        if (!currentMatchedProduct) return;
+        const qty = parseInt(document.getElementById("res-quantity").value) || 1;
+        const addBtn = document.getElementById("res-add-cart-btn");
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Adding...';
+
+        try {
+            const response = await fetch("/products/api/barcode-add-to-cart/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                },
+                body: JSON.stringify({
+                    barcode: currentMatchedProduct.barcode,
+                    quantity: qty,
+                })
+            });
+
+            const data = await response.json();
+            if (response.status === 401 || data.status === "auth_required") {
+                window.location.href = data.login_url || "/accounts/login/";
+                return;
+            }
+
+            if (data.status === "success") {
+                const alertEl = document.getElementById("res-alert");
+                document.getElementById("res-alert-msg").innerText = data.message;
+                alertEl.classList.remove("d-none");
+
+                // Update cart count badge in navbar if present
+                const cartBadge = document.querySelector(".cart-badge, #cart-count");
+                if (cartBadge && data.cart_quantity) {
+                    cartBadge.innerText = data.cart_quantity;
+                }
+            } else {
+                showError("Cart Error", data.message || "Could not add product to cart.");
+            }
+        } catch (err) {
+            console.error("Cart add error:", err);
+            showError("Network Error", "Could not reach server to add item.");
+        } finally {
+            addBtn.disabled = false;
+            addBtn.innerHTML = '<i class="bi bi-cart-plus-fill me-1"></i> Add to Cart';
+        }
+    }
+
+    // Session Scans List
+    function addToSessionList(prod) {
+        const emptyMsg = document.getElementById("empty-session-msg");
+        if (emptyMsg) emptyMsg.remove();
+
+        const list = document.getElementById("session-scan-list");
+        const countBadge = document.getElementById("session-count-badge");
+
+        sessionScans.unshift(prod);
+        countBadge.innerText = `${sessionScans.length} item${sessionScans.length > 1 ? 's' : ''}`;
+
+        const itemEl = document.createElement("div");
+        itemEl.className = "p-2 bg-light rounded-3 d-flex align-items-center justify-content-between border";
+        itemEl.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <img src="${prod.image_url || '/static/images/default.jpg'}" class="rounded-2 object-fit-cover" style="width: 34px; height: 34px;">
+                <div>
+                    <div class="fw-bold small text-truncate" style="max-width: 170px;">${prod.name}</div>
+                    <span class="text-success small fw-semibold">₹${prod.final_price.toFixed(2)}</span>
+                </div>
+            </div>
+            <span class="badge bg-white text-muted border font-monospace small">${prod.barcode}</span>
+        `;
+        list.prepend(itemEl);
+    }
+
+    // 1-Tap Barcode Preset Testing
+    function testBarcode(barcode) {
+        playScannerBeep();
+        lookupBarcode(barcode);
+    }
+
+    // Manual Barcode Input
+    function lookupManualBarcode() {
+        const input = document.getElementById("manual-barcode-input");
+        const val = input.value.trim();
+        if (val) {
+            playScannerBeep();
+            lookupBarcode(val);
+        }
+    }
+
+    function dismissResult() {
+        document.getElementById("product-result-wrapper").classList.add("d-none");
+        currentMatchedProduct = null;
+    }
+
+    function showError(title, msg) {
+        const card = document.getElementById("scanner-error-card");
+        document.getElementById("error-title").innerText = title;
+        document.getElementById("error-msg").innerText = msg;
+        card.classList.remove("d-none");
+    }
+
+    function hideError() {
+        document.getElementById("scanner-error-card").classList.add("d-none");
+    }
+
+    function getCsrfToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookieValue || '';
+    }
+</script>
+{% endblock %}
+

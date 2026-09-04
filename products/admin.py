@@ -7,6 +7,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_display = (
         "name",
+        "barcode",
         "category",
         "price",
         "stock",
@@ -20,6 +21,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     search_fields = (
         "name",
+        "barcode",
     )
 
     prepopulated_fields = {

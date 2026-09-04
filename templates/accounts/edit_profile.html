@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile | FreshMart{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Edit Profile</h2>
+                    <p class="text-muted mb-0">Update your personal account information and avatar</p>
+                </div>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Profile
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger mb-4">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Profile Picture Section -->
+                        <div class="text-center mb-4 pb-3 border-bottom">
+                            <div class="position-relative d-inline-block mb-3">
+                                {% if request.user.profile_picture %}
+                                <img src="{{ request.user.profile_picture.url }}" class="profile-avatar shadow-sm" alt="{{ request.user.username }}" id="avatar-preview">
+                                {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=198754&color=fff&size=256" class="profile-avatar shadow-sm" alt="{{ request.user.username }}" id="avatar-preview">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8 mx-auto">
+                                <label class="form-label small text-muted d-block">Change Avatar</label>
+                                <input type="file" name="profile_picture" class="form-control" accept="image/*" id="id_profile_picture">
+                                {% if form.profile_picture.errors %}
+                                <div class="text-danger small mt-1">{{ form.profile_picture.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- User Info Grid -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ form.first_name.id_for_label }}">First Name</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ form.last_name.id_for_label }}">Last Name</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ form.email.id_for_label }}">Email Address</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                                {{ form.phone_number }}
+                                {% if form.phone_number.errors %}
+                                <div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-light px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success px-4 fw-semibold">
+                                <i class="bi bi-check2-circle me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live preview for avatar upload
+    const avatarInput = document.getElementById('id_profile_picture');
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarInput && avatarPreview) {
+        avatarInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+</script>
+{% endblock %}
+

@@ -13,11 +13,12 @@ SECRET_KEY = os.getenv(
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    ".vercel.app",
-]
+ALLOWED_HOSTS = list(set([h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.onrender.com,.railway.app").split(",") if h.strip()] + ["testserver", "localhost", "127.0.0.1"]))
+
+CSRF_TRUSTED_ORIGINS = list(set([
+    f"https://{h.lstrip('.')}" for h in ALLOWED_HOSTS if h not in ["localhost", "127.0.0.1", "testserver"]
+] + ["https://*.onrender.com", "https://*.railway.app", "http://localhost:8000", "http://127.0.0.1:8000"]))
+
 
 # =========================
 # Applications
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     "coupons",
     "ai_assistant",
     "dashboard",
+    "wallet",
 ]
 
 AUTH_USER_MODEL = "accounts.CustomUser"
@@ -91,6 +93,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "grocery_project.context_processors.common_data",
             ],
         },
     },
@@ -163,7 +166,11 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
@@ -208,6 +215,17 @@ RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
 # =========================
 
 AI_API_KEY = os.getenv("AI_API_KEY", "")
+
+# =========================
+# Email
+# =========================
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "noreply@freshmart.com")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "FreshMart <noreply@freshmart.com>")
 
 # =========================
 # Production Security

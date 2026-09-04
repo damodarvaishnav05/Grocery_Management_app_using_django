@@ -1,124 +1,97 @@
 {% extends "base.html" %}
 
-{% block title %}
-Checkout | FreshMart
-{% endblock %}
+{% block title %}Checkout | FreshMart 10-Min Delivery{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <!-- Header -->
-
-    <div class="text-center mb-5">
-
-        <h1 class="fw-bold text-success">
-            Checkout
-        </h1>
-
-        <p class="text-muted">
-            Complete your order and get groceries delivered fast.
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-shield-check text-success me-2"></i> Delivery & Checkout
+        </h2>
+        <p class="text-muted mb-0">
+            Enter your doorstep delivery address and verify your order items.
         </p>
-
     </div>
 
     <div class="row g-4">
 
-        <!-- DELIVERY FORM -->
+        <!-- LEFT COLUMN: DELIVERY ADDRESS FORM -->
+        <div class="col-lg-7">
 
-        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
 
-            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-geo-alt text-success me-1"></i> Delivery Address
+                    </h5>
+                </div>
 
                 <div class="card-body p-4">
-
-                    <h4 class="fw-bold mb-4">
-
-                        <i class="bi bi-truck text-success me-2"></i>
-
-                        Delivery Information
-
-                    </h4>
 
                     <form method="POST">
 
                         {% csrf_token %}
 
-                        <div class="row">
+                        <div class="row g-3">
 
-                            <div class="col-md-6 mb-3">
-
-                                <label class="form-label">
-                                    Full Name
-                                </label>
-
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-muted">Full Name *</label>
                                 {{ form.full_name }}
-
                             </div>
 
-                            <div class="col-md-6 mb-3">
-
-                                <label class="form-label">
-                                    Phone Number
-                                </label>
-
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-muted">Phone Number *</label>
                                 {{ form.phone }}
-
                             </div>
 
-                        </div>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label fw-semibold small text-muted mb-0">Street Address & Flat / House No *</label>
+                                    <button type="button" id="detect-gps-btn" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1" onclick="detectLiveCheckoutLocation()">
+                                        <i class="bi bi-crosshair me-1"></i> Detect Live Location
+                                    </button>
+                                </div>
+                                {{ form.address }}
+                                <div id="gps-status-hint" class="small text-muted mt-1 d-none"></div>
+                            </div>
 
-                        <div class="mb-3">
 
-                            <label class="form-label">
-                                Delivery Address
-                            </label>
-
-                            {{ form.address }}
-
-                        </div>
-
-                        <div class="row">
-
-                            <div class="col-md-4 mb-3">
-
-                                <label class="form-label">
-                                    City
-                                </label>
-
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small text-muted">City *</label>
                                 {{ form.city }}
-
                             </div>
 
-                            <div class="col-md-4 mb-3">
-
-                                <label class="form-label">
-                                    State
-                                </label>
-
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small text-muted">State *</label>
                                 {{ form.state }}
-
                             </div>
 
-                            <div class="col-md-4 mb-3">
-
-                                <label class="form-label">
-                                    Pincode
-                                </label>
-
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small text-muted">Pincode *</label>
                                 {{ form.pincode }}
-
                             </div>
 
                         </div>
 
-                        <button
-                            type="submit"
-                            class="btn btn-success btn-lg w-100 mt-3 rounded-3"
-                        >
-                            <i class="bi bi-check-circle me-2"></i>
-                            Place Order
-                        </button>
+                        <div class="mt-4 p-3 bg-light rounded-3 d-flex align-items-center gap-3">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-3"></i>
+                            <div>
+                                <strong class="text-dark d-block">Estimated Arrival: 10 - 15 Minutes</strong>
+                                <small class="text-muted">Packed directly from the nearest neighborhood dark store</small>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button
+                                type="submit"
+                                class="btn btn-success w-100 btn-lg rounded-pill fw-bold shadow-sm py-3"
+                            >
+                                <i class="bi bi-credit-card me-1"></i> Continue to Payment (₹{{ total }})
+                            </button>
+                        </div>
 
                     </form>
 
@@ -128,121 +101,73 @@ Checkout | FreshMart
 
         </div>
 
-        <!-- ORDER SUMMARY -->
 
-        <div class="col-lg-4">
+        <!-- RIGHT COLUMN: ORDER SUMMARY -->
+        <div class="col-lg-5">
 
-            <div class="card border-0 shadow rounded-4 sticky-top">
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 90px;">
 
-                <div class="card-header bg-success text-white rounded-top-4">
-
-                    <h5 class="mb-0">
-                        🛒 Order Summary
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        Order Items ({{ cart_items.count }})
                     </h5>
-
+                    <a href="{% url 'cart:index' %}" class="small text-success fw-semibold text-decoration-none">
+                        Edit Cart
+                    </a>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-4">
 
-                    {% for item in cart_items %}
-
-                    <div class="d-flex mb-3">
-
-                        {% if item.product.image %}
-
-                        <img
-                            src="{{ item.product.image.url }}"
-                            width="65"
-                            height="65"
-                            class="rounded-3 me-3"
-                            style="object-fit:cover;"
-                            alt="{{ item.product.name }}"
-                        >
-
-                        {% endif %}
-
-                        <div class="flex-grow-1">
-
-                            <h6 class="mb-1">
-                                {{ item.product.name }}
-                            </h6>
-
-                            <small class="text-muted">
-                                Qty: {{ item.quantity }}
-                            </small>
-
+                    <!-- LIST OF CART ITEMS -->
+                    <div class="cart-items-preview mb-3 overflow-y-auto" style="max-height: 250px;">
+                        {% for item in cart_items %}
+                        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-light text-dark border">{{ item.quantity }}x</span>
+                                <div>
+                                    <div class="fw-semibold text-truncate small" style="max-width: 180px;">
+                                        {{ item.product.name }}
+                                    </div>
+                                    <small class="text-muted">₹{{ item.product.final_price }}</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold text-dark small">
+                                ₹{{ item.total_price }}
+                            </span>
                         </div>
-
-                        <strong>
-                            ₹{{ item.total_price }}
-                        </strong>
-
+                        {% endfor %}
                     </div>
 
-                    {% endfor %}
-
-                    <hr>
-
+                    <!-- BILL BREAKDOWN -->
                     <div class="d-flex justify-content-between mb-2">
-
-                        <span>
-                            Subtotal
-                        </span>
-
-                        <span>
-                            ₹{{ total }}
-                        </span>
-
+                        <span class="text-muted">Items Subtotal</span>
+                        <strong class="text-dark">₹{{ subtotal }}</strong>
                     </div>
 
-                    {% if discount %}
-
+                    {% if discount > 0 %}
                     <div class="d-flex justify-content-between mb-2">
-
-                        <span>
-                            Discount
-                        </span>
-
-                        <span class="text-success fw-bold">
-                            -₹{{ discount }}
-                        </span>
-
+                        <span class="text-muted">Voucher Discount</span>
+                        <strong class="text-success">-₹{{ discount }}</strong>
                     </div>
-
                     {% endif %}
 
-                    <div class="d-flex justify-content-between mb-2">
-
-                        <span>
-                            Delivery
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Delivery Charges</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">
+                            FREE (Express)
                         </span>
-
-                        <span class="text-success">
-                            Free
-                        </span>
-
                     </div>
 
-                    <hr>
+                    <hr class="my-3">
 
-                    <div class="d-flex justify-content-between">
-
-                        <h5 class="fw-bold">
-                            Total
-                        </h5>
-
-                        <h5 class="fw-bold text-success">
-                            ₹{{ total }}
-                        </h5>
-
+                    <div class="d-flex justify-content-between align-items-baseline mb-3">
+                        <h5 class="fw-bold mb-0 text-dark">Final Amount</h5>
+                        <h4 class="fw-bold text-success mb-0">₹{{ total }}</h4>
                     </div>
 
-                    <div class="alert alert-success mt-3 mb-0">
-
+                    <div class="alert alert-success bg-success-subtle border-0 rounded-3 mb-0 small text-success-emphasis">
                         <i class="bi bi-shield-check me-1"></i>
-
-                        Secure Checkout & Safe Payment
-
+                        Transactions are 256-bit encrypted via Razorpay PCI-DSS certified gateway.
                     </div>
 
                 </div>
@@ -255,4 +180,78 @@ Checkout | FreshMart
 
 </div>
 
+{% block extra_js %}
+<script>
+    function detectLiveCheckoutLocation() {
+        const btn = document.getElementById("detect-gps-btn");
+        const hint = document.getElementById("gps-status-hint");
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Locating...';
+        hint.className = "small text-muted mt-1";
+        hint.innerText = "Requesting device GPS coordinates...";
+        hint.classList.remove("d-none");
+
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                hint.innerText = `GPS Found: ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E. Resolving street address...`;
+
+                try {
+                    // Free reverse geocoding via OpenStreetMap Nominatim
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                    const data = await resp.json();
+
+                    if (data && data.address) {
+                        const addr = data.address;
+                        const streetParts = [
+                            addr.house_number,
+                            addr.building,
+                            addr.road || addr.residential || addr.suburb,
+                            addr.neighbourhood
+                        ].filter(Boolean).join(", ");
+
+                        const addressInput = document.querySelector('input[name="address"], textarea[name="address"]');
+                        const cityInput = document.querySelector('input[name="city"]');
+                        const stateInput = document.querySelector('input[name="state"]');
+                        const pincodeInput = document.querySelector('input[name="pincode"]');
+
+                        if (addressInput && streetParts) addressInput.value = streetParts;
+                        if (cityInput && (addr.city || addr.town || addr.county)) cityInput.value = addr.city || addr.town || addr.county;
+                        if (stateInput && addr.state) stateInput.value = addr.state;
+                        if (pincodeInput && addr.postcode) pincodeInput.value = addr.postcode;
+
+                        hint.className = "small text-success mt-1 fw-semibold";
+                        hint.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Live location detected: ${streetParts || 'Location acquired'}`;
+                    } else {
+                        hint.className = "small text-success mt-1 fw-semibold";
+                        hint.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> GPS Coordinates locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    }
+                } catch(err) {
+                    console.warn("Reverse geocode warning:", err);
+                    hint.className = "small text-success mt-1";
+                    hint.innerText = `GPS coordinates acquired: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Location Updated';
+                }
+            },
+            function(err) {
+                console.warn("Geolocation error:", err);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-crosshair me-1"></i> Try Again';
+                hint.className = "small text-danger mt-1";
+                hint.innerText = "Location permission denied or unavailable. Please enter address manually.";
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+</script>
+{% endblock %}
 {% endblock %}

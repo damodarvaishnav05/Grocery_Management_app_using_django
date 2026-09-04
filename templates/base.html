@@ -11,11 +11,30 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="description"
+        content="FreshMart — fresh groceries, fruits, vegetables and daily essentials delivered to your door in minutes."
+    >
+
     <title>
         {% block title %}
         FreshMart
         {% endblock %}
     </title>
+
+    <!-- Favicon (inline, no static asset required) -->
+    <link
+        rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%AC%3C/text%3E%3C/svg%3E"
+    >
+
+    <!-- Fonts: Fraunces (display) + Manrope (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
     <!-- Bootstrap -->
     <link
@@ -29,11 +48,223 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     >
 
-    <!-- Custom CSS -->
+    <!-- Custom CSS with Cache Buster -->
     <link
         rel="stylesheet"
-        href="{% static 'css/style.css' %}"
+        href="{% static 'css/style.css' %}?v=3.5"
     >
+
+    <style>
+        /* Mobile-First Reset & Overflow Prevention */
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Category Filter Pills (PC: Wraps cleanly, Mobile: Smooth touch scroll without scrollbar) */
+        .category-pills-bar {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            gap: 8px !important;
+            margin-bottom: 24px !important;
+            width: 100% !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .category-pills-bar {
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                padding-bottom: 6px !important;
+            }
+            .category-pills-bar::-webkit-scrollbar {
+                display: none !important;
+            }
+        }
+
+        /* Product Cards & Floating Badges */
+        .product-card {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            position: relative !important;
+            transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+            overflow: hidden !important;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 14px 28px rgba(18, 46, 32, 0.08) !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        .product-img-container {
+            position: relative !important;
+            height: 200px !important;
+            width: 100% !important;
+            background: #f8fafc !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 14px !important;
+            overflow: hidden !important;
+            border-radius: 16px 16px 0 0 !important;
+        }
+
+        .product-img-container img {
+            max-height: 100% !important;
+            max-width: 100% !important;
+            object-fit: contain !important;
+            transition: transform 0.3s ease !important;
+        }
+
+        .product-card:hover .product-img-container img {
+            transform: scale(1.05) !important;
+        }
+
+        .discount-pill {
+            position: absolute !important;
+            top: 10px !important;
+            left: 10px !important;
+            background: #FF9F1C !important;
+            color: #122E20 !important;
+            font-weight: 800 !important;
+            font-size: 0.72rem !important;
+            padding: 4px 8px !important;
+            border-radius: 6px !important;
+            line-height: 1.2 !important;
+            z-index: 5 !important;
+            box-shadow: 0 2px 6px rgba(255, 159, 28, 0.35) !important;
+            display: inline-block !important;
+        }
+
+        .wishlist-heart-btn {
+            position: absolute !important;
+            top: 10px !important;
+            right: 10px !important;
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #64748b !important;
+            font-size: 1rem !important;
+            text-decoration: none !important;
+            z-index: 5 !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .wishlist-heart-btn:hover {
+            color: #e11d48 !important;
+            background: #ffffff !important;
+            transform: scale(1.1) !important;
+        }
+
+        .wishlist-heart-btn.active {
+            color: #e11d48 !important;
+            background: #ffe4e6 !important;
+        }
+
+        @media (max-width: 576px) {
+            .product-img-container {
+                height: 140px !important;
+                padding: 8px !important;
+            }
+        }
+
+        @media (max-width: 991px) {
+            body {
+                padding-bottom: 74px !important;
+            }
+
+            .mobile-bottom-nav {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                height: 62px !important;
+                background: rgba(255, 255, 255, 0.98) !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
+                border-top: 1px solid #e2e8f0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-around !important;
+                z-index: 1050 !important;
+                box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08) !important;
+                padding-bottom: env(safe-area-inset-bottom, 0) !important;
+            }
+
+            .nav-item-mobile {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-decoration: none !important;
+                color: #64748b !important;
+                font-size: 0.7rem !important;
+                font-weight: 600 !important;
+                position: relative !important;
+                padding: 6px 12px !important;
+                transition: color 0.15s ease !important;
+            }
+
+            .nav-item-mobile i {
+                font-size: 1.25rem !important;
+                margin-bottom: 2px !important;
+                line-height: 1 !important;
+            }
+
+            .nav-item-mobile.active,
+            .nav-item-mobile:hover,
+            .nav-item-mobile:focus {
+                color: #1F7A4D !important;
+            }
+
+            .mobile-nav-badge {
+                position: absolute !important;
+                top: 2px !important;
+                right: 8px !important;
+                font-size: 0.62rem !important;
+                padding: 2px 5px !important;
+                border-radius: 999px !important;
+                line-height: 1 !important;
+                font-weight: 800 !important;
+            }
+
+            /* Chip buttons & horizontal touch scrolling */
+            .chip-btn {
+                white-space: nowrap !important;
+                flex-shrink: 0 !important;
+                border-radius: 999px !important;
+                padding: 6px 14px !important;
+                font-size: 0.85rem !important;
+            }
+
+            .mobile-scroll-container {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                gap: 8px !important;
+                scrollbar-width: none !important;
+            }
+
+            .mobile-scroll-container::-webkit-scrollbar {
+                display: none !important;
+            }
+        }
+    </style>
 
     {% block extra_css %}
     {% endblock %}
@@ -46,121 +277,269 @@
 <!-- NAVBAR -->
 <!-- ========================= -->
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
 
     <div class="container">
 
-        <a
-            class="navbar-brand fw-bold"
-            href="/"
-        >
-            🛒 FreshMart
-        </a>
+        <div class="d-flex justify-content-between align-items-center w-100 w-lg-auto">
+            <a
+                class="navbar-brand fw-bold d-flex align-items-center gap-2 mb-0"
+                href="/"
+            >
+                <span class="fs-4">🥬</span>
+                <span>FreshMart</span>
+            </a>
 
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarContent"
+            <!-- Mobile Quick Header Icons -->
+            <div class="d-flex align-items-center gap-2 d-lg-none">
+                {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}" class="btn btn-sm text-white py-1 px-2 border-0" title="My Profile">
+                    <i class="bi bi-person-circle fs-5"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-warning rounded-pill py-1 px-3 fw-bold">
+                    Login
+                </a>
+                {% endif %}
+
+                <button
+                    class="navbar-toggler border-0 shadow-none p-1"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent"
+                    aria-controls="navbarContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Prominent Search (Instant search on mobile and desktop) -->
+        <form
+            class="d-flex mx-auto my-2 my-lg-0 col-12 col-lg-5"
+            method="GET"
+            action="{% url 'products:index' %}"
+            role="search"
         >
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <div class="input-group w-100 shadow-sm rounded-pill overflow-hidden bg-white">
+                <input
+                    class="form-control rounded-start-pill ps-3 border-0 shadow-none"
+                    type="search"
+                    name="q"
+                    placeholder="Search fresh fruits, milk, veggies..."
+                    aria-label="Search groceries"
+                >
+
+                <!-- FreshBarcode™ Scanner Button -->
+                <a
+                    href="{% url 'products:barcode_scanner' %}"
+                    class="btn btn-white bg-white text-secondary border-0 px-2 px-md-2 barcode-scanner-btn"
+                    title="Scan Barcode (FreshBarcode™)"
+                >
+                    <i class="bi bi-upc-scan fs-5"></i>
+                </a>
+
+                <!-- FreshVoice™ Microphone Button -->
+                <button
+                    type="button"
+                    class="btn btn-white bg-white text-success border-0 px-2 px-md-3 voice-search-btn"
+                    title="Speak to Search (FreshVoice™)"
+                    onclick="openVoiceAssistant()"
+                >
+                    <i class="bi bi-mic-fill fs-5"></i>
+                </button>
+
+                <button
+                    class="btn btn-warning rounded-end-pill px-3 px-md-4 fw-bold"
+                    type="submit"
+                    aria-label="Submit search"
+                >
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
 
         <div
             class="collapse navbar-collapse"
             id="navbarContent"
         >
 
-            <!-- Search -->
+            <ul class="navbar-nav ms-auto align-items-center gap-1 gap-lg-2">
 
-            <form
-                class="d-flex mx-auto"
-                method="GET"
-                action="{% url 'products:index' %}"
-            >
-
-                <input
-                    class="form-control me-2"
-                    type="search"
-                    name="q"
-                    placeholder="Search groceries..."
-                >
-
-                <button
-                    class="btn btn-light"
-                    type="submit"
-                >
-                    Search
-                </button>
-
-            </form>
-
-            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        href="{% url 'categories:index' %}"
+                    >
+                        <i class="bi bi-grid me-1"></i> Categories
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     <a
                         class="nav-link"
                         href="{% url 'products:index' %}"
                     >
-                        Products
+                        <i class="bi bi-bag me-1"></i> Products
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link text-warning fw-semibold"
+                        href="{% url 'ai_assistant:index' %}"
+                    >
+                        <i class="bi bi-robot me-1"></i> AI Guide
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link text-white fw-semibold"
+                        href="{% url 'cart:smart_scan' %}"
+                    >
+                        <i class="bi bi-card-checklist me-1 text-warning"></i> Smart List
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link text-white fw-semibold"
+                        href="{% url 'products:barcode_scanner' %}"
+                        title="Scan Grocery Barcodes"
+                    >
+                        <i class="bi bi-upc-scan me-1 text-warning"></i> Barcode
                     </a>
                 </li>
 
                 {% if user.is_authenticated %}
 
-                <!-- Wishlist -->
+                <!-- Wishlist with Live Counter Badge -->
                 <li class="nav-item">
                     <a
-                        class="nav-link"
+                        class="nav-link position-relative p-2"
                         href="{% url 'wishlist:index' %}"
+                        aria-label="Wishlist"
+                        title="My Wishlist"
                     >
-                        <i class="bi bi-heart"></i>
+                        <i class="bi bi-heart fs-5"></i>
+                        {% if wishlist_count > 0 %}
+                        <span class="nav-badge bg-danger text-white">
+                            {{ wishlist_count }}
+                        </span>
+                        {% endif %}
                     </a>
                 </li>
 
-                <!-- Cart -->
+                <!-- Cart with Live Counter Badge -->
                 <li class="nav-item">
                     <a
-                        class="nav-link"
+                        class="nav-link position-relative p-2 me-lg-2"
                         href="{% url 'cart:index' %}"
+                        aria-label="Cart"
+                        title="Shopping Cart"
                     >
-                        <i class="bi bi-cart3"></i>
+                        <i class="bi bi-cart3 fs-5"></i>
+                        {% if cart_count > 0 %}
+                        <span class="nav-badge bg-warning text-dark">
+                            {{ cart_count }}
+                        </span>
+                        {% endif %}
                     </a>
                 </li>
 
-                <!-- User Menu -->
+                <!-- FreshMart Wallet Badge -->
+                <li class="nav-item d-none d-md-block me-2">
+                    <a href="{% url 'wallet:dashboard' %}" class="btn btn-outline-light rounded-pill px-3 py-1 btn-sm fw-semibold border-white border-opacity-25 shadow-sm" title="FreshMart Cash Balance">
+                        <i class="bi bi-wallet2 text-warning me-1"></i> ₹{{ wallet_balance }}
+                    </a>
+                </li>
+
+                <!-- User Dropdown Menu -->
                 <li class="nav-item dropdown">
 
                     <a
-                        class="nav-link dropdown-toggle"
+                        class="nav-link dropdown-toggle btn btn-outline-light btn-sm border-0 d-flex align-items-center gap-2 py-1 px-2"
                         href="#"
                         role="button"
                         data-bs-toggle="dropdown"
+                        aria-expanded="false"
                     >
-                        <i class="bi bi-person-circle"></i>
-
-                        {{ user.first_name|default:user.username }}
+                        <i class="bi bi-person-circle fs-5"></i>
+                        <span class="fw-semibold">{{ user.first_name|default:user.username }}</span>
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3">
+
+                        <li>
+                            <div class="px-3 py-2 border-bottom">
+                                <small class="text-muted d-block">Signed in as</small>
+                                <strong class="text-dark">{{ user.username }}</strong>
+                            </div>
+                        </li>
 
                         <li>
                             <a
-                                class="dropdown-item"
+                                class="dropdown-item py-2 d-flex justify-content-between align-items-center"
+                                href="{% url 'wallet:dashboard' %}"
+                            >
+                                <span><i class="bi bi-wallet2 me-2 text-warning"></i> FreshCash Wallet</span>
+                                <span class="badge bg-success-subtle text-success rounded-pill fw-bold">₹{{ wallet_balance }}</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                class="dropdown-item py-2"
                                 href="{% url 'accounts:profile' %}"
                             >
-                                My Profile
+                                <i class="bi bi-person me-2 text-success"></i> My Profile
                             </a>
                         </li>
 
                         <li>
                             <a
-                                class="dropdown-item"
+                                class="dropdown-item py-2"
                                 href="{% url 'orders:my_orders' %}"
                             >
-                                My Orders
+                                <i class="bi bi-bag-check me-2 text-primary"></i> My Orders
                             </a>
                         </li>
+
+                        <li>
+                            <a
+                                class="dropdown-item py-2"
+                                href="{% url 'orders:my_orders' %}"
+                            >
+                                <i class="bi bi-geo-alt me-2 text-danger"></i> Live GPS Tracking
+                            </a>
+                        </li>
+
+                        {% if user.is_staff %}
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a
+                                class="dropdown-item py-2 fw-semibold text-success"
+                                href="{% url 'dashboard:index' %}"
+                            >
+                                <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                class="dropdown-item py-2 text-secondary"
+                                href="{% url 'inventory:index' %}"
+                            >
+                                <i class="bi bi-boxes me-2"></i> Stock Inventory
+                            </a>
+                        </li>
+                        {% endif %}
 
                         <li>
                             <hr class="dropdown-divider">
@@ -168,10 +547,10 @@
 
                         <li>
                             <a
-                                class="dropdown-item text-danger"
+                                class="dropdown-item py-2 text-danger"
                                 href="{% url 'accounts:logout' %}"
                             >
-                                Logout
+                                <i class="bi bi-box-arrow-right me-2"></i> Logout
                             </a>
                         </li>
 
@@ -184,7 +563,7 @@
                 <li class="nav-item">
 
                     <a
-                        class="nav-link"
+                        class="nav-link fw-semibold"
                         href="{% url 'accounts:login' %}"
                     >
                         Login
@@ -195,7 +574,7 @@
                 <li class="nav-item">
 
                     <a
-                        class="btn btn-light ms-2"
+                        class="btn btn-warning rounded-pill px-3 ms-lg-2 fw-bold"
                         href="{% url 'accounts:register' %}"
                     >
                         Register
@@ -225,6 +604,7 @@
 
         <div
             class="alert alert-{{ message.tags }} alert-dismissible fade show"
+            role="alert"
         >
 
             {{ message }}
@@ -233,6 +613,7 @@
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="alert"
+                aria-label="Close"
             ></button>
 
         </div>
@@ -258,57 +639,57 @@
 <!-- FOOTER -->
 <!-- ========================= -->
 
-<footer class="bg-dark text-white mt-5">
+<footer class="text-white mt-5">
 
     <div class="container py-5">
 
-        <div class="row">
+        <div class="row g-4">
 
             <div class="col-md-4">
 
-                <h4>FreshMart</h4>
+                <h4 class="mb-3">FreshMart</h4>
 
                 <p>
-                    Fresh groceries delivered to your doorstep.
+                    Fresh groceries delivered to your doorstep
+                    in as little as 10 minutes.
                 </p>
 
             </div>
 
             <div class="col-md-4">
 
-                <h5>Quick Links</h5>
+                <h5 class="mb-3">Quick Links</h5>
 
                 <ul class="list-unstyled">
 
-                    <li>
-                        <a
-                            href="/"
-                            class="text-white text-decoration-none"
-                        >
+                    <li class="mb-2">
+                        <a href="/">
                             Home
                         </a>
                     </li>
 
-                    <li>
-                        <a
-                            href="{% url 'products:index' %}"
-                            class="text-white text-decoration-none"
-                        >
+                    <li class="mb-2">
+                        <a href="{% url 'products:index' %}">
                             Products
                         </a>
                     </li>
 
+                    <li>
+                        <a href="{% url 'wallet:dashboard' %}">
+                            FreshCash Wallet
+                        </a>
+                    </li>
                 </ul>
 
             </div>
 
             <div class="col-md-4">
 
-                <h5>Contact</h5>
+                <h5 class="mb-3">Contact</h5>
 
-                <p>support@freshmart.com</p>
+                <p class="mb-1">support@freshmart.com</p>
 
-                <p>+91 902205XXXX</p>
+                <p class="mb-0">+91 902205XXXX</p>
 
             </div>
 
@@ -324,9 +705,303 @@
 
 </footer>
 
-<!-- Bootstrap JS -->
+<!-- ========================= -->
+<!-- MOBILE BOTTOM NAVIGATION (Instacart/Blinkit Style) -->
+<!-- ========================= -->
+<div class="mobile-bottom-nav d-lg-none" role="navigation" aria-label="Mobile Navigation">
 
+    <a href="/" class="nav-item-mobile {% if request.path == '/' %}active{% endif %}">
+        <i class="bi bi-house-door{% if request.path == '/' %}-fill{% endif %}"></i>
+        <span>Home</span>
+    </a>
+
+    <a href="{% url 'categories:index' %}" class="nav-item-mobile {% if '/categories/' in request.path %}active{% endif %}">
+        <i class="bi bi-grid{% if '/categories/' in request.path %}-fill{% endif %}"></i>
+        <span>Categories</span>
+    </a>
+
+    <a href="{% url 'ai_assistant:index' %}" class="nav-item-mobile {% if '/ai/' in request.path %}active{% endif %}">
+        <i class="bi bi-robot"></i>
+        <span>AI Guide</span>
+    </a>
+
+    <a href="{% url 'wishlist:index' %}" class="nav-item-mobile {% if '/wishlist/' in request.path %}active{% endif %}">
+        <i class="bi bi-heart{% if '/wishlist/' in request.path %}-fill{% endif %}"></i>
+        <span>Wishlist</span>
+        {% if wishlist_count > 0 %}
+        <span class="mobile-nav-badge bg-danger text-white">
+            {{ wishlist_count }}
+        </span>
+        {% endif %}
+    </a>
+
+    <a href="{% url 'cart:index' %}" class="nav-item-mobile {% if '/cart/' in request.path %}active{% endif %}">
+        <i class="bi bi-cart3"></i>
+        <span>Cart</span>
+        {% if cart_count > 0 %}
+        <span class="mobile-nav-badge bg-warning text-dark">
+            {{ cart_count }}
+        </span>
+        {% endif %}
+    </a>
+
+</div>
+
+<!-- ========================= -->
+<!-- FRESHVOICE™ ASSISTANT MODAL -->
+<!-- ========================= -->
+<style>
+    .voice-pulse-ring {
+        position: absolute;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: rgba(25, 135, 84, 0.25);
+        animation: voicePulse 1.5s infinite ease-out;
+    }
+    @keyframes voicePulse {
+        0% { transform: scale(0.7); opacity: 0.9; }
+        100% { transform: scale(1.4); opacity: 0; }
+    }
+    .voice-chip {
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .voice-chip:hover {
+        background: #eef9f2 !important;
+        border-color: #198754 !important;
+        color: #198754 !important;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="modal fade" id="freshVoiceModal" tabindex="-1" aria-labelledby="freshVoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                    <i class="bi bi-soundwave me-1"></i> FreshVoice™ Assistant
+                </span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="stopVoiceListening()"></button>
+            </div>
+
+            <!-- ANIMATED PULSING MICROPHONE CIRCLE -->
+            <div class="my-4 position-relative d-inline-flex justify-content-center align-items-center" style="margin: 0 auto; width: 120px; height: 120px;">
+                <div id="voice-pulse-ring" class="voice-pulse-ring"></div>
+                <div id="voice-mic-core" class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-lg" style="width: 76px; height: 76px; z-index: 2; transition: all 0.3s ease;">
+                    <i class="bi bi-mic-fill fs-1" id="voice-mic-icon"></i>
+                </div>
+            </div>
+
+            <h5 class="fw-bold text-dark mb-1" id="voice-status-title">Listening... Speak now</h5>
+            <p class="text-muted small mb-3" id="voice-status-subtitle">Say a product, category, or command like "add 2 milk"</p>
+
+            <!-- LIVE TRANSCRIPTION CARD -->
+            <div class="p-3 bg-light rounded-3 mb-3 text-start border">
+                <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size: 11px;">You are saying:</small>
+                <div id="voice-transcript-text" class="fw-bold text-dark fs-5" style="min-height: 32px;">
+                    <span class="text-muted fw-normal fst-italic">"Listening..."</span>
+                </div>
+            </div>
+
+            <!-- VOICE SUGGESTION CHIPS -->
+            <div class="text-start mb-2">
+                <small class="text-muted text-uppercase fw-bold d-block mb-2" style="font-size: 11px;">Try saying or click to test:</small>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-white text-dark border p-2 rounded-pill fw-semibold voice-chip" onclick="simulateVoiceCommand('Find fresh cow milk')">
+                        🥛 "Find fresh cow milk"
+                    </span>
+                    <span class="badge bg-white text-dark border p-2 rounded-pill fw-semibold voice-chip" onclick="simulateVoiceCommand('Add whole wheat bread to cart')">
+                        🍞 "Add whole wheat bread to cart"
+                    </span>
+                    <span class="badge bg-white text-dark border p-2 rounded-pill fw-semibold voice-chip" onclick="simulateVoiceCommand('Show fruits')">
+                        🍎 "Show fruits"
+                    </span>
+                    <span class="badge bg-white text-dark border p-2 rounded-pill fw-semibold voice-chip" onclick="simulateVoiceCommand('Where is my order')">
+                        🛵 "Where is my order"
+                    </span>
+                    <span class="badge bg-white text-dark border p-2 rounded-pill fw-semibold voice-chip" onclick="simulateVoiceCommand('Check wallet balance')">
+                        💳 "Check wallet balance"
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- FRESHVOICE ENGINE SCRIPT -->
+<script>
+    let recognition = null;
+    let isListening = false;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function openVoiceAssistant() {
+        const modalEl = document.getElementById('freshVoiceModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+        startVoiceListening();
+    }
+
+    function startVoiceListening() {
+        const transcriptElem = document.getElementById("voice-transcript-text");
+        const statusTitle = document.getElementById("voice-status-title");
+        const pulseRing = document.getElementById("voice-pulse-ring");
+        const micCore = document.getElementById("voice-mic-core");
+
+        transcriptElem.innerHTML = '<span class="text-muted fw-normal fst-italic">"Listening... Say a product or command"</span>';
+        statusTitle.innerText = "Listening... Speak now";
+        pulseRing.classList.remove("d-none");
+        micCore.classList.remove("bg-secondary");
+        micCore.classList.add("bg-success");
+
+        if (!SpeechRecognition) {
+            statusTitle.innerText = "Microphone not supported in this browser";
+            transcriptElem.innerHTML = '<span class="text-danger small">Speech recognition requires Chrome, Edge, or Safari. Click any suggestion chip below to test:</span>';
+            pulseRing.classList.add("d-none");
+            return;
+        }
+
+        try {
+            if (recognition) {
+                recognition.abort();
+            }
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-IN';
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                isListening = true;
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                const current = finalTranscript || interimTranscript;
+                if (current) {
+                    transcriptElem.innerHTML = `<span class="text-success">"${current}"</span>`;
+                }
+
+                if (finalTranscript) {
+                    stopVoiceListening();
+                    executeVoiceCommand(finalTranscript);
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.warn("Speech recognition error:", event.error);
+                if (event.error === "not-allowed") {
+                    statusTitle.innerText = "Microphone Access Denied";
+                    transcriptElem.innerHTML = '<span class="text-danger small">Please grant microphone permission or click the suggestion chips below to test.</span>';
+                } else if (event.error !== "no-speech") {
+                    statusTitle.innerText = "Didn't catch that. Speak again.";
+                }
+                pulseRing.classList.add("d-none");
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                pulseRing.classList.add("d-none");
+            };
+
+            recognition.start();
+        } catch(e) {
+            console.error("SpeechRecognition start error:", e);
+        }
+    }
+
+    function stopVoiceListening() {
+        if (recognition && isListening) {
+            recognition.stop();
+            isListening = false;
+        }
+        const pulseRing = document.getElementById("voice-pulse-ring");
+        if (pulseRing) pulseRing.classList.add("d-none");
+    }
+
+    function simulateVoiceCommand(text) {
+        document.getElementById("voice-transcript-text").innerHTML = `<span class="text-success">"${text}"</span>`;
+        stopVoiceListening();
+        executeVoiceCommand(text);
+    }
+
+    async function executeVoiceCommand(commandText) {
+        const statusTitle = document.getElementById("voice-status-title");
+        const statusSub = document.getElementById("voice-status-subtitle");
+
+        // Cancel any pending speech synthesis in the browser to ensure complete silence
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+
+        statusTitle.innerText = "Processing...";
+        statusSub.innerText = "";
+
+        // Fill search inputs across the page with recognized voice text
+        const searchInputs = document.querySelectorAll('input[name="q"]');
+        searchInputs.forEach(input => input.value = commandText);
+
+        try {
+            const response = await fetch("/products/api/voice-command/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                },
+                body: JSON.stringify({ command: commandText })
+            });
+
+            const data = await response.json();
+            if (data.status === "success" || data.status === "warning") {
+                if (data.query) {
+                    searchInputs.forEach(input => input.value = data.query);
+                }
+
+                setTimeout(() => {
+                    const modalEl = document.getElementById('freshVoiceModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    if (data.action === "search" && data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else if (data.action === "navigate" && data.url) {
+                        window.location.href = data.url;
+                    } else if (data.action === "added_to_cart" && data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    }
+                }, 350);
+            } else {
+                statusTitle.innerText = "Could not find item";
+                statusSub.innerText = "Try clicking one of the sample chips below:";
+            }
+        } catch(err) {
+            console.error("Voice execution error:", err);
+            statusTitle.innerText = "Network error. Please try again.";
+        }
+    }
+
+    function getCsrfToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookieValue || '';
+    }
+</script>
 
 {% block extra_js %}
 {% endblock %}

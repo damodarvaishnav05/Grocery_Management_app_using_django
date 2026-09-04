@@ -37,9 +37,25 @@ class Product(models.Model):
 
     available = models.BooleanField(default=True)
 
+    barcode = models.CharField(
+        max_length=64,
+        unique=True,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="UPC, EAN-13, or custom product barcode"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.barcode:
+            # Auto-generate unique 13-digit EAN-style barcode based on product ID
+            self.barcode = f"890103{self.id:07d}"
+            Product.objects.filter(pk=self.pk).update(barcode=self.barcode)
 
     def __str__(self):
         return self.name
@@ -49,11 +65,22 @@ class Product(models.Model):
         return self.discount_price if self.discount_price else self.price
 
     @property
+    def discount_percent(self):
+        if self.discount_price and self.price > self.discount_price and self.price > 0:
+            return int(round(((self.price - self.discount_price) / self.price) * 100))
+        return 0
+
+    @property
+    def savings_amount(self):
+        if self.discount_price and self.price > self.discount_price:
+            return self.price - self.discount_price
+        return 0
+
+    @property
     def average_rating(self):
         return self.reviews.aggregate(
             Avg("rating")
         )["rating__avg"] or 0
-
 
     @property
     def review_count(self):

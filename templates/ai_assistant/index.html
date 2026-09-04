@@ -1,89 +1,177 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}
-AI Assistant
-{% endblock %}
+{% block title %}AI Grocery Assistant | FreshMart{% endblock %}
 
 {% block content %}
-
 <div class="container py-5">
 
+    <!-- HERO HEADER -->
     <div class="text-center mb-5">
-
-        <i class="bi bi-robot text-success"
-           style="font-size:80px;">
-        </i>
-
-        <h1 class="fw-bold">
-            FreshMart AI Assistant
+        <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-success bg-opacity-10 text-success mb-3 shadow-sm" style="width: 80px; height: 80px;">
+            <i class="bi bi-robot fs-1"></i>
+        </div>
+        <h1 class="display-6 fw-bold text-success-emphasis mb-2">
+            FreshMart AI Shopping & Nutrition Guide
         </h1>
-
-        <p class="text-muted">
-            Ask for grocery recommendations,
-            diet plans and healthy foods.
+        <p class="text-muted lead mx-auto" style="max-width: 650px;">
+            Ask for dietary advice, quick 10-minute recipes, grocery storage secrets, and real-time store help.
         </p>
-
     </div>
 
+    <!-- SUGGESTION CHIPS -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white" style="overflow: hidden; max-width: 100%;">
+                <small class="text-uppercase fw-bold text-muted mb-2 d-block">
+                    <i class="bi bi-stars text-warning me-1"></i> Quick Topics to Ask
+                </small>
+                <div class="mobile-scroll-container pb-1" id="suggestion-chips" style="display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 8px; scrollbar-width: none; width: 100%;">
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Suggest foods for weight loss">
+                        🥗 Weight Loss Foods
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="What are high protein foods?">
+                        💪 High Protein Picks
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Healthy quick breakfast ideas">
+                        🍳 10-Min Breakfasts
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Best diabetes friendly groceries">
+                        🩺 Diabetes-Friendly
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="How to keep vegetables fresh longer?">
+                        🌿 Keep Produce Fresh 2x Longer
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Immunity boosting superfoods">
+                        🛡️ Immunity Boosters
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="What are today's active coupon codes?">
+                        🎉 Today's Coupons
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="How does 10-minute delivery work?">
+                        🚚 Express Delivery Info
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="What payment options are available?">
+                        💳 Payment Methods
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT INPUT FORM -->
     <div class="row justify-content-center">
-
-        <div class="col-lg-8">
-
-            <div class="card shadow border-0">
-
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-
-                    <form method="POST">
-
+                    <form method="POST" id="ai-form">
                         {% csrf_token %}
-
-                        <textarea
-                            name="question"
-                            rows="4"
-                            class="form-control mb-3"
-                            placeholder="Example: Suggest foods for weight loss"
-                            required
-                        ></textarea>
-
-                        <button
-                            type="submit"
-                            class="btn btn-success w-100"
-                        >
-                            Ask Assistant
-                        </button>
-
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light border-end-0 text-success">
+                                <i class="bi bi-chat-heart fs-4"></i>
+                            </span>
+                            <input
+                                type="text"
+                                name="question"
+                                id="ai-input"
+                                class="form-control border-start-0 border-end-0 shadow-none ps-2"
+                                placeholder="Ask anything... (e.g. 'high protein breakfast' or 'how to store spinach')"
+                                value="{{ user_query }}"
+                                required
+                            >
+                            <button class="btn btn-success px-4 fw-bold" type="submit">
+                                <i class="bi bi-send-fill me-1"></i> Ask AI
+                            </button>
+                        </div>
                     </form>
-
                 </div>
-
             </div>
 
+            <!-- AI RESPONSE CARD -->
             {% if answer %}
-
-            <div class="card shadow border-0 mt-4">
-
-                <div class="card-body">
-
-                    <h4 class="text-success">
-                        AI Response
-                    </h4>
-
-                    <hr>
-
-                    <pre style="white-space:pre-wrap;border:none;background:none;">
-{{ answer }}
-                    </pre>
-
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 animate-fade-in">
+                <div class="card-header bg-success text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check-circle-fill fs-5 text-warning"></i>
+                        <h5 class="mb-0 fw-bold">{{ answer.title }}</h5>
+                    </div>
+                    <span class="badge bg-white text-success rounded-pill px-3 py-2 fw-semibold">
+                        {{ answer.category }}
+                    </span>
                 </div>
 
-            </div>
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <p class="lead text-dark fw-medium mb-4 pb-3 border-bottom">
+                        {{ answer.summary }}
+                    </p>
 
+                    <!-- KEY POINTS -->
+                    <div class="row g-3 mb-4">
+                        {% for title, desc in answer.points %}
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-light h-100 border border-light-subtle">
+                                <h6 class="fw-bold text-success mb-1">
+                                    <i class="bi bi-arrow-right-circle-fill me-1 text-success"></i>
+                                    {{ title }}
+                                </h6>
+                                <p class="text-muted small mb-0">
+                                    {{ desc }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- AVOID LIST (if available) -->
+                    {% if answer.avoid %}
+                    <div class="alert alert-danger bg-danger-subtle border-0 rounded-3 mb-4">
+                        <h6 class="fw-bold text-danger mb-2">
+                            <i class="bi bi-exclamation-octagon-fill me-1"></i> Foods / Habits to Avoid:
+                        </h6>
+                        <ul class="mb-0 small text-danger-emphasis">
+                            {% for item in answer.avoid %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- PRO TIP (if available) -->
+                    {% if answer.tip %}
+                    <div class="alert alert-warning bg-warning-subtle border-0 rounded-3 mb-4">
+                        <h6 class="fw-bold text-warning-emphasis mb-1">
+                            <i class="bi bi-lightbulb-fill me-1 text-warning"></i> Chef / Nutritionist Tip:
+                        </h6>
+                        <p class="mb-0 small text-warning-emphasis">
+                            {{ answer.tip }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
             {% endif %}
 
         </div>
-
     </div>
 
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const input = document.getElementById("ai-input");
+        const form = document.getElementById("ai-form");
+        const chips = document.querySelectorAll(".chip-btn");
+
+        chips.forEach(chip => {
+            chip.addEventListener("click", function() {
+                const query = this.getAttribute("data-query");
+                if (input && form && query) {
+                    input.value = query;
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

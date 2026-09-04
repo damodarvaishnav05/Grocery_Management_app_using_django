@@ -57,7 +57,17 @@ def apply_coupon(request):
 
     request.session["coupon_id"] = coupon.id
 
-    messages.success(request, "Coupon applied")
+    messages.success(request, f"Coupon '{coupon.code}' applied! ({coupon.discount_percent}% OFF)")
 
     return redirect("cart:index")
+
+
+def remove_coupon(request):
+
+    if "coupon_id" in request.session:
+        del request.session["coupon_id"]
+        messages.info(request, "Coupon removed from order.")
+
+    return redirect("cart:index")
+
 

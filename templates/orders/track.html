@@ -1,0 +1,1180 @@
+{% extends "base.html" %}
+
+{% block title %}Live Tracking Order #{{ order.id }} | FreshMart{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* FreshMap™ Container & Canvas Styling */
+    .map-wrapper {
+        position: relative;
+        width: 100%;
+        height: 520px;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        background: #f1f5f9;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+        user-select: none;
+    }
+    @media (max-width: 768px) {
+        .map-wrapper {
+            height: 380px;
+        }
+    }
+
+    #city-map-svg {
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+        display: block;
+        transition: filter 0.4s ease;
+    }
+    #city-map-svg:active {
+        cursor: grabbing;
+    }
+
+    /* Day / Night Theme Transition */
+    .map-theme-night #city-map-svg {
+        filter: brightness(0.92) contrast(1.08);
+    }
+
+    /* Turn-by-Turn GPS Navigation HUD */
+    .nav-hud-bar {
+        position: absolute;
+        top: 14px;
+        left: 16px;
+        right: 70px;
+        z-index: 10;
+        background: rgba(18, 46, 32, 0.94);
+        backdrop-filter: blur(10px);
+        color: #ffffff;
+        border-radius: 14px;
+        padding: 10px 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        border: 1px solid rgba(255,255,255,0.15);
+        transition: all 0.3s ease;
+    }
+    .map-theme-night .nav-hud-bar {
+        background: rgba(15, 23, 42, 0.95);
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    /* Map Control Buttons */
+    .map-ctrl-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1e293b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .map-ctrl-btn:hover {
+        background: #f8fafc;
+        transform: scale(1.06);
+        color: #10b981;
+    }
+    .map-theme-night .map-ctrl-btn {
+        background: #1e293b;
+        color: #e2e8f0;
+        border-color: #334155;
+    }
+    .map-theme-night .map-ctrl-btn:hover {
+        background: #334155;
+        color: #34d399;
+    }
+
+    /* Floating Rider ETA Tooltip */
+    .rider-floating-tooltip {
+        position: absolute;
+        pointer-events: none;
+        z-index: 8;
+        transform: translate(-50%, -100%);
+        margin-top: -18px;
+        transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1), top 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .rider-pill {
+        background: #0f172a;
+        color: #ffffff;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+        border: 1.5px solid #22c55e;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .rider-pill::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px 6px 0 6px;
+        border-style: solid;
+        border-color: #0f172a transparent transparent transparent;
+    }
+
+    /* Traveling Route Chevrons Animation */
+    @keyframes pulseDash {
+        from { stroke-dashoffset: 60; }
+        to { stroke-dashoffset: 0; }
+    }
+    .traveling-route-line {
+        animation: pulseDash 2s linear infinite;
+    }
+
+    /* Radar Ping for Rider */
+    @keyframes radarWave {
+        0% { r: 16; opacity: 0.8; }
+        100% { r: 52; opacity: 0; }
+    }
+    .radar-circle {
+        animation: radarWave 2s ease-out infinite;
+        transform-origin: center;
+    }
+
+    /* Stage Pill Styling */
+    .stage-pill {
+        transition: all 0.3s ease;
+        opacity: 0.45;
+    }
+    .stage-pill.active {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+    .pin-box {
+        letter-spacing: 6px;
+        font-family: monospace;
+        font-size: 1.5rem;
+        background: #f8fafc;
+        border: 2px dashed #059669;
+        color: #065f46;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- BREADCRUMB & HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-success">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'orders:my_orders' %}" class="text-decoration-none text-success">My Orders</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Track Order #{{ order.id }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-bold">
+                <span class="spinner-grow spinner-grow-sm text-success me-1" style="width: 8px; height: 8px;" role="status"></span>
+                FreshTrack™ Real City GPS
+            </span>
+            <a href="{% url 'orders:detail' order.id %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-receipt me-1"></i> Order Bill
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN TRACKING ROW -->
+    <div class="row g-4">
+
+        <!-- LEFT COLUMN: REALISTIC VECTOR MAP & CONTROLS -->
+        <div class="col-lg-7">
+            <div id="map-container" class="map-wrapper card border-0 shadow-sm rounded-4">
+
+                <!-- TURN-BY-TURN NAVIGATION HUD BANNER (Google Maps Style) -->
+                <div class="nav-hud-bar d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div id="nav-maneuver-icon" class="fs-4 text-warning">
+                            <i class="bi bi-arrow-up-circle-fill"></i>
+                        </div>
+                        <div>
+                            <div id="nav-instruction-text" class="fw-bold small" style="line-height: 1.2;">
+                                Cruising on Kharadi Main Expressway
+                            </div>
+                            <small id="nav-sub-text" class="text-white-50" style="font-size: 11px;">
+                                Heading towards Gulmohar Paradise Homes • Next turn: Gulmohar Ave
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-none d-sm-flex flex-column align-items-end">
+                        <span id="nav-speed-badge" class="badge bg-success rounded-pill px-2 py-1" style="font-size: 10px;">
+                            ⚡ 28 km/h
+                        </span>
+                        <span id="nav-dist-text" class="text-white-50 fw-semibold mt-1" style="font-size: 11px;">
+                            1.4 km left
+                        </span>
+                    </div>
+                </div>
+
+                <!-- FLOATING RIDER ETA PILL (Follows Rider on Map) -->
+                <div id="rider-floating-tooltip" class="rider-floating-tooltip" style="left: 50%; top: 50%;">
+                    <div class="rider-pill">
+                        <span class="spinner-grow spinner-grow-sm text-success" style="width: 6px; height: 6px;"></span>
+                        <span id="rider-floating-name">{{ tracking.rider_name|default:"Vikram" }}</span>
+                        <span class="text-warning" id="rider-floating-eta">~{{ telemetry.eta_minutes }} Mins</span>
+                    </div>
+                </div>
+
+                <!-- FLOATING MAP CONTROLS -->
+                <div class="position-absolute top-0 end-0 m-3 z-3 d-flex flex-column gap-2" style="margin-top: 14px !important;">
+                    <button id="live-gps-btn" class="map-ctrl-btn text-danger" title="Connect Real-Time Live Location (GPS)">
+                        <i id="gps-btn-icon" class="bi bi-geo-alt-fill fs-5"></i>
+                    </button>
+                    <button id="theme-toggle-btn" class="map-ctrl-btn" title="Toggle Day / Night Mode">
+                        <i id="theme-icon" class="bi bi-moon-stars-fill text-warning"></i>
+                    </button>
+                    <button id="recenter-btn" class="map-ctrl-btn" title="Recenter Route">
+                        <i class="bi bi-arrows-fullscreen"></i>
+                    </button>
+                    <button id="focus-rider-btn" class="map-ctrl-btn text-primary" title="Follow Rider">
+                        <i class="bi bi-compass-fill"></i>
+                    </button>
+                    <button id="zoom-in-btn" class="map-ctrl-btn" title="Zoom In">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                    <button id="zoom-out-btn" class="map-ctrl-btn" title="Zoom Out">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                </div>
+
+                <!-- REAL-TIME LIVE DEVICE GPS BANNER -->
+                <div id="live-gps-status-banner" class="d-none position-absolute bottom-0 start-0 end-0 m-3 p-2 px-3 bg-dark bg-opacity-95 text-white rounded-3 shadow d-flex justify-content-between align-items-center small z-3 border border-success border-opacity-50" style="bottom: 45px !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="spinner-grow spinner-grow-sm text-success" style="width: 8px; height: 8px;"></span>
+                        <span><strong class="text-success">Live GPS Active:</strong> <span id="gps-coords-text">Connecting...</span></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="gps-distance-text" class="badge bg-success-subtle text-success border border-success-subtle">Store: Calculating...</span>
+                        <span id="gps-accuracy-badge" class="badge bg-light text-dark">±8m</span>
+                    </div>
+                </div>
+
+
+                <!-- VECTOR CITY MAP (High-Definition Realistic Canvas/SVG) -->
+                <svg
+                    id="city-map-svg"
+                    viewBox="0 0 1000 700"
+                    preserveAspectRatio="xMidYMid meet"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <defs>
+                        <!-- Road Gradients -->
+                        <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#059669" />
+                        </linearGradient>
+
+                        <!-- Water Pattern -->
+                        <linearGradient id="riverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#7dd3fc" />
+                            <stop offset="100%" stop-color="#38bdf8" />
+                        </linearGradient>
+
+                        <!-- Park Pattern -->
+                        <linearGradient id="parkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#dcfce7" />
+                            <stop offset="100%" stop-color="#bbf7d0" />
+                        </linearGradient>
+
+                        <!-- Headlight Beam Gradient -->
+                        <linearGradient id="headlightBeam" x1="0%" y1="50%" x2="100%" y2="50%">
+                            <stop offset="0%" stop-color="rgba(254, 240, 138, 0.65)" />
+                            <stop offset="100%" stop-color="rgba(254, 240, 138, 0.0)" />
+                        </linearGradient>
+
+                        <!-- Drop Shadows -->
+                        <filter id="mapShadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.15" />
+                        </filter>
+                        <filter id="pinShadow" x="-30%" y="-30%" width="160%" height="160%">
+                            <feDropShadow dx="0" dy="5" stdDeviation="5" flood-opacity="0.3" />
+                        </filter>
+                    </defs>
+
+                    <!-- MAP BACKGROUND (Urban Ground) -->
+                    <rect id="map-bg" x="0" y="0" width="1000" height="700" fill="#f1f5f9" />
+
+                    <!-- CITY PARKS & GREENERY -->
+                    <g id="parks-layer">
+                        <!-- Greenwood Central Park -->
+                        <path d="M 60,60 Q 140,40 240,70 Q 300,120 260,220 Q 180,260 80,210 Q 30,140 60,60 Z" fill="url(#parkGrad)" stroke="#86efac" stroke-width="2" />
+                        <text x="130" y="140" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#15803d" opacity="0.8">🌲 Greenwood Park</text>
+                        <!-- Trees in Central Park -->
+                        <circle cx="110" cy="100" r="10" fill="#22c55e" opacity="0.6" />
+                        <circle cx="130" cy="90" r="14" fill="#16a34a" opacity="0.7" />
+                        <circle cx="190" cy="120" r="12" fill="#15803d" opacity="0.6" />
+                        <circle cx="160" cy="180" r="15" fill="#22c55e" opacity="0.7" />
+                        <circle cx="100" cy="170" r="11" fill="#16a34a" opacity="0.6" />
+
+                        <!-- Riverside Garden South -->
+                        <path d="M 720,440 Q 860,420 950,470 Q 980,580 890,640 Q 770,660 710,570 Q 680,480 720,440 Z" fill="url(#parkGrad)" stroke="#86efac" stroke-width="2" />
+                        <text x="780" y="540" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#15803d" opacity="0.8">🌿 Riverside Woods</text>
+                        <circle cx="820" cy="500" r="14" fill="#16a34a" opacity="0.6" />
+                        <circle cx="860" cy="520" r="11" fill="#22c55e" opacity="0.7" />
+                        <circle cx="800" cy="580" r="13" fill="#15803d" opacity="0.6" />
+                    </g>
+
+                    <!-- WATERWAYS (Scenic River flowing diagonally) -->
+                    <g id="water-layer">
+                        <!-- Mula-Mutha River -->
+                        <path d="M 0,420 Q 250,480 460,370 Q 680,260 1000,320 L 1000,410 Q 680,340 450,460 Q 240,570 0,510 Z" fill="url(#riverGrad)" opacity="0.85" />
+                        <text x="180" y="475" font-family="'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#0369a1" opacity="0.7" transform="rotate(11, 180, 475)">🌊 Mula-Mutha River</text>
+                    </g>
+
+                    <!-- CITY BUILDINGS & URBAN RESIDENTIAL BLOCKS -->
+                    <g id="buildings-layer" opacity="0.95">
+                        <!-- Tech Park District -->
+                        <rect x="360" y="60" width="80" height="60" rx="6" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+                        <text x="372" y="95" font-family="'Segoe UI', sans-serif" font-size="10" font-weight="700" fill="#64748b">Tech Park One</text>
+
+                        <rect x="470" y="60" width="100" height="70" rx="6" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+                        <text x="485" y="100" font-family="'Segoe UI', sans-serif" font-size="10" font-weight="700" fill="#64748b">Metro Station</text>
+
+                        <rect x="600" y="70" width="90" height="60" rx="6" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+                        <text x="612" y="105" font-family="'Segoe UI', sans-serif" font-size="10" font-weight="700" fill="#64748b">City Mall</text>
+
+                        <!-- Commercial Plaza -->
+                        <rect x="730" y="80" width="90" height="80" rx="6" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+                        <text x="742" y="125" font-family="'Segoe UI', sans-serif" font-size="10" font-weight="700" fill="#64748b">Apollo Hospital</text>
+
+                        <!-- Residential Blocks near destination -->
+                        <rect x="680" y="470" width="60" height="50" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+                        <rect x="750" y="480" width="60" height="50" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+                        <rect x="820" y="490" width="60" height="50" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mapShadow)" />
+
+                        <!-- Customer Apartment Complex (Gulmohar Paradise Homes) -->
+                        <rect x="850" y="240" width="110" height="75" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="2" filter="url(#mapShadow)" />
+                        <text x="858" y="275" font-family="'Segoe UI', sans-serif" font-size="10" font-weight="800" fill="#ea580c">Gulmohar Paradise</text>
+                        <text x="858" y="292" font-family="'Segoe UI', sans-serif" font-size="9" font-weight="600" fill="#9a3412">Homes • Gate #1</text>
+                    </g>
+
+                    <!-- ROAD NETWORK (Real Street Layout) -->
+                    <g id="road-network-layer">
+                        <!-- Secondary Streets & Residential Lanes -->
+                        <!-- North-South Tech Park Ave -->
+                        <path d="M 330,0 L 330,700" stroke="#ffffff" stroke-width="16" stroke-linecap="round" />
+                        <path d="M 330,0 L 330,700" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="8,8" />
+
+                        <!-- East-West Cross Street -->
+                        <path d="M 0,220 L 1000,220" stroke="#ffffff" stroke-width="16" stroke-linecap="round" />
+                        <path d="M 0,220 L 1000,220" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="8,8" />
+
+                        <!-- South Connector -->
+                        <path d="M 220,400 L 220,700" stroke="#ffffff" stroke-width="14" stroke-linecap="round" />
+                        <path d="M 640,220 L 640,700" stroke="#ffffff" stroke-width="16" stroke-linecap="round" />
+
+                        <!-- PRIMARY ARTERIAL EXPRESSWAY (West to East Main Ring Road) -->
+                        <path id="arterial-expressway" d="M 0,160 Q 300,160 480,180 T 1000,200" stroke="#ffffff" stroke-width="32" stroke-linecap="round" filter="url(#mapShadow)" />
+                        <!-- Expressway Divider Line -->
+                        <path d="M 0,160 Q 300,160 480,180 T 1000,200" stroke="#facc15" stroke-width="2.5" stroke-dasharray="14,10" />
+
+                        <!-- RIVER HIGHWAY BRIDGES (Crossings over the river) -->
+                        <rect x="314" y="380" width="32" height="70" rx="4" fill="#94a3b8" stroke="#475569" stroke-width="2" filter="url(#mapShadow)" />
+                        <rect x="320" y="375" width="20" height="80" rx="3" fill="#ffffff" />
+
+                        <rect x="624" y="270" width="32" height="85" rx="4" fill="#94a3b8" stroke="#475569" stroke-width="2" filter="url(#mapShadow)" />
+                        <rect x="630" y="265" width="20" height="95" rx="3" fill="#ffffff" />
+
+                        <!-- STREET NAME LABELS -->
+                        <g fill="#64748b" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="700" letter-spacing="1">
+                            <text x="60" y="154">KHARADI MAIN EXPRESSWAY</text>
+                            <text x="660" y="194">HIGHWAY RING ROAD</text>
+                            <text x="345" y="320" transform="rotate(90, 345, 320)">METRO TECH BLVD</text>
+                            <text x="655" y="440" transform="rotate(90, 655, 440)">GULMOHAR AVENUE</text>
+                            <text x="810" y="214">LANE NO. 1</text>
+                        </g>
+                    </g>
+
+                    <!-- REAL NAVIGATION DELIVERY ROUTE -->
+                    <g id="delivery-route-layer">
+                        <!-- Soft Route Outer Glow -->
+                        <path
+                            id="route-path-glow"
+                            d="M 120,160 L 330,160 L 480,180 L 640,188 L 640,320 L 780,320 L 820,280 L 890,280"
+                            fill="none"
+                            stroke="rgba(34, 197, 94, 0.35)"
+                            stroke-width="18"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+
+                        <!-- Main Solid Navigation Ribbon -->
+                        <path
+                            id="route-path-main"
+                            d="M 120,160 L 330,160 L 480,180 L 640,188 L 640,320 L 780,320 L 820,280 L 890,280"
+                            fill="none"
+                            stroke="url(#routeGrad)"
+                            stroke-width="8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+
+                        <!-- Animated Pulsing Chevrons / Dashes Moving Ahead -->
+                        <path
+                            id="route-path-animated"
+                            class="traveling-route-line"
+                            d="M 120,160 L 330,160 L 480,180 L 640,188 L 640,320 L 780,320 L 820,280 L 890,280"
+                            fill="none"
+                            stroke="#ffffff"
+                            stroke-width="3.5"
+                            stroke-linecap="round"
+                            stroke-dasharray="10, 20"
+                            stroke-linejoin="round"
+                            opacity="0.9"
+                        />
+                    </g>
+
+                    <!-- START POINT: FRESHMART DARK STORE HUB -->
+                    <g id="store-marker-group" transform="translate(120, 160)" filter="url(#pinShadow)">
+                        <!-- Hub Pulse Ring -->
+                        <circle cx="0" cy="0" r="28" fill="none" stroke="#10b981" stroke-width="2" opacity="0.6">
+                            <animate attributeName="r" values="18;38;18" dur="3s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.8;0;0.8" dur="3s" repeatCount="indefinite" />
+                        </circle>
+
+                        <!-- Warehouse Pin Icon -->
+                        <circle cx="0" cy="0" r="20" fill="#047857" stroke="#ffffff" stroke-width="3.5" />
+                        <text x="0" y="6" text-anchor="middle" font-family="'bootstrap-icons'" font-size="16" fill="#ffffff">🏬</text>
+
+                        <!-- Store Badge Label -->
+                        <rect x="-85" y="-48" width="170" height="26" rx="13" fill="#065f46" stroke="#ffffff" stroke-width="2" />
+                        <text x="0" y="-31" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#ffffff">
+                            FreshMart Hub #4 (Kharadi)
+                        </text>
+                    </g>
+
+                    <!-- END POINT: CUSTOMER DOORSTEP DESTINATION -->
+                    <g id="home-marker-group" transform="translate(890, 280)" filter="url(#pinShadow)">
+                        <!-- Delivery Radius Zone -->
+                        <circle cx="0" cy="0" r="32" fill="rgba(249, 115, 22, 0.18)" stroke="#f97316" stroke-width="2" stroke-dasharray="4,4" />
+
+                        <!-- 3D Home Pin -->
+                        <circle cx="0" cy="0" r="20" fill="#ea580c" stroke="#ffffff" stroke-width="3.5" />
+                        <text x="0" y="6" text-anchor="middle" font-family="'bootstrap-icons'" font-size="16" fill="#ffffff">🏠</text>
+
+                        <!-- Destination Badge Label -->
+                        <rect x="-80" y="28" width="160" height="26" rx="13" fill="#9a3412" stroke="#ffffff" stroke-width="2" />
+                        <text x="0" y="45" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#ffffff">
+                            Your Doorstep (Home)
+                        </text>
+                    </g>
+
+                    <!-- DYNAMIC MOVING RIDER & SCOOTER -->
+                    <g id="rider-vehicle-group" transform="translate(480, 180)">
+                        <!-- Radar Pulse Waves -->
+                        <circle class="radar-circle" cx="0" cy="0" r="18" fill="rgba(37, 99, 235, 0.25)" stroke="#3b82f6" stroke-width="2" />
+
+                        <!-- Rotating Scooter Sub-Group -->
+                        <g id="scooter-body" transform="rotate(0)">
+                            <!-- Headlight Cone (Shining on the road forward) -->
+                            <polygon points="12,-16 68,-36 68,36 12,16" fill="url(#headlightBeam)" />
+
+                            <!-- Outer Glowing Base -->
+                            <ellipse cx="0" cy="0" rx="19" ry="19" fill="#1e40af" stroke="#ffffff" stroke-width="3" filter="url(#mapShadow)" />
+
+                            <!-- Electric Scooter Top View Graphic -->
+                            <!-- Chassis & Body -->
+                            <rect x="-10" y="-5" width="20" height="10" rx="4" fill="#0284c7" />
+                            <!-- Front Wheel & Handlebar -->
+                            <rect x="7" y="-7" width="5" height="14" rx="2" fill="#0f172a" />
+                            <!-- Headlight Bulb -->
+                            <circle cx="12" cy="0" r="3" fill="#fef08a" />
+                            <!-- Delivery Cargo Box with FreshMart Leaf Logo -->
+                            <rect x="-16" y="-7" width="11" height="14" rx="2" fill="#16a34a" stroke="#ffffff" stroke-width="1" />
+                            <circle cx="-10" cy="0" r="2.5" fill="#ffffff" />
+                            <!-- Rider Helmet -->
+                            <circle cx="-1" cy="0" r="5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5" />
+                        </g>
+                    </g>
+
+                    <!-- REAL-TIME LIVE DEVICE GPS BLUE DOT (Google Maps Live Location Dot) -->
+                    <g id="live-device-gps-group" transform="translate(890, 280)" class="d-none">
+                        <!-- Pulsing accuracy circle -->
+                        <circle id="gps-accuracy-circle" cx="0" cy="0" r="34" fill="rgba(37, 99, 235, 0.2)" stroke="#3b82f6" stroke-width="1.5">
+                            <animate attributeName="r" values="22;46;22" dur="2.2s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2.2s" repeatCount="indefinite" />
+                        </circle>
+                        <!-- White halo -->
+                        <circle cx="0" cy="0" r="10" fill="#ffffff" filter="url(#pinShadow)" />
+                        <!-- Core vibrant blue dot -->
+                        <circle cx="0" cy="0" r="7" fill="#2563eb" />
+                        <!-- Heading indicator arrow -->
+                        <polygon points="0,-16 -5,-7 5,-7" fill="#2563eb" opacity="0.8" />
+                        <!-- Tooltip tag -->
+                        <rect x="-60" y="-38" width="120" height="20" rx="10" fill="#1e40af" stroke="#ffffff" stroke-width="1.5" />
+                        <text x="0" y="-24" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="9.5" font-weight="700" fill="#ffffff">
+                            📍 YOU (LIVE DEVICE)
+                        </text>
+                    </g>
+                </svg>
+
+
+                <!-- MAP LEGEND STRIP -->
+                <div class="card-footer bg-white border-top py-2 px-3 d-flex justify-content-between align-items-center flex-wrap gap-2 small text-muted position-relative z-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="rounded-circle bg-success d-inline-block" style="width: 10px; height: 10px;"></span>
+                            Dark Store Hub #4
+                        </span>
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="rounded-circle bg-primary d-inline-block" style="width: 10px; height: 10px;"></span>
+                            Rider on Ather 450X
+                        </span>
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="rounded-circle bg-warning d-inline-block" style="width: 10px; height: 10px;"></span>
+                            Your Doorstep
+                        </span>
+                    </div>
+                    <span id="last-ping-time" class="small text-muted">GPS Signal: Strong (100%)</span>
+                </div>
+
+            </div>
+
+            <!-- INTERACTIVE SIMULATOR CONTROLLER (Staff & Testing Panel) -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mt-3 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted text-uppercase fw-bold">
+                        <i class="bi bi-sliders2 me-1 text-success"></i> Delivery Simulator (Test All 5 Stages Instantly)
+                    </small>
+                    <span class="badge bg-secondary rounded-pill">1-Click Test</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm btn-outline-dark rounded-pill sim-stage-btn" data-stage="received">
+                        1. Confirmed
+                    </button>
+                    <button class="btn btn-sm btn-outline-dark rounded-pill sim-stage-btn" data-stage="packed">
+                        2. Packed
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill sim-stage-btn" data-stage="on_the_way">
+                        3. On The Way 🛵
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning rounded-pill sim-stage-btn text-dark" data-stage="arriving">
+                        4. Arriving
+                    </button>
+                    <button class="btn btn-sm btn-outline-success rounded-pill sim-stage-btn" data-stage="delivered">
+                        5. Delivered ✅
+                    </button>
+                    <button class="btn btn-sm btn-light border rounded-pill sim-stage-btn text-muted" data-stage="reset" title="Follow real-world order elapsed time">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Live Clock
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: LIVE STATUS, ETA, RIDER & PIN CONSOLE -->
+        <div class="col-lg-5">
+
+            <!-- ETA HERO CARD -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 text-white" style="background: linear-gradient(135deg, #122E20 0%, #1F7A4D 100%);">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 small fw-semibold mb-1">
+                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Express 10-15 Min Delivery
+                        </span>
+                        <h2 class="fw-bold mb-0 mt-1" id="eta-display">
+                            {% if telemetry.is_delivered %}
+                                Delivered! 🎉
+                            {% elif telemetry.is_cancelled %}
+                                Cancelled
+                            {% else %}
+                                ~{{ telemetry.eta_minutes }} Mins
+                            {% endif %}
+                        </h2>
+                    </div>
+                    <span class="badge bg-white text-success fw-bold px-3 py-2 rounded-pill fs-6">
+                        Order #{{ order.id }}
+                    </span>
+                </div>
+
+                <p class="text-white-50 small mb-3" id="stage-desc-display">
+                    {{ telemetry.stage_desc }}
+                </p>
+
+                <!-- LIVE PROGRESS BAR -->
+                <div class="progress rounded-pill mb-2" style="height: 10px; background: rgba(255,255,255,0.2);">
+                    <div
+                        id="progress-bar-fill"
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                        role="progressbar"
+                        style="width: {{ telemetry.progress }}%;"
+                        aria-valuenow="{{ telemetry.progress }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                    ></div>
+                </div>
+                <div class="d-flex justify-content-between small text-white-50">
+                    <span id="stage-title-display" class="text-white fw-bold">{{ telemetry.stage_title }}</span>
+                    <span id="progress-percent-display">{{ telemetry.progress }}%</span>
+                </div>
+            </div>
+
+            <!-- 4-STEP MILESTONES -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                <div class="row text-center g-2">
+                    <div class="col-3">
+                        <div id="step-received" class="stage-pill p-2 rounded-3 {% if telemetry.progress >= 20 %}active bg-success bg-opacity-10 text-success border border-success border-opacity-25{% else %}bg-light text-muted{% endif %}">
+                            <i class="bi bi-check-circle-fill d-block fs-5"></i>
+                            <small class="fw-bold" style="font-size: 11px;">Placed</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div id="step-packed" class="stage-pill p-2 rounded-3 {% if telemetry.progress >= 45 %}active bg-success bg-opacity-10 text-success border border-success border-opacity-25{% else %}bg-light text-muted{% endif %}">
+                            <i class="bi bi-box-seam d-block fs-5"></i>
+                            <small class="fw-bold" style="font-size: 11px;">Packed</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div id="step-on_the_way" class="stage-pill p-2 rounded-3 {% if telemetry.progress >= 70 %}active bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25{% else %}bg-light text-muted{% endif %}">
+                            <i class="bi bi-bicycle d-block fs-5"></i>
+                            <small class="fw-bold" style="font-size: 11px;">On Way</small>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div id="step-delivered" class="stage-pill p-2 rounded-3 {% if telemetry.is_delivered %}active bg-success bg-opacity-10 text-success border border-success border-opacity-25{% else %}bg-light text-muted{% endif %}">
+                            <i class="bi bi-house-door-fill d-block fs-5"></i>
+                            <small class="fw-bold" style="font-size: 11px;">Delivered</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DELIVERY PIN SECURITY BOX -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted text-uppercase fw-bold d-block">Contactless Delivery PIN</small>
+                        <span class="small text-muted">Share code with rider at doorstep</span>
+                    </div>
+                    <div class="pin-box px-3 py-1 rounded-3 fw-bold">
+                        {{ tracking.delivery_pin }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIDER PROFILE CARD -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="position-relative">
+                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 52px; height: 52px;">
+                                {{ tracking.rider_name|slice:":1" }}
+                            </div>
+                            <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle"></span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark" id="rider-name-display">{{ tracking.rider_name }}</h6>
+                            <small class="text-muted d-block" id="rider-vehicle-display">{{ tracking.rider_vehicle }}</small>
+                            <span class="badge bg-warning text-dark px-2 py-0 fw-semibold" style="font-size: 11px;">
+                                <i class="bi bi-star-fill text-dark me-1"></i>{{ tracking.rider_rating }} Rating
+                            </span>
+                        </div>
+                    </div>
+                    <a href="tel:{{ tracking.rider_phone }}" class="btn btn-outline-success rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px;" title="Call Delivery Partner">
+                        <i class="bi bi-telephone-fill fs-5"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ORDER ITEMS ACCORDION -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header bg-white py-3 px-3 border-bottom d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark small text-uppercase">
+                        <i class="bi bi-basket text-success me-1"></i> Order Items ({{ items.count }})
+                    </span>
+                    <strong class="text-success">₹{{ order.total_amount }}</strong>
+                </div>
+                <div class="card-body p-3" style="max-height: 200px; overflow-y: auto;">
+                    {% for item in items %}
+                    <div class="d-flex align-items-center justify-content-between py-1 border-bottom border-light">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" class="rounded" style="width: 32px; height: 32px; object-fit: contain;" alt="{{ item.product.name }}">
+                            {% else %}
+                            <div class="rounded bg-light text-success d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <i class="bi bi-bag"></i>
+                            </div>
+                            {% endif %}
+                            <span class="small fw-semibold text-dark">{{ item.product.name }}</span>
+                        </div>
+                        <span class="small text-muted">{{ item.quantity }} × ₹{{ item.price }}</span>
+                    </div>
+                    {% endfor %}
+                    <div class="pt-2 text-muted small">
+                        <i class="bi bi-geo-alt text-danger me-1"></i> Delivering to: {{ order.address }}, {{ order.city }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- FRESHMAP™ ULTRA NAVIGATION ENGINE SCRIPT -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const orderId = "{{ order.id }}";
+        const apiUrl = "{% url 'orders:api_track' order.id %}";
+
+        // Navigation Waypoint Coordinates along realistic city roads
+        // Hub (120, 160) -> Kharadi Expressway -> Metro Junction -> Gulmohar Ave -> Lane 1 -> Doorstep (890, 280)
+        const waypoints = [
+            { x: 120, y: 160, desc: "Order Packed at FreshMart Hub #4. Preparing for dispatch.", turn: "bi-box-seam", instruction: "Order assembling at Dark Store" },
+            { x: 330, y: 160, desc: "Exiting Hub. Heading East along Kharadi Main Expressway.", turn: "bi-arrow-up", instruction: "Continue straight on Kharadi Main Expressway (800m)" },
+            { x: 480, y: 180, desc: "Cruising past Metro Station & Tech Park at 32 km/h.", turn: "bi-arrow-up-right", instruction: "Slight right across Metro Expressway Bridge" },
+            { x: 640, y: 188, desc: "Approaching River Bridge overpass.", turn: "bi-arrow-right", instruction: "In 200m, turn right onto Gulmohar Avenue" },
+            { x: 640, y: 320, desc: "Crossing South River Bridge into Gulmohar Enclave.", turn: "bi-arrow-left", instruction: "Turn left onto Residential Lane No. 1" },
+            { x: 780, y: 320, desc: "Rider entered Thrite Nagar. Approaching Gulmohar Paradise Homes.", turn: "bi-arrow-up-right", instruction: "Approaching destination gate on the right" },
+            { x: 820, y: 280, desc: "Rider at Society Main Gate. Contacting security.", turn: "bi-geo-alt-fill", instruction: "Arriving at Gulmohar Paradise Homes Gate #1" },
+            { x: 890, y: 280, desc: "Arrived at your doorstep! Please share your delivery PIN.", turn: "bi-check2-circle", instruction: "Delivered at Doorstep! Enjoy your groceries 🎉" },
+        ];
+
+        // Path Element for precise distance calculation
+        const routePathElem = document.getElementById("route-path-main");
+        const totalPathLength = routePathElem.getTotalLength();
+
+        // SVG Pan & Zoom State
+        let viewBox = { x: 0, y: 0, w: 1000, h: 700 };
+        const initialViewBox = { x: 0, y: 0, w: 1000, h: 700 };
+        const svg = document.getElementById("city-map-svg");
+        let isDragging = false;
+        let startPoint = { x: 0, y: 0 };
+        let currentProgress = {{ telemetry.progress }};
+        let followRider = false;
+        let isNightMode = false;
+
+        // Apply ViewBox transform
+        function updateSvgViewBox() {
+            svg.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+            updateRiderTooltipPos();
+        }
+
+        // Calculate Position & Heading on Path for any progress percentage (0 - 100)
+        function getPathPointAtProgress(progress) {
+            const clamped = Math.max(0, Math.min(100, progress));
+            const distance = (clamped / 100) * totalPathLength;
+            const pt = routePathElem.getPointAtLength(distance);
+
+            // Calculate tangent angle for realistic vehicle heading
+            const delta = 2.0;
+            const ptAhead = routePathElem.getPointAtLength(Math.min(totalPathLength, distance + delta));
+            const ptBehind = routePathElem.getPointAtLength(Math.max(0, distance - delta));
+            const angleRad = Math.atan2(ptAhead.y - ptBehind.y, ptAhead.x - ptBehind.x);
+            const angleDeg = (angleRad * 180 / Math.PI);
+
+            return { x: pt.x, y: pt.y, angle: angleDeg };
+        }
+
+        // Position Rider on Map
+        function renderRider(progress) {
+            const riderPoint = getPathPointAtProgress(progress);
+            const riderGroup = document.getElementById("rider-vehicle-group");
+            const scooterBody = document.getElementById("scooter-body");
+
+            if (riderGroup) {
+                riderGroup.setAttribute("transform", `translate(${riderPoint.x}, ${riderPoint.y})`);
+            }
+            if (scooterBody) {
+                scooterBody.setAttribute("transform", `rotate(${riderPoint.angle})`);
+            }
+
+            // Update Navigation HUD based on route progression
+            updateNavHud(progress);
+
+            // Update Floating Tooltip
+            updateRiderTooltipPos(riderPoint.x, riderPoint.y);
+
+            // If auto-following rider, smoothly pan camera
+            if (followRider) {
+                viewBox.x = riderPoint.x - viewBox.w / 2;
+                viewBox.y = riderPoint.y - viewBox.h / 2;
+                updateSvgViewBox();
+            }
+        }
+
+        // Update Turn-by-Turn Instruction Banner
+        function updateNavHud(progress) {
+            const waypointIndex = Math.min(
+                waypoints.length - 1,
+                Math.floor((progress / 100) * waypoints.length)
+            );
+            const wp = waypoints[waypointIndex];
+
+            const textElem = document.getElementById("nav-instruction-text");
+            const subElem = document.getElementById("nav-sub-text");
+            const iconElem = document.getElementById("nav-maneuver-icon");
+            const distElem = document.getElementById("nav-dist-text");
+            const speedElem = document.getElementById("nav-speed-badge");
+
+            if (progress >= 100) {
+                textElem.innerText = "Package Delivered at Doorstep! 🎉";
+                subElem.innerText = "Order completed • Thank you for choosing FreshMart!";
+                iconElem.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+                distElem.innerText = "0 m remaining";
+                speedElem.innerText = "Parked";
+            } else if (progress >= 85) {
+                textElem.innerText = "Arriving at Gulmohar Paradise Homes Gate #1";
+                subElem.innerText = "Rider at security gate • Share PIN {{ tracking.delivery_pin }}";
+                iconElem.innerHTML = '<i class="bi bi-geo-alt-fill text-warning"></i>';
+                distElem.innerText = "150 m remaining";
+                speedElem.innerText = "⚡ 15 km/h";
+            } else {
+                textElem.innerText = wp.instruction;
+                subElem.innerText = wp.desc;
+                iconElem.innerHTML = `<i class="bi ${wp.turn}"></i>`;
+                const distLeftKm = ((100 - progress) * 0.035).toFixed(1);
+                distElem.innerText = `${distLeftKm} km left`;
+                speedElem.innerText = "⚡ 28 km/h";
+            }
+        }
+
+        // Align HTML Floating Tooltip with SVG Coordinates
+        function updateRiderTooltipPos(svgX, svgY) {
+            const tooltip = document.getElementById("rider-floating-tooltip");
+            if (!tooltip) return;
+
+            if (svgX === undefined || svgY === undefined) {
+                const pt = getPathPointAtProgress(currentProgress);
+                svgX = pt.x;
+                svgY = pt.y;
+            }
+
+            const svgRect = svg.getBoundingClientRect();
+            // Convert SVG point to client screen percentage
+            const screenX = ((svgX - viewBox.x) / viewBox.w) * svgRect.width;
+            const screenY = ((svgY - viewBox.y) / viewBox.h) * svgRect.height;
+
+            tooltip.style.left = `${screenX}px`;
+            tooltip.style.top = `${screenY}px`;
+        }
+
+        // Recenter Route
+        function recenterRoute() {
+            followRider = false;
+            viewBox = { ...initialViewBox };
+            updateSvgViewBox();
+        }
+
+        document.getElementById("recenter-btn").addEventListener("click", recenterRoute);
+
+        // Follow Rider Toggle
+        document.getElementById("focus-rider-btn").addEventListener("click", function() {
+            followRider = !followRider;
+            const btn = document.getElementById("focus-rider-btn");
+            if (followRider) {
+                btn.classList.add("text-success");
+                btn.classList.remove("text-primary");
+                viewBox.w = 550;
+                viewBox.h = 385;
+                const pt = getPathPointAtProgress(currentProgress);
+                viewBox.x = pt.x - viewBox.w / 2;
+                viewBox.y = pt.y - viewBox.h / 2;
+                updateSvgViewBox();
+            } else {
+                btn.classList.remove("text-success");
+                btn.classList.add("text-primary");
+                recenterRoute();
+            }
+        });
+
+        // Zoom Controls
+        document.getElementById("zoom-in-btn").addEventListener("click", function() {
+            zoomMap(0.85);
+        });
+        document.getElementById("zoom-out-btn").addEventListener("click", function() {
+            zoomMap(1.18);
+        });
+
+        function zoomMap(factor) {
+            followRider = false;
+            const newW = viewBox.w * factor;
+            const newH = viewBox.h * factor;
+            if (newW >= 300 && newW <= 1600) {
+                viewBox.x += (viewBox.w - newW) / 2;
+                viewBox.y += (viewBox.h - newH) / 2;
+                viewBox.w = newW;
+                viewBox.h = newH;
+                updateSvgViewBox();
+            }
+        }
+
+        // Mouse Drag / Touch Pan Implementation
+        svg.addEventListener("mousedown", function(e) {
+            isDragging = true;
+            followRider = false;
+            startPoint = { x: e.clientX, y: e.clientY };
+        });
+
+        window.addEventListener("mousemove", function(e) {
+            if (!isDragging) return;
+            const dx = (e.clientX - startPoint.x) * (viewBox.w / svg.clientWidth);
+            const dy = (e.clientY - startPoint.y) * (viewBox.h / svg.clientHeight);
+
+            viewBox.x -= dx;
+            viewBox.y -= dy;
+            startPoint = { x: e.clientX, y: e.clientY };
+            updateSvgViewBox();
+        });
+
+        window.addEventListener("mouseup", function() {
+            isDragging = false;
+        });
+
+        // Mouse Wheel Zoom
+        svg.addEventListener("wheel", function(e) {
+            e.preventDefault();
+            const factor = e.deltaY > 0 ? 1.12 : 0.9;
+            zoomMap(factor);
+        }, { passive: false });
+
+        // Touch Drag for Mobile
+        let touchStart = { x: 0, y: 0 };
+        svg.addEventListener("touchstart", function(e) {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                followRider = false;
+                touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+        });
+
+        svg.addEventListener("touchmove", function(e) {
+            if (!isDragging || e.touches.length !== 1) return;
+            const dx = (e.touches[0].clientX - touchStart.x) * (viewBox.w / svg.clientWidth);
+            const dy = (e.touches[0].clientY - touchStart.y) * (viewBox.h / svg.clientHeight);
+
+            viewBox.x -= dx;
+            viewBox.y -= dy;
+            touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            updateSvgViewBox();
+        });
+
+        svg.addEventListener("touchend", function() {
+            isDragging = false;
+        });
+
+        // Day / Night Theme Toggle
+        document.getElementById("theme-toggle-btn").addEventListener("click", function() {
+            isNightMode = !isNightMode;
+            const mapContainer = document.getElementById("map-container");
+            const mapBg = document.getElementById("map-bg");
+            const themeIcon = document.getElementById("theme-icon");
+
+            if (isNightMode) {
+                mapContainer.classList.add("map-theme-night");
+                mapBg.setAttribute("fill", "#0f172a");
+                themeIcon.className = "bi bi-sun-fill text-warning";
+            } else {
+                mapContainer.classList.remove("map-theme-night");
+                mapBg.setAttribute("fill", "#f1f5f9");
+                themeIcon.className = "bi bi-moon-stars-fill text-warning";
+            }
+        });
+
+        window.addEventListener("resize", () => updateRiderTooltipPos());
+
+        // Telemetry Update & UI Sync
+        function updateUI(data) {
+            currentProgress = data.progress;
+
+            // Update Text Displays
+            const etaElem = document.getElementById("eta-display");
+            const floatingEta = document.getElementById("rider-floating-eta");
+            if (data.is_delivered) {
+                etaElem.innerText = "Delivered! 🎉";
+                if (floatingEta) floatingEta.innerText = "Delivered!";
+            } else if (data.is_cancelled) {
+                etaElem.innerText = "Cancelled";
+                if (floatingEta) floatingEta.innerText = "Cancelled";
+            } else {
+                etaElem.innerText = `~${data.eta_minutes} Mins`;
+                if (floatingEta) floatingEta.innerText = `~${data.eta_minutes} Mins`;
+            }
+
+            document.getElementById("stage-desc-display").innerText = data.stage_desc;
+            document.getElementById("stage-title-display").innerText = data.stage_title;
+            document.getElementById("progress-percent-display").innerText = `${data.progress}%`;
+
+            const progressBar = document.getElementById("progress-bar-fill");
+            progressBar.style.width = `${data.progress}%`;
+            progressBar.setAttribute("aria-valuenow", data.progress);
+
+            // Update Milestones
+            updateMilestones(data.progress, data.is_delivered);
+
+            // Move Rider on the realistic map
+            renderRider(data.progress);
+
+            document.getElementById("last-ping-time").innerText = "GPS Synced: " + new Date().toLocaleTimeString();
+        }
+
+        function updateMilestones(progress, isDelivered) {
+            const steps = [
+                { id: "step-received", active: progress >= 20 },
+                { id: "step-packed", active: progress >= 45 },
+                { id: "step-on_the_way", active: progress >= 70 },
+                { id: "step-delivered", active: isDelivered || progress >= 100 },
+            ];
+
+            steps.forEach(s => {
+                const el = document.getElementById(s.id);
+                if (!el) return;
+                if (s.active) {
+                    el.classList.add("active");
+                    if (s.id === "step-on_the_way") {
+                        el.className = "stage-pill p-2 rounded-3 active bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25";
+                    } else {
+                        el.className = "stage-pill p-2 rounded-3 active bg-success bg-opacity-10 text-success border border-success border-opacity-25";
+                    }
+                } else {
+                    el.className = "stage-pill p-2 rounded-3 bg-light text-muted";
+                }
+            });
+        }
+
+        // Live Telemetry Polling (every 4 seconds)
+        function pollTelemetry() {
+            fetch(apiUrl, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    updateUI(data);
+                }
+            })
+            .catch(err => console.warn("Live telemetry poll error:", err));
+        }
+
+        const pollInterval = setInterval(pollTelemetry, 4000);
+
+        // Simulator Buttons Handler
+        document.querySelectorAll(".sim-stage-btn").forEach(btn => {
+            btn.addEventListener("click", function() {
+                const stage = this.dataset.stage;
+                const simUrl = `/orders/api/track/${orderId}/simulate/${stage}/`;
+
+                fetch(simUrl, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                .then(res => res.json())
+                .then(() => {
+                    pollTelemetry();
+                })
+                .catch(err => console.error("Simulation trigger failed:", err));
+            });
+        });
+
+        // Real-Time Live Device Location (GPS) Engine
+        let gpsWatchId = null;
+        let isGpsActive = false;
+
+        document.getElementById("live-gps-btn")?.addEventListener("click", function() {
+            toggleLiveDeviceGps();
+        });
+
+        function toggleLiveDeviceGps() {
+            const gpsBtn = document.getElementById("live-gps-btn");
+            const gpsIcon = document.getElementById("gps-btn-icon");
+            const gpsBanner = document.getElementById("live-gps-status-banner");
+            const gpsBlueDot = document.getElementById("live-device-gps-group");
+
+            if (isGpsActive) {
+                // Turn off live GPS tracking
+                if (gpsWatchId !== null) {
+                    navigator.geolocation.clearWatch(gpsWatchId);
+                    gpsWatchId = null;
+                }
+                isGpsActive = false;
+                gpsBtn.classList.remove("bg-success", "text-white");
+                gpsBtn.classList.add("text-danger");
+                gpsIcon.className = "bi bi-geo-alt-fill fs-5";
+                gpsBanner.classList.add("d-none");
+                gpsBlueDot.classList.add("d-none");
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            gpsIcon.className = "spinner-border spinner-border-sm";
+
+            // Start streaming high-accuracy GPS fixes
+            gpsWatchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    isGpsActive = true;
+                    gpsIcon.className = "bi bi-crosshair fs-5";
+                    gpsBtn.classList.add("bg-success", "text-white");
+                    gpsBtn.classList.remove("text-danger");
+                    gpsBanner.classList.remove("d-none");
+                    gpsBlueDot.classList.remove("d-none");
+
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = Math.round(position.coords.accuracy || 10);
+
+                    document.getElementById("gps-coords-text").innerText = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+                    document.getElementById("gps-accuracy-badge").innerText = `±${accuracy}m accuracy`;
+
+                    // Push live GPS coordinates to backend
+                    fetch(`/orders/api/track/${orderId}/update-location/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCsrfToken()
+                        },
+                        body: JSON.stringify({
+                            lat: lat,
+                            lng: lng,
+                            accuracy: accuracy
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            document.getElementById("gps-distance-text").innerText = `Store: ${data.distance_km} km`;
+                            document.getElementById("last-ping-time").innerText = `Device GPS: ${data.distance_km} km to Hub`;
+                        }
+                    })
+                    .catch(err => console.warn("Live location sync failed:", err));
+                },
+                function(error) {
+                    gpsIcon.className = "bi bi-geo-alt-fill fs-5";
+                    console.warn("Geolocation access error:", error);
+                    alert("Unable to access device location. Please allow browser location access when prompted.");
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function getCsrfToken() {
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+            return cookieValue || '';
+        }
+
+        // Initial Map Render
+        renderRider(currentProgress);
+        updateSvgViewBox();
+    });
+</script>
+{% endblock %}
+

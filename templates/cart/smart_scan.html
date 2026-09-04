@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+
+{% block title %}FreshScan™ AI Grocery List Scanner | FreshMart{% endblock %}
+
+{% block extra_head %}
+<!-- Tesseract.js for In-Browser Optical Character Recognition -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+    .scanner-hero {
+        background: linear-gradient(135deg, #122E20 0%, #1F7A4D 100%);
+        border-radius: 1.5rem;
+    }
+    .preset-chip {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        font-size: 0.82rem;
+    }
+    .preset-chip:hover {
+        background: #eef9f2;
+        border-color: #1F7A4D;
+        color: #1F7A4D;
+        transform: translateY(-2px);
+    }
+    .drop-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 1rem;
+        background: #f8fafc;
+        transition: border-color 0.2s ease;
+        cursor: pointer;
+    }
+    .drop-zone:hover {
+        border-color: #1F7A4D;
+        background: #f0fdf4;
+    }
+    .match-row {
+        transition: background-color 0.15s ease;
+    }
+    .match-row:hover {
+        background-color: #f8fafc;
+    }
+    .confidence-pill {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 10px;
+    }
+    .sticky-scan-bar {
+        position: sticky;
+        bottom: 16px;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-success">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'cart:index' %}" class="text-decoration-none text-success">Shopping Cart</a></li>
+            <li class="breadcrumb-item active" aria-current="page">FreshScan™ Smart List</li>
+        </ol>
+    </nav>
+
+    <!-- HERO BANNER -->
+    <div class="scanner-hero p-4 p-md-5 text-white mb-4 shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">
+                    <i class="bi bi-stars me-1"></i> AI Smart Cart Loader
+                </span>
+                <h2 class="fw-bold mb-2">FreshScan™ — Paste or Snap Your Grocery List</h2>
+                <p class="text-white-50 mb-0 lead fs-6">
+                    Never search for items one-by-one again. Paste your WhatsApp grocery message, type notes, or upload a handwritten paper list. Our AI matches products and fills your cart in seconds!
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end d-none d-lg-block">
+                <span class="display-3">📋✨</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK PRESET CHIPS -->
+    <div class="mb-4">
+        <small class="text-muted text-uppercase fw-bold d-block mb-2">
+            <i class="bi bi-lightning-fill text-warning me-1"></i> Or try a 1-click sample grocery haul:
+        </small>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="preset-chip px-3 py-2 rounded-pill fw-semibold shadow-sm" onclick="loadPreset('breakfast')">
+                🥛 Breakfast Essentials (Milk, Bread, Eggs, Butter, Bananas)
+            </span>
+            <span class="preset-chip px-3 py-2 rounded-pill fw-semibold shadow-sm" onclick="loadPreset('veggies')">
+                🥗 Daily Veggie Basket (Potatoes, Onions, Tomatoes, Spinach, Cucumbers)
+            </span>
+            <span class="preset-chip px-3 py-2 rounded-pill fw-semibold shadow-sm" onclick="loadPreset('fruits')">
+                🍎 Fresh Fruit Box (Apples, Mangoes, Pomegranate, Oranges)
+            </span>
+            <span class="preset-chip px-3 py-2 rounded-pill fw-semibold shadow-sm" onclick="loadPreset('cleaning')">
+                🧼 Laundry & Home Care (Surf Excel, Ariel, Rin, Wheel)
+            </span>
+        </div>
+    </div>
+
+    <!-- MAIN INPUT TABS CARD -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
+        <div class="card-header bg-white border-bottom p-0">
+            <ul class="nav nav-tabs nav-justified border-bottom-0" id="scanTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active py-3 fw-bold text-success" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button" role="tab">
+                        <i class="bi bi-chat-left-text me-2"></i> Paste Text or WhatsApp List
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link py-3 fw-bold text-success" id="image-tab" data-bs-toggle="tab" data-bs-target="#image-tab-pane" type="button" role="tab">
+                        <i class="bi bi-camera me-2"></i> Photo of Handwritten Paper List
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content" id="scanTabsContent">
+
+                <!-- TAB 1: TEXT PASTE -->
+                <div class="tab-pane fade show active" id="text-tab-pane" role="tabpanel">
+                    <form method="POST" action="{% url 'cart:smart_scan' %}" id="text-scan-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="grocery_text" class="form-label fw-semibold text-dark">
+                                Enter your grocery items (one per line, with optional quantities):
+                            </label>
+                            <textarea
+                                class="form-control rounded-3 p-3 font-monospace"
+                                id="grocery_text"
+                                name="grocery_text"
+                                rows="6"
+                                placeholder="Example:&#10;2 litres cow milk&#10;1 packet whole wheat bread&#10;12 farm fresh eggs&#10;1 kg vine ripe tomatoes&#10;2 kg potatoes&#10;surf excel quick wash"
+                            >{{ raw_text }}</textarea>
+                            <div class="form-text">
+                                Tip: You can paste numbers, units (kg, litre, packet), or simply names like "bananas, apples, milk".
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" onclick="clearInput()">
+                                <i class="bi bi-eraser me-1"></i> Clear Text
+                            </button>
+                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                                <i class="bi bi-search me-1"></i> Scan & Match Groceries
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB 2: IMAGE OCR -->
+                <div class="tab-pane fade" id="image-tab-pane" role="tabpanel">
+                    <div class="drop-zone p-4 text-center mb-3" onclick="document.getElementById('paper-file-input').click()">
+                        <i class="bi bi-cloud-arrow-up display-4 text-success d-block mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-1">Click to browse or snap a photo of your paper list</h6>
+                        <small class="text-muted d-block">Supports JPG, PNG, WEBP (Smartphone photos, receipts, or sticky notes)</small>
+                        <input type="file" id="paper-file-input" accept="image/*" class="d-none" onchange="handleImageUpload(event)">
+                    </div>
+
+                    <!-- OCR Progress Indicator -->
+                    <div id="ocr-status-card" class="card border border-success-subtle bg-light rounded-3 p-3 mb-3 d-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+                            <div class="flex-grow-1">
+                                <strong class="d-block text-dark small" id="ocr-status-title">Reading text from photo...</strong>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    <div id="ocr-progress-bar" class="progress-bar bg-success" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extracted Text Preview -->
+                    <div id="ocr-result-preview" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-success">
+                                <i class="bi bi-check-circle-fill me-1"></i> Text extracted from photo:
+                            </span>
+                            <button class="btn btn-sm btn-success rounded-pill px-3 fw-semibold" onclick="submitOcrText()">
+                                Scan & Match Extracted Items ➔
+                            </button>
+                        </div>
+                        <textarea id="ocr-extracted-text" class="form-control font-monospace mb-3" rows="5"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MATCHED RESULTS SECTION -->
+    {% if scan_results %}
+    <div id="results-anchor"></div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white">
+        <div class="card-header bg-success text-white py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-basket-fill me-2"></i> Matched Grocery Basket
+                </h5>
+                <small class="text-white-50">
+                    Found {{ scan_results.matched_count }} of {{ scan_results.total_items }} items from your list
+                </small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="toggleSelectAll()">
+                    Select / Deselect All
+                </button>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'cart:batch_add' %}" id="batch-add-form">
+            {% csrf_token %}
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase text-muted">
+                            <tr>
+                                <th style="width: 40px;" class="ps-4"></th>
+                                <th style="width: 60px;">Product</th>
+                                <th>Item Details & Match</th>
+                                <th style="width: 140px;" class="text-center">Quantity</th>
+                                <th style="width: 110px;" class="text-end">Price</th>
+                                <th style="width: 120px;" class="text-end pe-4">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for match in scan_results.matches %}
+                            <tr class="match-row" id="row-{{ match.product.id }}">
+                                <td class="ps-4">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input item-checkbox"
+                                        name="selected_products"
+                                        value="{{ match.product.id }}"
+                                        data-price="{{ match.product.final_price }}"
+                                        id="check-{{ match.product.id }}"
+                                        {% if match.selected %}checked{% endif %}
+                                        onchange="recalculateTotal()"
+                                    >
+                                </td>
+                                <td>
+                                    {% if match.product.image %}
+                                    <img src="{{ match.product.image.url }}" class="rounded-3 border" style="width: 50px; height: 50px; object-fit: contain; background: #fafafa;" alt="{{ match.product.name }}">
+                                    {% else %}
+                                    <div class="rounded-3 bg-light d-flex align-items-center justify-content-center text-success" style="width: 50px; height: 50px;">
+                                        <i class="bi bi-basket"></i>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="text-dark d-block">{{ match.product.name }}</strong>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <small class="text-muted">From line: "<em>{{ match.original_line }}</em>"</small>
+                                        <span class="confidence-pill bg-success-subtle text-success border border-success-subtle">
+                                            {{ match.confidence }}% match
+                                        </span>
+                                        {% if match.in_stock %}
+                                        <span class="badge bg-light text-muted border">In Stock ({{ match.product.stock }})</span>
+                                        {% else %}
+                                        <span class="badge bg-danger-subtle text-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="input-group input-group-sm justify-content-center" style="max-width: 120px; margin: auto;">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="adjustQty({{ match.product.id }}, -1)">-</button>
+                                        <input
+                                            type="number"
+                                            class="form-control text-center qty-input"
+                                            id="qty-{{ match.product.id }}"
+                                            name="quantity_{{ match.product.id }}"
+                                            value="{{ match.allocated_quantity|default:1 }}"
+                                            min="1"
+                                            max="{{ match.product.stock }}"
+                                            data-price="{{ match.product.final_price }}"
+                                            onchange="recalculateTotal()"
+                                        >
+                                        <button class="btn btn-outline-secondary" type="button" onclick="adjustQty({{ match.product.id }}, 1)">+</button>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="fw-semibold text-dark">₹{{ match.product.final_price }}</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <strong class="text-success row-subtotal" id="subtotal-{{ match.product.id }}">
+                                        ₹{{ match.subtotal }}
+                                    </strong>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-emoji-frown display-4 d-block mb-2"></i>
+                                    No direct matches found in our catalog for the provided text. Try our preset examples above!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- UNMATCHED ITEMS NOTICE (If Any) -->
+                {% if scan_results.unmatched %}
+                <div class="p-3 bg-light border-top border-warning-subtle">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-info-circle-fill text-warning"></i>
+                        <small class="fw-bold text-dark">Could not find exact matches for {{ scan_results.unmatched|length }} items:</small>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-1">
+                        {% for un in scan_results.unmatched %}
+                        <span class="badge bg-white text-muted border px-2 py-1">
+                            "{{ un.original_line }}"
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- STICKY BOTTOM ACTION BAR -->
+            {% if scan_results.matches %}
+            <div class="sticky-scan-bar p-3 mt-3 mx-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fs-4">🛒</span>
+                    <div>
+                        <span class="small text-muted text-uppercase fw-bold d-block">Estimated Total</span>
+                        <h4 class="fw-bold text-success mb-0" id="grand-total-display">
+                            ₹{{ scan_results.estimated_total }}
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{% url 'cart:index' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                        View Existing Cart
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow">
+                        <i class="bi bi-cart-plus-fill me-1"></i> Add Selected Items to Cart
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    // PRESET LOADER
+    const presets = {
+        breakfast: "2 litres cow milk\n1 packet whole wheat bread\n12 farm fresh eggs\n500g pure cream butter\n1 dozen fresh bananas",
+        veggies: "2 kg farm fresh potatoes\n1 kg red onions\n1 kg vine ripe tomatoes\nbaby spinach 250g\ncrunchy english cucumbers",
+        fruits: "1 kg royal gala apples\nalphonso mangoes box of 6\n1 kg ruby red pomegranate\n1 kg nagpur sweet oranges",
+        cleaning: "surf excel quick wash\nariel complete detergent powder\nrin powder\nwheel lemon washing powder"
+    };
+
+    function loadPreset(key) {
+        if (presets[key]) {
+            document.getElementById("grocery_text").value = presets[key];
+            // Switch to text tab if not active
+            const textTabTrigger = document.querySelector('#text-tab');
+            const tab = new bootstrap.Tab(textTabTrigger);
+            tab.show();
+            // Automatically submit for instantaneous delight
+            document.getElementById("text-scan-form").submit();
+        }
+    }
+
+    function clearInput() {
+        document.getElementById("grocery_text").value = "";
+    }
+
+    // QUANTITY & SUBTOTAL LIVE RECALCULATION
+    function adjustQty(productId, delta) {
+        const input = document.getElementById("qty-" + productId);
+        let val = parseInt(input.value) || 1;
+        const max = parseInt(input.getAttribute("max")) || 99;
+        val = Math.max(1, Math.min(max, val + delta));
+        input.value = val;
+        recalculateTotal();
+    }
+
+    function recalculateTotal() {
+        let grandTotal = 0;
+        document.querySelectorAll(".item-checkbox").forEach(cb => {
+            const pid = cb.value;
+            const qtyInput = document.getElementById("qty-" + pid);
+            const qty = parseInt(qtyInput.value) || 1;
+            const unitPrice = parseFloat(cb.getAttribute("data-price")) || 0;
+            const rowSubtotal = qty * unitPrice;
+
+            document.getElementById("subtotal-" + pid).innerText = "₹" + rowSubtotal.toFixed(2);
+
+            if (cb.checked) {
+                grandTotal += rowSubtotal;
+            }
+        });
+
+        const totalDisplay = document.getElementById("grand-total-display");
+        if (totalDisplay) {
+            totalDisplay.innerText = "₹" + grandTotal.toFixed(2);
+        }
+    }
+
+    function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll(".item-checkbox");
+        const allChecked = Array.from(checkboxes).every(c => c.checked);
+        checkboxes.forEach(c => c.checked = !allChecked);
+        recalculateTotal();
+    }
+
+    // CLIENT-SIDE IN-BROWSER TESSERACT.JS OCR
+    async function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const statusCard = document.getElementById("ocr-status-card");
+        const statusTitle = document.getElementById("ocr-status-title");
+        const progressBar = document.getElementById("ocr-progress-bar");
+        const previewSection = document.getElementById("ocr-result-preview");
+        const textarea = document.getElementById("ocr-extracted-text");
+
+        statusCard.classList.remove("d-none");
+        previewSection.classList.add("d-none");
+
+        try {
+            statusTitle.innerText = "Initializing OCR Engine...";
+            progressBar.style.width = "15%";
+
+            const worker = await Tesseract.createWorker("eng");
+            statusTitle.innerText = "Scanning handwriting / text from image...";
+            progressBar.style.width = "40%";
+
+            const ret = await worker.recognize(file);
+            progressBar.style.width = "100%";
+            statusTitle.innerText = "Recognition complete!";
+
+            await worker.terminate();
+
+            const text = ret.data.text.trim();
+            if (text) {
+                textarea.value = text;
+                previewSection.classList.remove("d-none");
+            } else {
+                alert("Could not detect legible text in this image. Try another photo or paste directly into the text tab.");
+            }
+        } catch (err) {
+            console.error("OCR Error:", err);
+            statusTitle.innerText = "OCR error. Please paste text directly.";
+        } finally {
+            setTimeout(() => {
+                statusCard.classList.add("d-none");
+            }, 1500);
+        }
+    }
+
+    function submitOcrText() {
+        const text = document.getElementById("ocr-extracted-text").value;
+        if (text) {
+            document.getElementById("grocery_text").value = text;
+            document.getElementById("text-scan-form").submit();
+        }
+    }
+</script>
+{% endblock %}
+

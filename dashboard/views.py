@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
@@ -99,8 +100,20 @@ def update_order_status(
             "status"
         )
 
-        order.status = status
-        order.save()
+        valid_statuses = dict(Order.STATUS_CHOICES)
+
+        if status in valid_statuses:
+            order.status = status
+            order.save()
+            messages.success(
+                request,
+                f"Order #{order.id} status updated to {status}."
+            )
+        else:
+            messages.error(
+                request,
+                f"Invalid order status selected: {status}"
+            )
 
     return redirect(
         "dashboard:orders"
