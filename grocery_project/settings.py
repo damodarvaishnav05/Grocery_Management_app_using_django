@@ -13,11 +13,24 @@ SECRET_KEY = os.getenv(
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = list(set([h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.onrender.com,.railway.app").split(",") if h.strip()] + ["testserver", "localhost", "127.0.0.1"]))
+ALLOWED_HOSTS = list(set(
+    [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.onrender.com,.railway.app").split(",") if h.strip()]
+    + ["testserver", "localhost", "127.0.0.1", ".onrender.com", "om-super-mart.onrender.com", "*"] if DEBUG else
+    [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.onrender.com,.railway.app").split(",") if h.strip()]
+    + ["testserver", "localhost", "127.0.0.1", ".onrender.com", "om-super-mart.onrender.com"]
+))
 
 CSRF_TRUSTED_ORIGINS = list(set([
-    f"https://{h.lstrip('.')}" for h in ALLOWED_HOSTS if h not in ["localhost", "127.0.0.1", "testserver"]
-] + ["https://*.onrender.com", "https://*.railway.app", "http://localhost:8000", "http://127.0.0.1:8000"]))
+    f"https://{h.lstrip('.')}" for h in ALLOWED_HOSTS if h not in ["localhost", "127.0.0.1", "testserver", "*"]
+] + [
+    "https://*.onrender.com",
+    "https://om-super-mart.onrender.com",
+    "https://*.railway.app",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]))
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # =========================
@@ -169,7 +182,7 @@ STORAGES = {
         "BACKEND": (
             "django.contrib.staticfiles.storage.StaticFilesStorage"
             if DEBUG
-            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            else "whitenoise.storage.CompressedStaticFilesStorage"
         ),
     },
 }
@@ -237,3 +250,40 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+
+# =========================
+# Logging Configuration
+# =========================
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
