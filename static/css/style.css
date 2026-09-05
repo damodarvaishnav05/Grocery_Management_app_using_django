@@ -1408,7 +1408,6 @@ footer .bg-black{
 
 /* Master Layout */
 .om-app-wrapper {
-    display: flex;
     min-height: 100vh;
     width: 100%;
     background: #F8FAFC;
@@ -1416,24 +1415,25 @@ footer .bg-black{
     position: relative;
 }
 
-/* Left Sidebar */
-.om-sidebar {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
-    background: var(--om-sidebar-bg);
-    color: #ffffff;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    z-index: 1040;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
-    flex-shrink: 0;
+/* Left Sidebar (Desktop Fixed) */
+@media (min-width: 992px) {
+    .om-sidebar {
+        width: 250px !important;
+        min-width: 250px !important;
+        max-width: 250px !important;
+        background: var(--om-sidebar-bg) !important;
+        color: #ffffff;
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        z-index: 1040 !important;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08) !important;
+    }
 }
 
 .om-brand-header {
@@ -1534,14 +1534,17 @@ footer .bg-black{
 
 /* Main Content Area */
 .om-main-wrapper {
-    flex: 1 1 auto;
-    min-width: 0;
+    width: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     background: #F8FAFC;
-    margin-left: 250px;
-    width: calc(100% - 250px);
+}
+
+@media (min-width: 992px) {
+    .om-main-wrapper {
+        padding-left: 250px !important;
+    }
 }
 
 @media (max-width: 991.98px) {
@@ -1550,8 +1553,7 @@ footer .bg-black{
     }
 
     .om-main-wrapper {
-        margin-left: 0 !important;
-        width: 100% !important;
+        padding-left: 0 !important;
         padding-bottom: 70px;
     }
 }
