@@ -5,6 +5,7 @@ app_name = "wallet"
 
 urlpatterns = [
     path("", views.wallet_dashboard, name="dashboard"),
+    path("dashboard/", views.wallet_dashboard, name="index"),
     path("top-up/", views.top_up_wallet, name="top_up"),
     path("pay/<int:order_id>/", views.pay_with_wallet, name="pay_with_wallet"),
 ]
