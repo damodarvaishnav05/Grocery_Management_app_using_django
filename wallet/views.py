@@ -68,7 +68,7 @@ def top_up_wallet(request):
             )
             messages.success(
                 request,
-                f"🎉 ₹{amount:.2f} successfully credited to your FreshMart Wallet! Current balance: ₹{wallet.balance:.2f}"
+                f"🎉 ₹{amount:.2f} successfully credited to your Om Super Mart Wallet! Current balance: ₹{wallet.balance:.2f}"
             )
         except Exception as e:
             messages.error(request, f"Top-up error: {str(e)}")
@@ -94,7 +94,7 @@ def pay_with_wallet(request, order_id):
         diff = order.total_amount - wallet.balance
         messages.warning(
             request,
-            f"Insufficient wallet balance. You need ₹{diff:.2f} more to pay with FreshMart Wallet."
+            f"Insufficient wallet balance. You need ₹{diff:.2f} more to pay with Om Super Mart Wallet."
         )
         return redirect("payments:payment", order.id)
 
@@ -139,26 +139,26 @@ def pay_with_wallet(request, order_id):
             # 5. Send Email Confirmation
             if request.user.email:
                 send_mail(
-                    subject=f"Order #{order.id} Confirmed (Paid via FreshMart Wallet)",
+                    subject=f"Order #{order.id} Confirmed (Paid via Om Super Mart Wallet)",
                     message=f"""
 Hello {order.full_name},
 
-Thank you for your order! Payment of ₹{order.total_amount} was successfully processed via your FreshMart Wallet.
+Thank you for your order! Payment of ₹{order.total_amount} was successfully processed via your Om Super Mart Wallet.
 
 Order ID: #{order.id}
 Delivery Address: {order.address}, {order.city} - {order.pincode}
 Remaining Wallet Balance: ₹{wallet.balance}
 
-FreshMart express delivery will arrive in 10-15 minutes!
+Om Super Mart express delivery will arrive in 10-15 minutes!
 """,
-                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "FreshMart <noreply@freshmart.com>"),
+                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>"),
                     recipient_list=[request.user.email],
                     fail_silently=True
                 )
 
         messages.success(
             request,
-            f"⚡ Instant 1-Click Payment Successful! ₹{order.total_amount} debited from your FreshMart Wallet."
+            f"⚡ Instant 1-Click Payment Successful! ₹{order.total_amount} debited from your Om Super Mart Wallet."
         )
         return redirect("orders:success", order.id)
 

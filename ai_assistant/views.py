@@ -106,7 +106,7 @@ def get_ai_response(question):
         return {
             "title": "🍳 Quick & Energizing Healthy Breakfast Ideas",
             "category": "Recipes & Meal Prep",
-            "summary": "5 to 10 minute wholesome breakfast recipes made with FreshMart groceries:",
+            "summary": "5 to 10 minute wholesome breakfast recipes made with Om Super Mart groceries:",
             "points": [
                 ("Power Oatmeal Bowl", "Cook rolled oats in warm milk or almond milk, top with sliced banana, chia seeds, and a drizzle of honey."),
                 ("Avocado & Boiled Egg Toast", "Whole grain bread toasted with mashed avocado, lime juice, chili flakes, and sliced boiled eggs."),
@@ -143,7 +143,7 @@ def get_ai_response(question):
         return {
             "title": "🚚 Express Delivery & Order Information",
             "category": "Store Support",
-            "summary": "Everything you need to know about FreshMart deliveries and tracking:",
+            "summary": "Everything you need to know about Om Super Mart deliveries and tracking:",
             "points": [
                 ("Ultra-Fast 10-Min Delivery", "Fresh produce and essentials delivered to your doorstep in 10 to 15 minutes across covered zones."),
                 ("Real-time Status Tracking", "Track your order status live (Pending -> Confirmed -> Shipped -> Delivered) in the 'My Orders' tab."),
@@ -159,11 +159,11 @@ def get_ai_response(question):
     # ==========================================
     elif any(k in q for k in ["coupon", "discount", "offer", "promo", "voucher", "save money", "code"]):
         from datetime import date
-        today_code = f"FRESH{date.today().strftime('%d%m')}"
+        today_code = f"OMSUPER{date.today().strftime('%d%m')}"
         return {
             "title": "🎉 Coupons, Offers & Today's Special Code",
             "category": "Promotions",
-            "summary": "Maximize your grocery savings every day on FreshMart:",
+            "summary": "Maximize your grocery savings every day on Om Super Mart:",
             "points": [
                 (f"Today's Active Coupon: {today_code}", f"Apply code '{today_code}' at checkout to unlock an instant 10% discount on your order!"),
                 ("First Order Bonus", "New customers get free delivery and welcome vouchers automatically credited to their account."),
@@ -230,7 +230,7 @@ def get_ai_response(question):
     # ==========================================
     else:
         return {
-            "title": "🤖 Welcome to FreshMart AI Grocery Assistant",
+            "title": "🤖 Welcome to Om Super Mart AI Grocery Assistant",
             "category": "General Guide",
             "summary": f"You asked: \"{question}\". I am trained to give you immediate expert guidance on groceries, nutrition, recipes, and store assistance.",
             "points": [

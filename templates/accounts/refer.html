@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Refer & Earn ₹50 | Om Super Mart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- HERO REFER HEADER -->
+    <div class="card border-0 text-white rounded-4 overflow-hidden mb-4 shadow-sm" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%);">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-3">
+                        <i class="bi bi-gift-fill text-warning me-1"></i> Om Super Mart Rewards
+                    </span>
+                    <h1 class="display-5 fw-bold mb-3">
+                        Refer Friends & Earn <span class="text-warning">₹50</span>
+                    </h1>
+                    <p class="lead mb-4 text-white-50" style="max-width: 600px;">
+                        Share your love for fresh groceries! When your friends register with your invite code, you both get ₹50 OmCash added to your wallet instantly.
+                    </p>
+
+                    <!-- STATS ROW -->
+                    <div class="row g-3">
+                        <div class="col-sm-4 col-6">
+                            <div class="bg-black bg-opacity-25 rounded-3 p-3 text-center">
+                                <h3 class="fw-bold mb-0 text-warning">{{ friends_count }}</h3>
+                                <small class="text-white-50">Friends Joined</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-6">
+                            <div class="bg-black bg-opacity-25 rounded-3 p-3 text-center">
+                                <h3 class="fw-bold mb-0 text-white">₹{{ total_earned }}</h3>
+                                <small class="text-white-50">OmCash Earned</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-12">
+                            <div class="bg-black bg-opacity-25 rounded-3 p-3 text-center">
+                                <h3 class="fw-bold mb-0 text-success">₹50</h3>
+                                <small class="text-white-50">Per Referral</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <div class="display-1 mb-2">🎁</div>
+                    <div class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold fs-6">
+                        Unlimited Referrals!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REFERRAL LINK & CODE SHARE CARD -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4">
+                <h4 class="fw-bold mb-1">Your Personal Referral Link</h4>
+                <p class="text-muted small mb-4">Share this link directly with family and friends on WhatsApp, SMS, or social media.</p>
+
+                <div class="mb-4">
+                    <label class="form-label small text-muted fw-semibold">Referral Code</label>
+                    <div class="input-group input-group-lg mb-3">
+                        <input
+                            type="text"
+                            class="form-control fw-bold fs-4 text-danger bg-light"
+                            value="{{ referral_code }}"
+                            id="referralCodeInput"
+                            readonly
+                            style="letter-spacing: 2px;"
+                        >
+                        <button class="btn btn-outline-danger px-4 fw-bold" onclick="copyReferralCode()">
+                            <i class="bi bi-clipboard me-1"></i> Copy Code
+                        </button>
+                    </div>
+
+                    <label class="form-label small text-muted fw-semibold">Direct Invite Link</label>
+                    <div class="input-group mb-3">
+                        <input
+                            type="text"
+                            class="form-control bg-light"
+                            value="{{ referral_link }}"
+                            id="referralLinkInput"
+                            readonly
+                        >
+                        <button class="btn btn-danger px-3 fw-bold" onclick="copyReferralLink()">
+                            <i class="bi bi-link-45deg me-1"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SHARE ACTION BUTTONS -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a
+                        href="https://api.whatsapp.com/send?text=Hey!%20Join%20Om%20Super%20Mart%20for%2010-minute%20fresh%20grocery%20delivery.%20Use%20my%20code%20{{ referral_code }}%20to%20get%20%E2%82%B950%20free%20OmCash%20in%20your%20wallet!%20{{ referral_link }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-success rounded-pill px-4 py-2 fw-bold d-inline-flex align-items-center gap-2"
+                    >
+                        <i class="bi bi-whatsapp fs-5"></i> Share on WhatsApp
+                    </a>
+
+                    <a
+                        href="https://t.me/share/url?url={{ referral_link }}&text=Join%20Om%20Super%20Mart%20and%20get%20%E2%82%B950%20wallet%20bonus!"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-info text-white rounded-pill px-4 py-2 fw-bold d-inline-flex align-items-center gap-2"
+                    >
+                        <i class="bi bi-telegram fs-5"></i> Telegram
+                    </a>
+                </div>
+
+                <div id="copyToast" class="alert alert-success mt-3 py-2 px-3 small d-none align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill"></i> Copied to clipboard! Share it with friends.
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 bg-light">
+                <h5 class="fw-bold mb-3">How It Works</h5>
+
+                <div class="d-flex gap-3 mb-3">
+                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold" style="width: 36px; height: 36px;">1</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Invite your friends</h6>
+                        <small class="text-muted">Send your referral link or code via WhatsApp, SMS, or Telegram.</small>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mb-3">
+                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold" style="width: 36px; height: 36px;">2</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">They sign up & order</h6>
+                        <small class="text-muted">Your friend creates an account and immediately receives ₹50 welcome OmCash.</small>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center flex-shrink-0 fw-bold" style="width: 36px; height: 36px;">3</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">You get ₹50 OmCash</h6>
+                        <small class="text-muted">₹50 is credited directly to your OmCash Wallet to use on your next order!</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted d-block">Current Wallet Balance</small>
+                        <h5 class="fw-bold text-success mb-0">₹{{ wallet_balance }}</h5>
+                    </div>
+                    <a href="{% url 'wallet:index' %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                        View Wallet <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REFERRED FRIENDS LIST -->
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Referred Friends ({{ friends_count }})</h5>
+            <span class="text-muted small">Updated in real-time</span>
+        </div>
+
+        {% if referred_friends %}
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Friend</th>
+                        <th>Joined On</th>
+                        <th>Status</th>
+                        <th class="text-end">Bonus Credited</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for friend in referred_friends %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px;">
+                                    {{ friend.username|first|upper }}
+                                </div>
+                                <div>
+                                    <span class="fw-semibold">{{ friend.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-muted small">{{ friend.created_at|date:"d M Y, h:i A" }}</td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">Joined</span></td>
+                        <td class="text-end fw-bold text-success">+ ₹50.00</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="display-3 mb-2">🤝</div>
+            <h6 class="fw-bold text-muted">No friends invited yet</h6>
+            <p class="small text-muted mb-3">Share your referral link above and be the first to earn ₹50!</p>
+            <button class="btn btn-danger rounded-pill px-4 fw-bold" onclick="copyReferralLink()">
+                <i class="bi bi-share me-1"></i> Copy & Share Invite Link
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+function copyReferralCode() {
+    const input = document.getElementById('referralCodeInput');
+    input.select();
+    navigator.clipboard.writeText(input.value);
+    showToast();
+}
+function copyReferralLink() {
+    const input = document.getElementById('referralLinkInput');
+    input.select();
+    navigator.clipboard.writeText(input.value);
+    showToast();
+}
+function showToast() {
+    const toast = document.getElementById('copyToast');
+    toast.classList.remove('d-none');
+    toast.classList.add('d-flex');
+    setTimeout(() => {
+        toast.classList.add('d-none');
+        toast.classList.remove('d-flex');
+    }, 3000);
+}
+</script>
+{% endblock %}

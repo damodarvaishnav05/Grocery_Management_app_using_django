@@ -31,6 +31,18 @@ class RegisterForm(forms.ModelForm):
         )
     )
 
+    referral_code = forms.CharField(
+        required=False,
+        max_length=20,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Referral Code (e.g. OM8X79)",
+                "style": "text-transform: uppercase;"
+            }
+        )
+    )
+
     class Meta:
         model = CustomUser
 
@@ -104,6 +116,17 @@ class RegisterForm(forms.ModelForm):
 
         return email
 
+    def clean_referral_code(self):
+        code = self.cleaned_data.get("referral_code", "").strip().upper()
+        if code:
+            referrer = CustomUser.objects.filter(referral_code=code).first()
+            if not referrer:
+                raise forms.ValidationError("Invalid referral code. Please check or leave blank.")
+            self.referrer = referrer
+            return code
+        self.referrer = None
+        return ""
+
     def clean(self):
 
         cleaned = super().clean()
@@ -125,6 +148,9 @@ class RegisterForm(forms.ModelForm):
         )
 
         user.role = CustomUser.CUSTOMER
+
+        if hasattr(self, "referrer") and self.referrer:
+            user.referred_by = self.referrer
 
         if commit:
             user.save()

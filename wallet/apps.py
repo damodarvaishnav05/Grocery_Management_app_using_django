@@ -4,7 +4,7 @@ from django.apps import AppConfig
 class WalletConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "wallet"
-    verbose_name = "FreshMart Wallet & Cash"
+    verbose_name = "Om Super Mart Wallet & OmCash"
 
     def ready(self):
         import wallet.signals  # noqa

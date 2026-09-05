@@ -184,7 +184,7 @@ def download_invoice(request, order_id):
 
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = (
-        f'attachment; filename="FreshMart_Invoice_{order.id}.pdf"'
+        f'attachment; filename="Om_Super_Mart_Invoice_{order.id}.pdf"'
     )
 
     doc = SimpleDocTemplate(
@@ -205,7 +205,7 @@ def download_invoice(request, order_id):
         fontName="Helvetica-Bold",
         fontSize=24,
         leading=28,
-        textColor=colors.HexColor("#1F7A4D"),
+        textColor=colors.HexColor("#B91C1C"),
     )
     brand_tagline = ParagraphStyle(
         "FM_BrandTagline",
@@ -230,7 +230,7 @@ def download_invoice(request, order_id):
         fontSize=18,
         leading=22,
         alignment=2,
-        textColor=colors.HexColor("#122E20"),
+        textColor=colors.HexColor("#7F1D1D"),
     )
     invoice_meta = ParagraphStyle(
         "FM_InvoiceMeta",
@@ -247,7 +247,7 @@ def download_invoice(request, order_id):
         fontName="Helvetica-Bold",
         fontSize=8.5,
         leading=12,
-        textColor=colors.HexColor("#1F7A4D"),
+        textColor=colors.HexColor("#B91C1C"),
     )
     card_text = ParagraphStyle(
         "FM_CardText",
@@ -279,7 +279,7 @@ def download_invoice(request, order_id):
         fontName="Helvetica-Bold",
         fontSize=8,
         leading=11,
-        textColor=colors.HexColor("#122E20"),
+        textColor=colors.HexColor("#0F172A"),
     )
     footer_text = ParagraphStyle(
         "FM_Footer",
@@ -295,19 +295,19 @@ def download_invoice(request, order_id):
 
     # 1. HEADER ROW: Brand on Left, Tax Invoice on Right
     left_header = [
-        Paragraph("FreshMart", brand_title),
+        Paragraph("Om Super Mart", brand_title),
         Paragraph("10-MINUTE EXPRESS GROCERY DELIVERY", brand_tagline),
         Spacer(1, 4),
-        Paragraph("FreshMart Retail Private Limited", company_info),
+        Paragraph("Om Super Mart Retail Private Limited", company_info),
         Paragraph("GSTIN: 27AABCF1234M1Z5 | FSSAI Lic: 11521034000123", company_info),
-        Paragraph("Support: support@freshmart.com | Helpline: +91 902205XXXX", company_info),
-        Paragraph("Baner-Pashan Link Road, Pune, Maharashtra 411045", company_info),
+        Paragraph("Support: support@omsupermart.com | Helpline: +91 902205XXXX", company_info),
+        Paragraph("Main Ring Road Hub, Indore, Madhya Pradesh 452001", company_info),
     ]
 
     right_header = [
         Paragraph("TAX INVOICE", invoice_heading),
         Spacer(1, 4),
-        Paragraph(f"<b>Invoice No:</b> FM-INV-2026-{order.id:05d}", invoice_meta),
+        Paragraph(f"<b>Invoice No:</b> OM-INV-2026-{order.id:05d}", invoice_meta),
         Paragraph(f"<b>Date:</b> {order.created_at.strftime('%d %b %Y, %I:%M %p')}", invoice_meta),
         Paragraph(f"<b>Order Ref:</b> #{order.id}", invoice_meta),
         Paragraph("<b>Payment Status:</b> <font color='#16a34a'>PAID / CONFIRMED</font>", invoice_meta),
@@ -480,9 +480,9 @@ def download_invoice(request, order_id):
 
     # 5. FOOTER & POLICIES
     elements.append(Paragraph("This is an authentic computer-generated tax invoice and requires no physical signature.", footer_text))
-    elements.append(Paragraph("Eligible for instant doorstep return/replacement within 24 hours. Queries: support@freshmart.com", footer_text))
+    elements.append(Paragraph("Eligible for instant doorstep return/replacement within 24 hours. Queries: support@omsupermart.com", footer_text))
     elements.append(Spacer(1, 4))
-    elements.append(Paragraph("<b>Thank you for choosing FreshMart! Have a delicious, healthy day!</b>", ParagraphStyle("FM_TY", parent=footer_text, fontName="Helvetica-Bold", fontSize=8.5, textColor=colors.HexColor("#1F7A4D"))))
+    elements.append(Paragraph("<b>Thank you for choosing Om Super Mart! Have a delicious, healthy day!</b>", ParagraphStyle("FM_TY", parent=footer_text, fontName="Helvetica-Bold", fontSize=8.5, textColor=colors.HexColor("#B91C1C"))))
 
     doc.build(elements)
     return response
@@ -692,7 +692,7 @@ def update_live_location_api(request, order_id):
             telemetry = tracking.get_live_telemetry()
             return JsonResponse({
                 "status": "success",
-                "message": f"Real-time live location updated! Driving distance to FreshMart Hub: {distance_km} km.",
+                "message": f"Real-time live location updated! Driving distance to Om Super Mart Hub: {distance_km} km.",
                 "distance_km": distance_km,
                 "customer_lat": tracking.customer_lat,
                 "customer_lng": tracking.customer_lng,

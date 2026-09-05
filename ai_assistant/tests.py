@@ -9,7 +9,7 @@ class AIAssistantTests(TestCase):
     def test_ai_page_get(self):
         response = self.client.get(reverse("ai_assistant:index"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "FreshMart AI Shopping & Nutrition Guide")
+        self.assertContains(response, "Om Super Mart AI Shopping & Nutrition Guide")
         self.assertContains(response, "Weight Loss Foods")
 
     def test_ai_query_weight_loss(self):

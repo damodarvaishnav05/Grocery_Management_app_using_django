@@ -1,201 +1,50 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Om Super Mart — Fresh groceries, organic fruits, vegetables and daily essentials delivered to your door in 10 minutes.">
+    <title>{% block title %}Om Super Mart | 10-Minute Grocery Delivery{% endblock %}</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
 
-    <meta
-        name="description"
-        content="FreshMart — fresh groceries, fruits, vegetables and daily essentials delivered to your door in minutes."
-    >
-
-    <title>
-        {% block title %}
-        FreshMart
-        {% endblock %}
-    </title>
-
-    <!-- Favicon (inline, no static asset required) -->
-    <link
-        rel="icon"
-        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%AC%3C/text%3E%3C/svg%3E"
-    >
-
-    <!-- Fonts: Fraunces (display) + Manrope (body) -->
+    <!-- Fonts: Fraunces & Plus Jakarta Sans / Manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <!-- Custom CSS with Cache Buster -->
-    <link
-        rel="stylesheet"
-        href="{% static 'css/style.css' %}?v=4.0"
-    >
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5.0">
 
     <style>
-        /* Mobile-First Reset & Overflow Prevention */
+        /* Mobile-First Reset & Global Tweaks */
         html, body {
             overflow-x: hidden !important;
             width: 100% !important;
             max-width: 100% !important;
             margin: 0;
             padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Manrope', -apple-system, sans-serif;
+            background-color: #F8FAFC;
         }
 
-        /* Category Filter Pills (PC: Wraps cleanly, Mobile: Smooth touch scroll without scrollbar) */
-        .category-pills-bar {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            align-items: center !important;
-            gap: 8px !important;
-            margin-bottom: 24px !important;
-            width: 100% !important;
-        }
-
-        @media (max-width: 767.98px) {
-            .category-pills-bar {
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch !important;
-                scrollbar-width: none !important;
-                padding-bottom: 6px !important;
-            }
-            .category-pills-bar::-webkit-scrollbar {
-                display: none !important;
-            }
-        }
-
-        /* Product Cards & Floating Badges */
-        .product-card {
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 16px !important;
-            background: #ffffff !important;
-            position: relative !important;
-            transition: transform 0.22s ease, box-shadow 0.22s ease !important;
-            overflow: hidden !important;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px) !important;
-            box-shadow: 0 14px 28px rgba(18, 46, 32, 0.08) !important;
-            border-color: #cbd5e1 !important;
-        }
-
-        .product-img-container {
-            position: relative !important;
-            height: 200px !important;
-            width: 100% !important;
-            background: #f8fafc !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 14px !important;
-            overflow: hidden !important;
-            border-radius: 16px 16px 0 0 !important;
-        }
-
-        .product-img-container img {
-            max-height: 100% !important;
-            max-width: 100% !important;
-            object-fit: contain !important;
-            transition: transform 0.3s ease !important;
-        }
-
-        .product-card:hover .product-img-container img {
-            transform: scale(1.05) !important;
-        }
-
-        .discount-pill {
-            position: absolute !important;
-            top: 10px !important;
-            left: 10px !important;
-            background: #FF9F1C !important;
-            color: #122E20 !important;
-            font-weight: 800 !important;
-            font-size: 0.72rem !important;
-            padding: 4px 8px !important;
-            border-radius: 6px !important;
-            line-height: 1.2 !important;
-            z-index: 5 !important;
-            box-shadow: 0 2px 6px rgba(255, 159, 28, 0.35) !important;
-            display: inline-block !important;
-        }
-
-        .wishlist-heart-btn {
-            position: absolute !important;
-            top: 10px !important;
-            right: 10px !important;
-            width: 34px !important;
-            height: 34px !important;
-            border-radius: 50% !important;
-            background: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            color: #64748b !important;
-            font-size: 1rem !important;
-            text-decoration: none !important;
-            z-index: 5 !important;
-            border: 1px solid rgba(0, 0, 0, 0.06) !important;
-            transition: all 0.2s ease !important;
-        }
-
-        .wishlist-heart-btn:hover {
-            color: #e11d48 !important;
-            background: #ffffff !important;
-            transform: scale(1.1) !important;
-        }
-
-        .wishlist-heart-btn.active {
-            color: #e11d48 !important;
-            background: #ffe4e6 !important;
-        }
-
-        @media (max-width: 576px) {
-            .product-img-container {
-                height: 140px !important;
-                padding: 8px !important;
-            }
-        }
-
-        @media (max-width: 991px) {
-            body {
-                padding-bottom: 74px !important;
-            }
-
+        /* Mobile Bottom Nav */
+        @media (max-width: 991.98px) {
             .mobile-bottom-nav {
                 position: fixed !important;
                 bottom: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
-                width: 100% !important;
-                height: 62px !important;
-                background: rgba(255, 255, 255, 0.98) !important;
-                backdrop-filter: blur(16px) !important;
-                -webkit-backdrop-filter: blur(16px) !important;
+                height: 60px !important;
+                background: #ffffff !important;
                 border-top: 1px solid #e2e8f0 !important;
                 display: flex !important;
                 align-items: center !important;
@@ -226,9 +75,8 @@
             }
 
             .nav-item-mobile.active,
-            .nav-item-mobile:hover,
-            .nav-item-mobile:focus {
-                color: #1F7A4D !important;
+            .nav-item-mobile:hover {
+                color: #B91C1C !important;
             }
 
             .mobile-nav-badge {
@@ -242,474 +90,456 @@
                 font-weight: 800 !important;
             }
 
-            /* Chip buttons & horizontal touch scrolling */
-            .chip-btn {
-                white-space: nowrap !important;
-                flex-shrink: 0 !important;
-                border-radius: 999px !important;
-                padding: 6px 14px !important;
-                font-size: 0.85rem !important;
-            }
-
-            .mobile-scroll-container {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch !important;
-                gap: 8px !important;
-                scrollbar-width: none !important;
-            }
-
-            .mobile-scroll-container::-webkit-scrollbar {
-                display: none !important;
+            .om-main-wrapper {
+                padding-bottom: 70px;
             }
         }
     </style>
 
-    {% block extra_css %}
-    {% endblock %}
-
+    {% block extra_css %}{% endblock %}
 </head>
-
 <body>
 
-<!-- ========================= -->
-<!-- NAVBAR -->
-<!-- ========================= -->
+<div class="om-app-wrapper">
 
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
+    <!-- ======================================================= -->
+    <!-- DESKTOP LEFT SIDEBAR (Sticky, Crimson Wine-Red)        -->
+    <!-- ======================================================= -->
+    <aside class="om-sidebar d-none d-lg-flex" aria-label="Om Super Mart Navigation">
+        
+        <!-- Brand Header -->
+        <div class="om-brand-header">
+            <a href="/" class="om-brand-title">
+                <span class="d-inline-flex align-items-center justify-content-center bg-white text-danger rounded-circle" style="width: 38px; height: 38px; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                    🛒
+                </span>
+                <span>Om Super Mart</span>
+            </a>
+            <div class="om-brand-tagline">Good Food. Better Living</div>
+        </div>
 
-    <div class="container">
-
-        <div class="d-flex justify-content-between align-items-center w-100 w-lg-auto">
-            <a
-                class="navbar-brand fw-bold d-flex align-items-center gap-2 mb-0"
-                href="/"
-            >
-                <span class="fs-4">🥬</span>
-                <span>FreshMart</span>
+        <!-- Navigation Links -->
+        <nav class="om-nav-list flex-grow-1">
+            <a href="/" class="om-nav-link {% if request.path == '/' %}active{% endif %}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
             </a>
 
-            <!-- Mobile Quick Header Icons -->
-            <div class="d-flex align-items-center gap-2 d-lg-none">
-                {% if user.is_authenticated %}
-                <a href="{% url 'accounts:profile' %}" class="btn btn-sm text-white py-1 px-2 border-0" title="My Profile">
-                    <i class="bi bi-person-circle fs-5"></i>
-                </a>
-                {% else %}
-                <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-warning rounded-pill py-1 px-3 fw-bold">
-                    Login
-                </a>
-                {% endif %}
+            <a href="{% url 'categories:index' %}" class="om-nav-link {% if '/categories/' in request.path %}active{% endif %}">
+                <i class="bi bi-grid-fill"></i>
+                <span>Categories</span>
+            </a>
 
-                <button
-                    class="navbar-toggler border-0 shadow-none p-1"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarContent"
-                    aria-controls="navbarContent"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation"
-                >
-                    <span class="navbar-toggler-icon"></span>
+            <a href="{% url 'products:index' %}" class="om-nav-link {% if '/products/' in request.path and 'barcode' not in request.path %}active{% endif %}">
+                <i class="bi bi-basket2-fill"></i>
+                <span>All Products</span>
+            </a>
+
+            <a href="{% url 'products:index' %}?filter=discount" class="om-nav-link">
+                <i class="bi bi-tag-fill"></i>
+                <span>Offers & Deals</span>
+            </a>
+
+            <a href="{% url 'cart:smart_scan' %}" class="om-nav-link {% if '/cart/smart-scan/' in request.path %}active{% endif %}">
+                <i class="bi bi-card-checklist"></i>
+                <span>Smart List AI</span>
+            </a>
+
+            <a href="{% url 'products:barcode_scanner' %}" class="om-nav-link {% if '/barcode/' in request.path %}active{% endif %}">
+                <i class="bi bi-upc-scan"></i>
+                <span>Barcode Scanner</span>
+            </a>
+
+            <a href="{% url 'orders:my_orders' %}" class="om-nav-link {% if '/orders/' in request.path %}active{% endif %}">
+                <i class="bi bi-receipt"></i>
+                <span>My Orders</span>
+            </a>
+
+            <a href="{% url 'wallet:dashboard' %}" class="om-nav-link {% if '/wallet/' in request.path %}active{% endif %}">
+                <i class="bi bi-wallet2"></i>
+                <span>Wallet & OmCash</span>
+            </a>
+
+            <a href="{% url 'accounts:refer' %}" class="om-nav-link {% if '/accounts/refer/' in request.path %}active{% endif %}">
+                <i class="bi bi-gift-fill text-warning"></i>
+                <span>Refer & Earn</span>
+            </a>
+
+            <a href="{% url 'accounts:profile' %}" class="om-nav-link {% if '/accounts/profile/' in request.path %}active{% endif %}">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Addresses & Profile</span>
+            </a>
+
+            {% if user.is_staff %}
+            <a href="{% url 'dashboard:index' %}" class="om-nav-link text-warning">
+                <i class="bi bi-speedometer2"></i>
+                <span>Admin Dashboard</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <!-- Refer & Earn Sidebar Card -->
+        <div class="om-refer-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="fs-4">🎁</span>
+                <strong class="text-white">Refer & Earn</strong>
+            </div>
+            <p class="small text-white text-opacity-80 mb-3" style="font-size: 0.8rem; line-height: 1.35;">
+                Get <strong class="text-warning">₹50 OmCash</strong> for every friend who shops with your code!
+            </p>
+            <button type="button" class="btn-invite" data-bs-toggle="modal" data-bs-target="#referModal">
+                <i class="bi bi-share me-1"></i> Invite Now
+            </button>
+        </div>
+
+        <div class="om-sidebar-footer">
+            © 2026 Om Super Mart • v2.0
+        </div>
+    </aside>
+
+    <!-- ======================================================= -->
+    <!-- MOBILE OFFCANVAS SIDEBAR (< 992px)                      -->
+    <!-- ======================================================= -->
+    <div class="offcanvas offcanvas-start om-offcanvas-sidebar d-lg-none" tabindex="-1" id="omMobileSidebar" aria-labelledby="omMobileSidebarLabel">
+        <div class="offcanvas-header border-bottom border-white border-opacity-10 py-3">
+            <a href="/" class="om-brand-title text-decoration-none">
+                <span class="d-inline-flex align-items-center justify-content-center bg-white text-danger rounded-circle" style="width: 34px; height: 34px; font-size: 1.1rem;">
+                    🛒
+                </span>
+                <span class="fs-5">Om Super Mart</span>
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <div class="offcanvas-body d-flex flex-column p-3">
+            <nav class="om-nav-list flex-grow-1 p-0">
+                <a href="/" class="om-nav-link {% if request.path == '/' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'categories:index' %}" class="om-nav-link {% if '/categories/' in request.path %}active{% endif %}">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Categories</span>
+                </a>
+                <a href="{% url 'products:index' %}" class="om-nav-link">
+                    <i class="bi bi-basket2-fill"></i>
+                    <span>All Products</span>
+                </a>
+                <a href="{% url 'products:index' %}?filter=discount" class="om-nav-link">
+                    <i class="bi bi-tag-fill"></i>
+                    <span>Offers & Deals</span>
+                </a>
+                <a href="{% url 'cart:smart_scan' %}" class="om-nav-link">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Smart List AI</span>
+                </a>
+                <a href="{% url 'products:barcode_scanner' %}" class="om-nav-link">
+                    <i class="bi bi-upc-scan"></i>
+                    <span>Barcode Scanner</span>
+                </a>
+                <a href="{% url 'orders:my_orders' %}" class="om-nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="{% url 'wallet:dashboard' %}" class="om-nav-link">
+                    <i class="bi bi-wallet2"></i>
+                    <span>Wallet & OmCash</span>
+                </a>
+                <a href="{% url 'accounts:refer' %}" class="om-nav-link">
+                    <i class="bi bi-gift-fill text-warning"></i>
+                    <span>Refer & Earn</span>
+                </a>
+                <a href="{% url 'accounts:profile' %}" class="om-nav-link">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Addresses & Profile</span>
+                </a>
+            </nav>
+
+            <div class="om-refer-card mt-3 mb-2 mx-0">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="fs-4">🎁</span>
+                    <strong class="text-white">Refer & Earn</strong>
+                </div>
+                <p class="small text-white text-opacity-80 mb-3" style="font-size: 0.8rem;">
+                    Earn ₹50 for every friend who shops!
+                </p>
+                <button type="button" class="btn-invite" data-bs-toggle="modal" data-bs-target="#referModal" data-bs-dismiss="offcanvas">
+                    Invite Now
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Prominent Search (Instant search on mobile and desktop) -->
-        <form
-            class="d-flex mx-auto my-2 my-lg-0 col-12 col-lg-5"
-            method="GET"
-            action="{% url 'products:index' %}"
-            role="search"
-        >
-            <div class="input-group w-100 shadow-sm rounded-pill overflow-hidden bg-white">
-                <input
-                    class="form-control rounded-start-pill ps-3 border-0 shadow-none"
-                    type="search"
-                    name="q"
-                    placeholder="Search fresh fruits, milk, veggies..."
-                    aria-label="Search groceries"
-                >
+    <!-- ======================================================= -->
+    <!-- MAIN APPLICATION WRAPPER (Top Header + Content + Modals)-->
+    <!-- ======================================================= -->
+    <div class="om-main-wrapper">
 
-                <!-- FreshBarcode™ Scanner Button -->
-                <a
-                    href="{% url 'products:barcode_scanner' %}"
-                    class="btn btn-white bg-white text-secondary border-0 px-2 px-md-2 barcode-scanner-btn"
-                    title="Scan Barcode (FreshBarcode™)"
-                >
-                    <i class="bi bi-upc-scan fs-5"></i>
-                </a>
+        <!-- TOP HEADER -->
+        <header class="om-top-header sticky-top">
+            <div class="container-fluid px-2 px-md-4 d-flex align-items-center justify-content-between gap-2 gap-md-3">
+                
+                <!-- Left: Mobile Toggle & Delivery Location -->
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-light d-lg-none p-2 rounded-circle border shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#omMobileSidebar" aria-label="Open Sidebar">
+                        <i class="bi bi-list fs-5 text-dark"></i>
+                    </button>
 
-                <!-- FreshVoice™ Microphone Button -->
-                <button
-                    type="button"
-                    class="btn btn-white bg-white text-success border-0 px-2 px-md-3 voice-search-btn"
-                    title="Speak to Search (FreshVoice™)"
-                    onclick="openVoiceAssistant()"
-                >
-                    <i class="bi bi-mic-fill fs-5"></i>
-                </button>
+                    <button class="om-location-btn d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#locationModal" title="Change delivery location">
+                        <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+                        <div class="text-start d-none d-sm-block">
+                            <div class="om-location-label">Deliver to</div>
+                            <div class="om-location-city">
+                                <span id="headerLocationText">{{ delivery_location|default:"Indore, Madhya Pradesh 452001" }}</span>
+                                <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                            </div>
+                        </div>
+                    </button>
+                </div>
 
-                <button
-                    class="btn btn-warning rounded-end-pill px-3 px-md-4 fw-bold"
-                    type="submit"
-                    aria-label="Submit search"
-                >
-                    <i class="bi bi-search"></i>
-                </button>
-            </div>
-        </form>
+                <!-- Center: Search Bar with Barcode & Voice Assistant -->
+                <form class="om-search-bar flex-grow-1 mx-1 mx-md-3" method="GET" action="{% url 'products:index' %}" role="search">
+                    <div class="position-relative w-100">
+                        <input
+                            class="form-control om-search-input shadow-none"
+                            type="search"
+                            name="q"
+                            placeholder="Search for milk, atta, veggies, fruits..."
+                            aria-label="Search groceries"
+                        >
+                        <div class="om-search-actions">
+                            <!-- Barcode Scanner -->
+                            <a href="{% url 'products:barcode_scanner' %}" class="om-search-icon-btn" title="Scan Barcode (FreshBarcode™)">
+                                <i class="bi bi-upc-scan fs-5"></i>
+                            </a>
 
-        <div
-            class="collapse navbar-collapse"
-            id="navbarContent"
-        >
+                            <!-- Voice Assistant -->
+                            <button type="button" class="om-search-icon-btn" title="Speak to Search (FreshVoice™)" onclick="openVoiceAssistant()">
+                                <i class="bi bi-mic-fill fs-5 text-danger"></i>
+                            </button>
 
-            <ul class="navbar-nav ms-auto align-items-center gap-1 gap-lg-2">
+                            <!-- Red Search Button -->
+                            <button class="om-search-submit-btn d-none d-md-flex align-items-center gap-1" type="submit">
+                                <i class="bi bi-search"></i>
+                                <span>Search</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
 
-                <li class="nav-item">
-                    <a
-                        class="nav-link"
-                        href="{% url 'categories:index' %}"
-                    >
-                        <i class="bi bi-grid me-1"></i> Categories
-                    </a>
-                </li>
+                <!-- Right: Action Badges & User Profile -->
+                <div class="d-flex align-items-center gap-2 gap-md-3">
 
-                <li class="nav-item">
-                    <a
-                        class="nav-link"
-                        href="{% url 'products:index' %}"
-                    >
-                        <i class="bi bi-bag me-1"></i> Products
-                    </a>
-                </li>
+                    <!-- Notification Bell -->
+                    <div class="dropdown">
+                        <button class="om-header-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2" style="width: 280px;">
+                            <li><h6 class="dropdown-header fw-bold text-dark mb-1">Notifications</h6></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-2" href="{% url 'accounts:refer' %}">
+                                    <div class="fw-bold text-danger small">🎁 Refer & Earn ₹50</div>
+                                    <small class="text-muted">Invite friends to Om Super Mart!</small>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-2" href="{% url 'products:index' %}?filter=discount">
+                                    <div class="fw-bold text-success small">⚡ 10-Min Flash Sale</div>
+                                    <small class="text-muted">Up to 40% off on fresh produce today.</small>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 rounded-2" href="{% url 'wallet:dashboard' %}">
+                                    <div class="fw-bold text-primary small">💳 OmCash Active</div>
+                                    <small class="text-muted">Wallet balance: ₹{{ wallet_balance }}</small>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-                <li class="nav-item">
-                    <a
-                        class="nav-link text-warning fw-semibold"
-                        href="{% url 'ai_assistant:index' %}"
-                    >
-                        <i class="bi bi-robot me-1"></i> AI Guide
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="nav-link text-white fw-semibold"
-                        href="{% url 'cart:smart_scan' %}"
-                    >
-                        <i class="bi bi-card-checklist me-1 text-warning"></i> Smart List
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="nav-link text-white fw-semibold"
-                        href="{% url 'products:barcode_scanner' %}"
-                        title="Scan Grocery Barcodes"
-                    >
-                        <i class="bi bi-upc-scan me-1 text-warning"></i> Barcode
-                    </a>
-                </li>
-
-                {% if user.is_authenticated %}
-
-                <!-- Wishlist with Live Counter Badge -->
-                <li class="nav-item">
-                    <a
-                        class="nav-link position-relative p-2"
-                        href="{% url 'wishlist:index' %}"
-                        aria-label="Wishlist"
-                        title="My Wishlist"
-                    >
+                    <!-- Wishlist Header Button (Desktop) -->
+                    <a href="{% url 'wishlist:index' %}" class="om-header-btn d-none d-md-flex position-relative" title="My Wishlist">
                         <i class="bi bi-heart fs-5"></i>
                         {% if wishlist_count > 0 %}
-                        <span class="nav-badge bg-danger text-white">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
                             {{ wishlist_count }}
                         </span>
                         {% endif %}
                     </a>
-                </li>
 
-                <!-- Cart with Live Counter Badge -->
-                <li class="nav-item">
-                    <a
-                        class="nav-link position-relative p-2 me-lg-2"
-                        href="{% url 'cart:index' %}"
-                        aria-label="Cart"
-                        title="Shopping Cart"
-                    >
-                        <i class="bi bi-cart3 fs-5"></i>
-                        {% if cart_count > 0 %}
-                        <span class="nav-badge bg-warning text-dark">
-                            {{ cart_count }}
+                    <!-- Cart Header Badge Button -->
+                    <a href="{% url 'cart:index' %}" class="om-cart-badge-btn" title="View Cart">
+                        <i class="bi bi-cart3 text-danger fs-5"></i>
+                        <span class="d-none d-sm-inline">Cart</span>
+                        <span class="badge bg-danger rounded-pill px-2 py-1">
+                            ₹{{ sidebar_cart_total|default:"0" }}
                         </span>
-                        {% endif %}
-                    </a>
-                </li>
-
-                <!-- FreshMart Wallet Badge -->
-                <li class="nav-item d-none d-md-block me-2">
-                    <a href="{% url 'wallet:dashboard' %}" class="btn btn-outline-light rounded-pill px-3 py-1 btn-sm fw-semibold border-white border-opacity-25 shadow-sm" title="FreshMart Cash Balance">
-                        <i class="bi bi-wallet2 text-warning me-1"></i> ₹{{ wallet_balance }}
-                    </a>
-                </li>
-
-                <!-- User Dropdown Menu -->
-                <li class="nav-item dropdown">
-
-                    <a
-                        class="nav-link dropdown-toggle btn btn-outline-light btn-sm border-0 d-flex align-items-center gap-2 py-1 px-2"
-                        href="#"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-                        <i class="bi bi-person-circle fs-5"></i>
-                        <span class="fw-semibold">{{ user.first_name|default:user.username }}</span>
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3">
+                    <!-- User Profile Dropdown -->
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="om-avatar-circle">
+                                {{ user.first_name|default:user.username|slice:":1"|upper }}
+                            </div>
+                            <span class="d-none d-xl-inline fw-bold text-dark small">
+                                {{ user.first_name|default:user.username }}
+                            </span>
+                        </a>
 
-                        <li>
-                            <div class="px-3 py-2 border-bottom">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2 py-2" style="min-width: 220px;">
+                            <li class="px-3 py-2 border-bottom">
                                 <small class="text-muted d-block">Signed in as</small>
                                 <strong class="text-dark">{{ user.username }}</strong>
-                            </div>
-                        </li>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" href="{% url 'wallet:dashboard' %}">
+                                    <span><i class="bi bi-wallet2 me-2 text-warning"></i> OmCash Wallet</span>
+                                    <span class="badge bg-danger-subtle text-danger rounded-pill fw-bold">₹{{ wallet_balance }}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{% url 'accounts:refer' %}">
+                                    <i class="bi bi-gift me-2 text-danger"></i> Refer & Earn ₹50
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{% url 'orders:my_orders' %}">
+                                    <i class="bi bi-bag-check me-2 text-primary"></i> My Orders
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{% url 'accounts:profile' %}">
+                                    <i class="bi bi-person me-2 text-success"></i> My Profile & Addresses
+                                </a>
+                            </li>
 
-                        <li>
-                            <a
-                                class="dropdown-item py-2 d-flex justify-content-between align-items-center"
-                                href="{% url 'wallet:dashboard' %}"
-                            >
-                                <span><i class="bi bi-wallet2 me-2 text-warning"></i> FreshCash Wallet</span>
-                                <span class="badge bg-success-subtle text-success rounded-pill fw-bold">₹{{ wallet_balance }}</span>
-                            </a>
-                        </li>
+                            {% if user.is_staff %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item py-2 fw-semibold text-danger" href="{% url 'dashboard:index' %}">
+                                    <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 text-secondary" href="{% url 'inventory:index' %}">
+                                    <i class="bi bi-boxes me-2"></i> Stock Inventory
+                                </a>
+                            </li>
+                            {% endif %}
 
-                        <li>
-                            <a
-                                class="dropdown-item py-2"
-                                href="{% url 'accounts:profile' %}"
-                            >
-                                <i class="bi bi-person me-2 text-success"></i> My Profile
-                            </a>
-                        </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item py-2 text-danger" href="{% url 'accounts:logout' %}">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                            Login
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold text-white shadow-sm">
+                            Register
+                        </a>
+                    </div>
+                    {% endif %}
 
-                        <li>
-                            <a
-                                class="dropdown-item py-2"
-                                href="{% url 'orders:my_orders' %}"
-                            >
-                                <i class="bi bi-bag-check me-2 text-primary"></i> My Orders
-                            </a>
-                        </li>
+                </div>
 
-                        <li>
-                            <a
-                                class="dropdown-item py-2"
-                                href="{% url 'orders:my_orders' %}"
-                            >
-                                <i class="bi bi-geo-alt me-2 text-danger"></i> Live GPS Tracking
-                            </a>
-                        </li>
+            </div>
+        </header>
 
-                        {% if user.is_staff %}
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a
-                                class="dropdown-item py-2 fw-semibold text-success"
-                                href="{% url 'dashboard:index' %}"
-                            >
-                                <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
-                            </a>
-                        </li>
-
-                        <li>
-                            <a
-                                class="dropdown-item py-2 text-secondary"
-                                href="{% url 'inventory:index' %}"
-                            >
-                                <i class="bi bi-boxes me-2"></i> Stock Inventory
-                            </a>
-                        </li>
-                        {% endif %}
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <a
-                                class="dropdown-item py-2 text-danger"
-                                href="{% url 'accounts:logout' %}"
-                            >
-                                <i class="bi bi-box-arrow-right me-2"></i> Logout
-                            </a>
-                        </li>
-
-                    </ul>
-
-                </li>
-
-                {% else %}
-
-                <li class="nav-item">
-
-                    <a
-                        class="nav-link fw-semibold"
-                        href="{% url 'accounts:login' %}"
-                    >
-                        Login
-                    </a>
-
-                </li>
-
-                <li class="nav-item">
-
-                    <a
-                        class="btn btn-warning rounded-pill px-3 ms-lg-2 fw-bold"
-                        href="{% url 'accounts:register' %}"
-                    >
-                        Register
-                    </a>
-
-                </li>
-
-                {% endif %}
-
-            </ul>
-
+        <!-- DJANGO FLASH MESSAGES -->
+        {% if messages %}
+        <div class="container-fluid px-3 px-md-4 pt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm rounded-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
         </div>
+        {% endif %}
+
+        <!-- MAIN PAGE CONTENT -->
+        <main class="om-main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-white border-top mt-5 text-dark">
+            <div class="container py-5">
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="fs-3">🛒</span>
+                            <h4 class="fw-bold text-danger mb-0">Om Super Mart</h4>
+                        </div>
+                        <p class="text-muted small mb-3">
+                            Your trusted neighbourhood hypermarket delivered in 10 minutes. Fresh organic produce, farm-direct greens, dairy, bakery, and daily staples.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-danger-subtle text-danger p-2 rounded-3 fw-bold">⚡ 10-Min Delivery</span>
+                            <span class="badge bg-success-subtle text-success p-2 rounded-3 fw-bold">🛡️ Quality Tested</span>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 col-md-6 col-6">
+                        <h6 class="fw-bold text-dark mb-3">Shop Categories</h6>
+                        <ul class="list-unstyled small text-muted d-flex flex-column gap-2">
+                            <li><a href="{% url 'products:index' %}?category=vegetables" class="text-decoration-none text-muted">Vegetables</a></li>
+                            <li><a href="{% url 'products:index' %}?category=fresh-fruits" class="text-decoration-none text-muted">Fresh Fruits</a></li>
+                            <li><a href="{% url 'products:index' %}?category=dairy-breakfast" class="text-decoration-none text-muted">Dairy & Milk</a></li>
+                            <li><a href="{% url 'products:index' %}?category=bakery-breads" class="text-decoration-none text-muted">Bakery & Breads</a></li>
+                            <li><a href="{% url 'categories:index' %}" class="text-decoration-none text-danger fw-bold">View All →</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-6">
+                        <h6 class="fw-bold text-dark mb-3">Rewards & Features</h6>
+                        <ul class="list-unstyled small text-muted d-flex flex-column gap-2">
+                            <li><a href="{% url 'accounts:refer' %}" class="text-decoration-none text-danger fw-bold"><i class="bi bi-gift-fill me-1"></i> Refer & Earn ₹50</a></li>
+                            <li><a href="{% url 'wallet:dashboard' %}" class="text-decoration-none text-muted">OmCash Wallet</a></li>
+                            <li><a href="{% url 'cart:smart_scan' %}" class="text-decoration-none text-muted">Smart List AI Scanner</a></li>
+                            <li><a href="{% url 'products:barcode_scanner' %}" class="text-decoration-none text-muted">Barcode Scanner</a></li>
+                            <li><a href="{% url 'orders:my_orders' %}" class="text-decoration-none text-muted">Track Live Order</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="fw-bold text-dark mb-3">Customer Support</h6>
+                        <p class="small text-muted mb-1"><i class="bi bi-envelope-fill text-danger me-2"></i> support@omsupermart.com</p>
+                        <p class="small text-muted mb-1"><i class="bi bi-telephone-fill text-danger me-2"></i> +91 902205XXXX</p>
+                        <p class="small text-muted mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i> Hub #4, Indore, Madhya Pradesh 452001</p>
+                        <div class="p-2 bg-light rounded-3 text-center border">
+                            <small class="fw-bold text-danger">Open 24x7 for Instant Delivery</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top py-3 text-center small text-muted bg-light">
+                © 2026 Om Super Mart. All Rights Reserved. Delivered with ❤️ in Indore.
+            </div>
+        </footer>
 
     </div>
-
-</nav>
-
-<!-- ========================= -->
-<!-- MESSAGES -->
-<!-- ========================= -->
-
-<div class="container mt-3">
-
-    {% if messages %}
-
-        {% for message in messages %}
-
-        <div
-            class="alert alert-{{ message.tags }} alert-dismissible fade show"
-            role="alert"
-        >
-
-            {{ message }}
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-            ></button>
-
-        </div>
-
-        {% endfor %}
-
-    {% endif %}
 
 </div>
 
-<!-- ========================= -->
-<!-- CONTENT -->
-<!-- ========================= -->
-
-<main>
-
-    {% block content %}
-    {% endblock %}
-
-</main>
-
-<!-- ========================= -->
-<!-- FOOTER -->
-<!-- ========================= -->
-
-<footer class="text-white mt-5">
-
-    <div class="container py-5">
-
-        <div class="row g-4">
-
-            <div class="col-md-4">
-
-                <h4 class="mb-3">FreshMart</h4>
-
-                <p>
-                    Fresh groceries delivered to your doorstep
-                    in as little as 10 minutes.
-                </p>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <h5 class="mb-3">Quick Links</h5>
-
-                <ul class="list-unstyled">
-
-                    <li class="mb-2">
-                        <a href="/">
-                            Home
-                        </a>
-                    </li>
-
-                    <li class="mb-2">
-                        <a href="{% url 'products:index' %}">
-                            Products
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{% url 'wallet:dashboard' %}">
-                            FreshCash Wallet
-                        </a>
-                    </li>
-                </ul>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <h5 class="mb-3">Contact</h5>
-
-                <p class="mb-1">support@freshmart.com</p>
-
-                <p class="mb-0">+91 902205XXXX</p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="bg-black text-center py-3">
-
-        © 2026 FreshMart. All Rights Reserved.
-
-    </div>
-
-</footer>
-
-<!-- ========================= -->
-<!-- MOBILE BOTTOM NAVIGATION (Instacart/Blinkit Style) -->
-<!-- ========================= -->
+<!-- ======================================================= -->
+<!-- MOBILE BOTTOM NAVIGATION (Instacart/Blinkit Style)       -->
+<!-- ======================================================= -->
 <div class="mobile-bottom-nav d-lg-none" role="navigation" aria-label="Mobile Navigation">
-
     <a href="/" class="nav-item-mobile {% if request.path == '/' %}active{% endif %}">
         <i class="bi bi-house-door{% if request.path == '/' %}-fill{% endif %}"></i>
         <span>Home</span>
@@ -720,18 +550,16 @@
         <span>Categories</span>
     </a>
 
-    <a href="{% url 'ai_assistant:index' %}" class="nav-item-mobile {% if '/ai/' in request.path %}active{% endif %}">
-        <i class="bi bi-robot"></i>
-        <span>AI Guide</span>
+    <a href="{% url 'accounts:refer' %}" class="nav-item-mobile {% if '/accounts/refer/' in request.path %}active{% endif %}">
+        <i class="bi bi-gift{% if '/accounts/refer/' in request.path %}-fill{% endif %} text-danger"></i>
+        <span>Earn ₹50</span>
     </a>
 
     <a href="{% url 'wishlist:index' %}" class="nav-item-mobile {% if '/wishlist/' in request.path %}active{% endif %}">
         <i class="bi bi-heart{% if '/wishlist/' in request.path %}-fill{% endif %}"></i>
         <span>Wishlist</span>
         {% if wishlist_count > 0 %}
-        <span class="mobile-nav-badge bg-danger text-white">
-            {{ wishlist_count }}
-        </span>
+        <span class="mobile-nav-badge bg-danger text-white">{{ wishlist_count }}</span>
         {% endif %}
     </a>
 
@@ -739,24 +567,121 @@
         <i class="bi bi-cart3"></i>
         <span>Cart</span>
         {% if cart_count > 0 %}
-        <span class="mobile-nav-badge bg-warning text-dark">
-            {{ cart_count }}
-        </span>
+        <span class="mobile-nav-badge bg-danger text-white">{{ cart_count }}</span>
         {% endif %}
     </a>
-
 </div>
 
-<!-- ========================= -->
-<!-- FRESHVOICE™ ASSISTANT MODAL -->
-<!-- ========================= -->
+<!-- ======================================================= -->
+<!-- REFER & EARN MODAL (POPUP)                              -->
+<!-- ======================================================= -->
+<div class="modal fade" id="referModal" tabindex="-1" aria-labelledby="referModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center">
+            
+            <div class="p-4" style="background: linear-gradient(135deg, #7F1D1D 0%, #B91C1C 100%); color: #ffffff;">
+                <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-inline-flex p-3 rounded-circle bg-white bg-opacity-20 mb-3">
+                    <span style="font-size: 2.2rem;">🎁</span>
+                </div>
+                <h4 class="fw-bold mb-1">Refer Friends & Earn ₹50!</h4>
+                <p class="small text-white text-opacity-80 mb-0">
+                    Give ₹50 OmCash to friends on sign up, get ₹50 credited when they join!
+                </p>
+            </div>
+
+            <div class="p-4 bg-white">
+                {% if user.is_authenticated %}
+                <label class="form-label text-muted small fw-bold text-uppercase mb-2">Your Unique Invite Code</label>
+                <div class="d-flex align-items-center justify-content-between p-2 px-3 bg-light border border-2 border-danger border-opacity-25 rounded-3 mb-3">
+                    <span class="fs-4 font-monospace fw-bold text-danger tracking-wider" id="popupReferralCode">
+                        {{ user_referral_code|default:"OMSUPER50" }}
+                    </span>
+                    <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" onclick="copyReferralCodeFromPopup()">
+                        <i class="bi bi-copy me-1"></i> <span id="popupCopyBtnText">Copy</span>
+                    </button>
+                </div>
+
+                <div class="d-grid gap-2 mb-3">
+                    <a href="https://api.whatsapp.com/send?text=Hey!%20Join%20Om%20Super%20Mart%20and%20get%20%E2%82%B950%20free%20OmCash%20on%20your%20first%20order!%20Use%20my%20code%20{{ user_referral_code }}%20or%20click:%20https://om-super-mart.onrender.com/accounts/register/?ref={{ user_referral_code }}" target="_blank" class="btn btn-success fw-bold py-2 rounded-pill">
+                        <i class="bi bi-whatsapp me-2"></i> Share on WhatsApp
+                    </a>
+                    <a href="{% url 'accounts:refer' %}" class="btn btn-outline-danger fw-bold py-2 rounded-pill">
+                        View Full Refer & Earn Dashboard →
+                    </a>
+                </div>
+                {% else %}
+                <p class="text-muted mb-4">
+                    Please login or register to unlock your personal referral code and start earning ₹50 for every friend!
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'accounts:register' %}" class="btn btn-danger fw-bold py-2 rounded-pill">
+                        Create Account to Get Referral Code
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary fw-semibold py-2 rounded-pill">
+                        Already have an account? Login
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================= -->
+<!-- DELIVERY LOCATION SELECTOR MODAL                        -->
+<!-- ======================================================= -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-geo-alt-fill text-danger me-2"></i> Choose Delivery Location
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <p class="text-muted small mb-3">
+                Select your area to see items in stock with 10-minute instant delivery:
+            </p>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="manualLocationInput" class="form-control border-start-0" placeholder="Enter Pincode or City (e.g. 452001)" value="Indore 452001">
+                <button class="btn btn-danger fw-bold px-3" type="button" onclick="saveCustomLocation()">Save</button>
+            </div>
+
+            <div class="small fw-bold text-muted text-uppercase mb-2">Popular Fast-Delivery Hubs</div>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="selectCity('Indore, Madhya Pradesh 452001')">📍 Indore (Main)</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="selectCity('Bhopal, Madhya Pradesh 462001')">📍 Bhopal</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="selectCity('Mumbai, Maharashtra 400001')">📍 Mumbai</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="selectCity('Pune, Maharashtra 411001')">📍 Pune</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="selectCity('Delhi NCR 110001')">📍 Delhi NCR</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="selectCity('Bengaluru, Karnataka 560001')">📍 Bengaluru</button>
+            </div>
+
+            <div class="p-3 bg-light rounded-3 d-flex align-items-center gap-3">
+                <i class="bi bi-lightning-charge-fill text-warning fs-3"></i>
+                <small class="text-muted">
+                    Om Super Mart dark stores operate in each of these zones guaranteeing delivery within 10 minutes.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================= -->
+<!-- FRESHVOICE™ ASSISTANT MODAL                             -->
+<!-- ======================================================= -->
 <style>
     .voice-pulse-ring {
         position: absolute;
         width: 110px;
         height: 110px;
         border-radius: 50%;
-        background: rgba(25, 135, 84, 0.25);
+        background: rgba(185, 28, 28, 0.25);
         animation: voicePulse 1.5s infinite ease-out;
     }
     @keyframes voicePulse {
@@ -768,9 +693,9 @@
         transition: all 0.15s ease;
     }
     .voice-chip:hover {
-        background: #eef9f2 !important;
-        border-color: #198754 !important;
-        color: #198754 !important;
+        background: #FEF2F2 !important;
+        border-color: #B91C1C !important;
+        color: #B91C1C !important;
         transform: translateY(-1px);
     }
 </style>
@@ -780,8 +705,8 @@
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center p-4">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-bold">
-                    <i class="bi bi-soundwave me-1"></i> FreshVoice™ Assistant
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-1 fw-bold">
+                    <i class="bi bi-soundwave me-1"></i> OmVoice™ Assistant
                 </span>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="stopVoiceListening()"></button>
             </div>
@@ -789,7 +714,7 @@
             <!-- ANIMATED PULSING MICROPHONE CIRCLE -->
             <div class="my-4 position-relative d-inline-flex justify-content-center align-items-center" style="margin: 0 auto; width: 120px; height: 120px;">
                 <div id="voice-pulse-ring" class="voice-pulse-ring"></div>
-                <div id="voice-mic-core" class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-lg" style="width: 76px; height: 76px; z-index: 2; transition: all 0.3s ease;">
+                <div id="voice-mic-core" class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center shadow-lg" style="width: 76px; height: 76px; z-index: 2; transition: all 0.3s ease;">
                     <i class="bi bi-mic-fill fs-1" id="voice-mic-icon"></i>
                 </div>
             </div>
@@ -834,8 +759,48 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- FRESHVOICE ENGINE SCRIPT -->
+<!-- Global Helpers & Speech Recognition Script -->
 <script>
+    // Delivery Location helpers
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedLoc = localStorage.getItem('om_delivery_location');
+        if (savedLoc) {
+            const headerEl = document.getElementById('headerLocationText');
+            if (headerEl) headerEl.innerText = savedLoc;
+        }
+    });
+
+    function selectCity(cityName) {
+        localStorage.setItem('om_delivery_location', cityName);
+        const headerEl = document.getElementById('headerLocationText');
+        if (headerEl) headerEl.innerText = cityName;
+        const modalEl = document.getElementById('locationModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+    }
+
+    function saveCustomLocation() {
+        const val = document.getElementById('manualLocationInput').value.trim();
+        if (val) {
+            selectCity(val);
+        }
+    }
+
+    // Referral Copy helper
+    function copyReferralCodeFromPopup() {
+        const codeEl = document.getElementById('popupReferralCode');
+        const btnText = document.getElementById('popupCopyBtnText');
+        if (!codeEl) return;
+        const code = codeEl.innerText.trim();
+        navigator.clipboard.writeText(code).then(() => {
+            if (btnText) btnText.innerText = 'Copied!';
+            setTimeout(() => {
+                if (btnText) btnText.innerText = 'Copy';
+            }, 2500);
+        });
+    }
+
+    // FreshVoice Engine
     let recognition = null;
     let isListening = false;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -857,7 +822,7 @@
         statusTitle.innerText = "Listening... Speak now";
         pulseRing.classList.remove("d-none");
         micCore.classList.remove("bg-secondary");
-        micCore.classList.add("bg-success");
+        micCore.classList.add("bg-danger");
 
         if (!SpeechRecognition) {
             statusTitle.innerText = "Microphone not supported in this browser";
@@ -893,7 +858,7 @@
 
                 const current = finalTranscript || interimTranscript;
                 if (current) {
-                    transcriptElem.innerHTML = `<span class="text-success">"${current}"</span>`;
+                    transcriptElem.innerHTML = `<span class="text-danger">"${current}"</span>`;
                 }
 
                 if (finalTranscript) {
@@ -934,7 +899,7 @@
     }
 
     function simulateVoiceCommand(text) {
-        document.getElementById("voice-transcript-text").innerHTML = `<span class="text-success">"${text}"</span>`;
+        document.getElementById("voice-transcript-text").innerHTML = `<span class="text-danger">"${text}"</span>`;
         stopVoiceListening();
         executeVoiceCommand(text);
     }
@@ -943,7 +908,6 @@
         const statusTitle = document.getElementById("voice-status-title");
         const statusSub = document.getElementById("voice-status-subtitle");
 
-        // Cancel any pending speech synthesis in the browser to ensure complete silence
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }
@@ -951,7 +915,6 @@
         statusTitle.innerText = "Processing...";
         statusSub.innerText = "";
 
-        // Fill search inputs across the page with recognized voice text
         const searchInputs = document.querySelectorAll('input[name="q"]');
         searchInputs.forEach(input => input.value = commandText);
 
@@ -1003,8 +966,7 @@
     }
 </script>
 
-{% block extra_js %}
-{% endblock %}
+{% block extra_js %}{% endblock %}
 
 </body>
 </html>

@@ -1,6 +1,6 @@
-# 🛒 FreshMart
+# 🛒 Om Super Mart
 
-FreshMart is a modern AI-powered grocery delivery web application built with Django. It allows customers to browse products, manage carts and wishlists, apply coupons, place orders, and receive AI-assisted shopping recommendations.
+Om Super Mart is a modern AI-powered hypermarket grocery delivery web application built with Django. It allows customers to browse products, manage carts and wishlists, apply daily coupons, earn referral cashbacks (Refer & Earn ₹50), place orders, track delivery via real-time live GPS map, and receive AI-assisted shopping recommendations.
 
 
 ## 🚀 Features

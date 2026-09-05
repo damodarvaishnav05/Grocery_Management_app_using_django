@@ -242,8 +242,8 @@ EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     "django.core.mail.backends.console.EmailBackend"
 )
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "noreply@freshmart.com")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "FreshMart <noreply@freshmart.com>")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "noreply@omsupermart.com")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>")
 
 # =========================
 # Production Security

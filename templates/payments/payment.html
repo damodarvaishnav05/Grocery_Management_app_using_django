@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Complete Payment | FreshMart{% endblock %}
+{% block title %}Complete Payment | Om Super Mart{% endblock %}
 
 {% block content %}
 
@@ -13,7 +13,7 @@
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
 
                 <!-- HEADER -->
-                <div class="card-header bg-success text-white text-center py-4">
+                <div class="card-header bg-danger text-white text-center py-4">
                     <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-white bg-opacity-20 mb-2" style="width: 60px; height: 60px;">
                         <i class="bi bi-shield-lock-fill fs-3"></i>
                     </div>
@@ -24,7 +24,7 @@
                 <div class="card-body p-4 p-md-5 text-center">
 
                     <span class="text-muted small text-uppercase fw-bold">Amount Payable</span>
-                    <h1 class="display-5 fw-bold text-success my-2">
+                    <h1 class="display-5 fw-bold text-danger my-2">
                         ₹{{ order.total_amount }}
                     </h1>
 
@@ -43,16 +43,16 @@
                         </div>
                     </div>
 
-                    <!-- FRESHMART WALLET 1-CLICK OPTION -->
-                    <div class="card border border-success-subtle bg-success-subtle rounded-4 p-3 mb-3 text-start">
+                    <!-- OM SUPER MART WALLET 1-CLICK OPTION -->
+                    <div class="card border border-danger-subtle bg-danger-subtle rounded-4 p-3 mb-3 text-start">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-success text-white p-2 rounded-circle">
+                                <span class="badge bg-danger text-white p-2 rounded-circle">
                                     <i class="bi bi-wallet2 fs-6"></i>
                                 </span>
                                 <div>
-                                    <strong class="text-dark d-block" style="line-height: 1.2;">FreshMart Wallet</strong>
-                                    <small class="text-muted">Balance: <span class="fw-bold text-success">₹{{ wallet_balance }}</span></small>
+                                    <strong class="text-dark d-block" style="line-height: 1.2;">Om Super Mart Wallet</strong>
+                                    <small class="text-muted">Balance: <span class="fw-bold text-danger">₹{{ wallet_balance }}</span></small>
                                 </div>
                             </div>
                             <span class="badge bg-warning text-dark fw-bold rounded-pill px-2 py-1 small">
@@ -131,7 +131,7 @@
         "key": "{{ razorpay_key|default:'rzp_test_freshmart' }}",
         "amount": "{{ razorpay_amount }}",
         "currency": "INR",
-        "name": "FreshMart Groceries",
+        "name": "Om Super Mart Groceries",
         "description": "Order #{{ order.id }} Payment",
         "order_id": "{{ razorpay_order_id }}",
         "prefill": {

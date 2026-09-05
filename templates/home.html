@@ -1,463 +1,484 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}FreshMart | 10-Minute Grocery Delivery{% endblock %}
+{% block title %}Om Super Mart | 10-Minute Grocery Delivery{% endblock %}
 
 {% block content %}
+<div class="container-fluid px-2 px-md-4 py-3">
+    <div class="row g-4">
 
-<!-- HERO SECTION -->
-<section class="hero-section">
-    <div class="container">
+        <!-- ======================================================= -->
+        <!-- CENTER FEED COLUMN (Hero, Categories, Top Deals, Trust)-->
+        <!-- ======================================================= -->
+        <div class="col-xl-9 col-lg-8 col-12">
 
-        <div class="row align-items-center">
-
-            <div class="col-lg-6">
-
-                <span class="hero-eyebrow mb-3">
-                    <span class="fm-dot"></span>
-                    ⚡ Lightning Fast 10-Minute Delivery
-                </span>
-
-                <h1 class="display-3 mb-3 mt-3">
-                    Fresh groceries,<br>
-                    <em>delivered in minutes.</em>
-                </h1>
-
-                <p class="lead mb-4">
-                    Hand-picked farm fresh fruits, crisp greens, dairy essentials, artisan breads, and daily staples delivered directly to your doorstep.
-                </p>
-
-                <div class="d-flex gap-3 flex-wrap mb-4">
-
-                    <a
-                        href="{% url 'products:index' %}"
-                        class="btn btn-light btn-lg shadow-sm"
-                    >
-                        <i class="bi bi-basket2-fill me-1 text-success"></i> Start Shopping
-                    </a>
-
-                    <a
-                        href="{% url 'ai_assistant:index' %}"
-                        class="btn btn-outline-light btn-lg"
-                    >
-                        <i class="bi bi-robot me-1 text-warning"></i> Ask AI Assistant
-                    </a>
-
-                </div>
-
-                <div class="row hero-stats">
-
-                    <div class="col-4">
-                        <h3>{{ customer_count }}+</h3>
-                        <small>Happy Shoppers</small>
-                    </div>
-
-                    <div class="col-4">
-                        <h3>{{ product_count }}+</h3>
-                        <small>Fresh Items</small>
-                    </div>
-
-                    <div class="col-4">
-                        <h3>{{ category_count }}+</h3>
-                        <small>Categories</small>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-6 text-center d-none d-lg-block">
-
-                <div class="produce-crate" aria-hidden="true">
-
-                    <span class="fm-crate-tag">Farm Fresh Today</span>
-
-                    <div class="fm-grid">
-                        <span>🥑</span>
-                        <span>🍅</span>
-                        <span>🥦</span>
-                        <span>🍓</span>
-                        <span>🥕</span>
-                        <span>🍋</span>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-</section>
-
-<!-- Awning edge -->
-<div class="fm-scallop" aria-hidden="true"></div>
-
-
-<!-- VALUE PROPOSITIONS STRIP -->
-<section class="py-4 bg-white border-bottom shadow-sm">
-    <div class="container">
-        <div class="row g-3 text-center text-md-start">
-            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
-                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0">10-Minute Delivery</h6>
-                    <small class="text-muted">Direct from local dark stores</small>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
-                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
-                    <i class="bi bi-patch-check-fill"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0">100% Farm Fresh</h6>
-                    <small class="text-muted">Zero artificial ripeners</small>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
-                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
-                    <i class="bi bi-tag-fill"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0">Best Price Promise</h6>
-                    <small class="text-muted">Daily deals & coupons</small>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 d-flex align-items-center justify-content-center justify-content-md-start gap-3">
-                <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success fs-4">
-                    <i class="bi bi-arrow-repeat"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0">No Questions Return</h6>
-                    <small class="text-muted">Instant refund at doorstep</small>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- CATEGORIES -->
-<section class="py-5">
-
-    <div class="container">
-
-        <div class="d-flex justify-content-between align-items-end mb-4">
-            <div>
-                <span class="fm-kicker">Explore Fresh</span>
-                <h2 class="fw-bold mb-0">Shop By Category</h2>
-            </div>
-            <a href="{% url 'categories:index' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
-                All Categories <i class="bi bi-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="row g-3 g-md-4">
-
-            {% for category in categories %}
-
-            <div class="col-lg-3 col-md-4 col-6">
-
-                <a
-                    href="{% url 'products:index' %}?category={{ category.slug }}"
-                    class="text-decoration-none"
-                >
-
-                    <div class="card category-card h-100 text-center p-3 p-md-4 shadow-sm">
-
-                        <div class="category-icon-wrap mb-3">
-
-                            {% if category.image %}
-
-                                <img
-                                    src="{{ category.image.url }}"
-                                    class="img-fluid rounded-circle"
-                                    style="height:48px;width:48px;object-fit:cover;"
-                                    alt="{{ category.name }}"
-                                    onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 48 48\'><rect width=\'48\' height=\'48\' rx=\'24\' fill=\'%23e3f2e8\'/><text x=\'50%25\' y=\'55%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'22\'>🛒</text></svg>';"
-                                >
-
-                            {% elif category.icon %}
-
-                                <i class="bi {{ category.icon }} fs-3 text-success"></i>
-
-                            {% else %}
-
-                                <i class="bi bi-grid fs-3 text-success"></i>
-
-                            {% endif %}
-
+            <!-- CRIMSON HERO BANNER -->
+            <section class="om-hero-banner shadow-sm">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 col-md-10">
+                        <div class="om-hero-tagline">
+                            ⚡ ORGANIC FOOD MARKET • 10-MIN EXPRESS DELIVERY
                         </div>
 
-                        <h6 class="fw-bold mb-1 text-dark">
-                            {{ category.name }}
-                        </h6>
-                        <small class="text-muted d-none d-md-block">
-                            {{ category.description|truncatewords:6 }}
-                        </small>
+                        <h1 class="om-hero-heading">
+                            Fresh &amp; Healthy<br>
+                            Organic Grocery
+                        </h1>
 
-                    </div>
-
-                </a>
-
-            </div>
-
-            {% empty %}
-
-            <div class="col-12">
-                <div class="alert alert-warning text-center">
-                    No categories found.
-                </div>
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- FEATURED & POPULAR PRODUCTS -->
-{% if featured_products %}
-<section class="py-5 bg-white border-top border-bottom">
-
-    <div class="container">
-
-        <div class="d-flex justify-content-between align-items-end mb-4">
-            <div>
-                <span class="fm-kicker">Trending Now</span>
-                <h2 class="fw-bold mb-0">Featured Fresh Picks</h2>
-            </div>
-            <a href="{% url 'products:index' %}" class="btn btn-outline-success btn-sm rounded-pill fw-semibold">
-                Explore All Products <i class="bi bi-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="row g-2 g-md-4">
-
-            {% for product in featured_products %}
-
-            <div class="col-lg-3 col-md-4 col-sm-6 col-6">
-
-                <div class="card product-card h-100 shadow-sm border">
-
-                    <!-- Image & Floating Controls -->
-                    <div class="product-img-container">
-
-                        {% if product.discount_price and product.price > product.discount_price %}
-                        <span class="discount-pill">
-                            {{ product.discount_percent }}% OFF
-                        </span>
-                        {% endif %}
-
-                        <a
-                            href="{% url 'wishlist:add' product.id %}"
-                            class="wishlist-heart-btn"
-                            title="Add to Wishlist"
-                            aria-label="Wishlist"
-                        >
-                            <i class="bi bi-heart"></i>
-                        </a>
-
-                        {% if product.image %}
-                        <img
-                            src="{{ product.image.url }}"
-                            alt="{{ product.name }}"
-                            loading="lazy"
-                            onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 200\'><rect width=\'200\' height=\'200\' fill=\'%23f7f9f4\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'48\'>🥬</text></svg>';"
-                        >
-                        {% else %}
-                        <div class="d-flex align-items-center justify-content-center h-100">
-                            <i class="bi bi-basket text-success fs-1 opacity-50"></i>
-                        </div>
-                        {% endif %}
-
-                    </div>
-
-                    <!-- Body -->
-                    <div class="card-body p-3 d-flex flex-column">
-
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="text-success fw-bold">{{ product.category.name }}</small>
-                            <span class="small text-warning fw-semibold">
-                                ⭐ {{ product.average_rating|default:"4.8"|floatformat:1 }}
-                            </span>
-                        </div>
-
-                        <h6 class="fw-bold mb-1 text-truncate" title="{{ product.name }}">
-                            <a href="{% url 'products:detail' product.slug %}" class="text-dark text-decoration-none">
-                                {{ product.name }}
-                            </a>
-                        </h6>
-
-                        <p class="text-muted small mb-2 flex-grow-1" style="line-height: 1.4;">
-                            {{ product.description|truncatewords:8 }}
+                        <p class="om-hero-subtext">
+                            Delivering hand-picked farm fresh vegetables, crisp greens, dairy essentials, artisan breads, and daily staples to your doorstep in 10 minutes.
                         </p>
 
-                        <!-- Price Row -->
-                        <div class="d-flex align-items-baseline gap-2 mb-3">
-                            <span class="fs-5 fw-bold text-success">
-                                ₹{{ product.final_price }}
-                            </span>
-                            {% if product.discount_price %}
-                            <small class="text-muted text-decoration-line-through">
-                                ₹{{ product.price }}
-                            </small>
-                            {% endif %}
+                        <div class="d-flex flex-wrap gap-2 gap-sm-3 mb-3">
+                            <a href="{% url 'products:index' %}" class="om-hero-btn">
+                                <i class="bi bi-basket2-fill"></i> Shop Now →
+                            </a>
+                            <a href="{% url 'cart:smart_scan' %}" class="btn btn-outline-light rounded-pill px-4 py-2 fw-bold d-inline-flex align-items-center gap-2">
+                                <i class="bi bi-camera-fill"></i> Scan Grocery List
+                            </a>
                         </div>
-
-                        <!-- CTA -->
-                        {% if product.stock > 0 %}
-                        <a
-                            href="{% url 'cart:add' product.id %}"
-                            class="btn btn-success w-100 rounded-pill fw-bold"
-                        >
-                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
-                        </a>
-                        {% else %}
-                        <button class="btn btn-secondary w-100 rounded-pill fw-bold" disabled>
-                            Out of Stock
-                        </button>
-                        {% endif %}
-
                     </div>
 
+                    <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+                        <div class="text-center p-3 rounded-circle bg-white bg-opacity-10" style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+                            <span style="font-size: 5rem; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));">🥬</span>
+                        </div>
+                    </div>
                 </div>
 
-            </div>
+                <!-- Bottom Badges Strip -->
+                <div class="row om-hero-badges g-3 pt-3 mt-3">
+                    <div class="col-sm-4 col-12">
+                        <div class="om-badge-item">
+                            <div class="om-badge-icon">⚡</div>
+                            <div>
+                                <strong class="d-block text-white small">10-Min Fast Delivery</strong>
+                                <small class="text-white text-opacity-75" style="font-size: 0.75rem;">From local dark stores</small>
+                            </div>
+                        </div>
+                    </div>
 
-            {% endfor %}
+                    <div class="col-sm-4 col-12">
+                        <div class="om-badge-item">
+                            <div class="om-badge-icon">🛡️</div>
+                            <div>
+                                <strong class="d-block text-white small">100% Quality Guaranteed</strong>
+                                <small class="text-white text-opacity-75" style="font-size: 0.75rem;">Zero artificial ripeners</small>
+                            </div>
+                        </div>
+                    </div>
 
-        </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="om-badge-item">
+                            <div class="om-badge-icon">🏷️</div>
+                            <div>
+                                <strong class="d-block text-white small">Daily Lowest Prices</strong>
+                                <small class="text-white text-opacity-75" style="font-size: 0.75rem;">Best deals & OmCash cashbacks</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    </div>
+            <!-- CIRCULAR CATEGORY STRIP -->
+            <section class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">Shop By Category</h5>
+                        <small class="text-muted">Fresh everyday essentials handpicked for you</small>
+                    </div>
+                    <a href="{% url 'categories:index' %}" class="text-danger fw-bold text-decoration-none small d-flex align-items-center gap-1">
+                        <span>See All</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
 
-</section>
-{% endif %}
+                <div class="om-category-strip">
+                    {% for category in categories %}
+                    <a href="{% url 'products:index' %}?category={{ category.slug }}" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">
+                            {% if category.image %}
+                                <img
+                                    src="{{ category.image.url }}"
+                                    alt="{{ category.name }}"
+                                    onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'><rect width=\'64\' height=\'64\' fill=\'%23FEF2F2\'/><text x=\'50%25\' y=\'55%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'28\'>🛒</text></svg>';"
+                                >
+                            {% elif category.icon %}
+                                <i class="bi {{ category.icon }} text-danger"></i>
+                            {% else %}
+                                <span style="font-size: 1.6rem;">🥦</span>
+                            {% endif %}
+                        </div>
+                        <span class="om-category-circle-name">{{ category.name }}</span>
+                    </a>
+                    {% empty %}
+                    <!-- Sample Categories if database is refreshing -->
+                    <a href="{% url 'products:index' %}?category=vegetables" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">🥦</div>
+                        <span class="om-category-circle-name">Vegetables</span>
+                    </a>
+                    <a href="{% url 'products:index' %}?category=fresh-fruits" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">🍎</div>
+                        <span class="om-category-circle-name">Fresh Fruits</span>
+                    </a>
+                    <a href="{% url 'products:index' %}?category=dairy-breakfast" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">🥛</div>
+                        <span class="om-category-circle-name">Dairy & Milk</span>
+                    </a>
+                    <a href="{% url 'products:index' %}?category=bakery-breads" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">🍞</div>
+                        <span class="om-category-circle-name">Bakery</span>
+                    </a>
+                    <a href="{% url 'products:index' %}?category=cold-drinks-juices" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">🧃</div>
+                        <span class="om-category-circle-name">Beverages</span>
+                    </a>
+                    <a href="{% url 'products:index' %}?category=snacks-munchies" class="om-category-circle-item">
+                        <div class="om-category-circle-icon">🍪</div>
+                        <span class="om-category-circle-name">Snacks</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
 
+            <!-- TOP DEALS FOR YOU GRID -->
+            <section class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">Top Deals for You</h5>
+                        <small class="text-muted">Direct farm rates with instant doorstep delivery</small>
+                    </div>
+                    <a href="{% url 'products:index' %}" class="text-danger fw-bold text-decoration-none small d-flex align-items-center gap-1">
+                        <span>Explore All Products</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
 
-<!-- TODAY'S COUPON SPECIAL BANNER -->
-<section class="py-5">
+                <div class="row g-3">
+                    {% for product in featured_products %}
+                    <div class="col-xl-3 col-lg-4 col-md-4 col-6">
+                        <div class="om-product-card">
+                            <!-- Discount Badge -->
+                            {% if product.discount_percent and product.discount_percent > 0 %}
+                            <span class="om-product-badge">
+                                {{ product.discount_percent }}% OFF
+                            </span>
+                            {% else %}
+                            <span class="om-product-badge bg-dark">
+                                FRESH
+                            </span>
+                            {% endif %}
 
-    <div class="container">
+                            <!-- Wishlist Heart -->
+                            <a href="{% url 'wishlist:add' product.id %}" class="om-product-wishlist" title="Save to Wishlist">
+                                <i class="bi bi-heart"></i>
+                            </a>
 
-        <div class="card fm-offer-card border-0 overflow-hidden shadow-lg">
+                            <!-- Product Thumbnail -->
+                            <div class="om-product-thumb">
+                                {% if product.image %}
+                                <img
+                                    src="{{ product.image.url }}"
+                                    alt="{{ product.name }}"
+                                    loading="lazy"
+                                    onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 150 150\'><rect width=\'150\' height=\'150\' fill=\'%23FEF2F2\'/><text x=\'50%25\' y=\'55%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'40\'>🛒</text></svg>';"
+                                >
+                                {% else %}
+                                <span style="font-size: 3rem;">🛒</span>
+                                {% endif %}
+                            </div>
 
-            <div class="card-body text-center p-4 p-md-5">
+                            <!-- Product Body -->
+                            <div class="om-product-body">
+                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">
+                                    {{ product.category.name|default:"Groceries" }}
+                                </small>
 
-                <span class="badge bg-dark text-warning px-3 py-2 rounded-pill fw-bold text-uppercase mb-3">
-                    🔥 Daily Deal Alert
-                </span>
+                                <a href="{% url 'products:detail' product.slug %}" class="om-product-name text-decoration-none text-truncate" title="{{ product.name }}">
+                                    {{ product.name }}
+                                </a>
 
-                <h2 class="display-6 fw-bold mb-2">
-                    Get Flat 10% OFF on Your Entire Order!
-                </h2>
+                                <div class="om-product-unit">
+                                    {{ product.unit|default:"1 unit" }}
+                                </div>
 
-                <p class="lead mb-4" style="max-width: 550px; margin: 0 auto;">
-                    Apply today's fresh voucher at checkout to enjoy automatic savings on fresh produce and essentials.
+                                <div class="d-flex align-items-baseline mt-auto">
+                                    <span class="om-product-price">₹{{ product.final_price }}</span>
+                                    {% if product.discount_price and product.price > product.discount_price %}
+                                    <span class="om-product-mrp">₹{{ product.price }}</span>
+                                    {% endif %}
+                                </div>
+
+                                {% if product.stock > 0 %}
+                                <a href="{% url 'cart:add' product.id %}" class="om-product-btn">
+                                    <i class="bi bi-cart-plus"></i> Add to Cart
+                                </a>
+                                {% else %}
+                                <button class="btn btn-secondary w-100 rounded-pill py-2 mt-2 fw-bold btn-sm" disabled>
+                                    Out of Stock
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted">Loading fresh items catalog...</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- TRUST & VALUE PROPOSITIONS STRIP -->
+            <section class="om-trust-strip shadow-sm">
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="om-trust-item">
+                            <div class="om-trust-icon">
+                                <i class="bi bi-lightning-charge-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block text-dark small">10-Min Delivery</strong>
+                                <small class="text-muted">Instant from local dark stores</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="om-trust-item">
+                            <div class="om-trust-icon">
+                                <i class="bi bi-patch-check-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block text-dark small">100% Farm Fresh</strong>
+                                <small class="text-muted">Graded organic produce</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="om-trust-item">
+                            <div class="om-trust-icon">
+                                <i class="bi bi-tag-fill"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block text-dark small">Best Price Promise</strong>
+                                <small class="text-muted">Daily discounts & coupons</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="om-trust-item">
+                            <div class="om-trust-icon">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block text-dark small">Instant Returns</strong>
+                                <small class="text-muted">Doorstep refund guaranteed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DAILY VOUCHER ALERT BANNER -->
+            <section class="card border-0 rounded-4 shadow-sm mt-4 p-4 text-center" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: #ffffff;">
+                <div class="d-inline-flex align-items-center justify-content-center gap-2 mb-2">
+                    <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold">🔥 TODAY'S SAVINGS</span>
+                </div>
+                <h3 class="fw-bold mb-2">Get Flat 10% OFF on Your Entire Basket!</h3>
+                <p class="text-white text-opacity-75 small mb-3" style="max-width: 500px; margin: 0 auto;">
+                    Apply Om Super Mart's daily voucher code during checkout for automatic instant savings on fruits, veggies, and pantry items.
                 </p>
-
-                <div class="d-inline-flex align-items-center gap-2 bg-dark p-2 px-4 rounded-pill shadow">
-                    <span class="text-white fw-bold fs-4 font-monospace tracking-wide">
-                        {{ today_coupon }}
-                    </span>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-warning rounded-pill px-3 fw-bold"
-                        onclick="navigator.clipboard.writeText('{{ today_coupon }}'); this.innerText='COPIED!';"
-                    >
+                <div class="d-inline-flex align-items-center gap-2 p-1 px-3 bg-white bg-opacity-10 rounded-pill border border-white border-opacity-20 mx-auto">
+                    <span class="font-monospace fw-bold fs-5 text-warning tracking-wider">{{ today_coupon }}</span>
+                    <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" onclick="navigator.clipboard.writeText('{{ today_coupon }}'); this.innerText='COPIED!';">
                         Copy Code
                     </button>
                 </div>
+            </section>
 
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- RIGHT SIDEBAR COLUMN (Season's Best, Cart, Promo, Orders)-->
+        <!-- ======================================================= -->
+        <div class="col-xl-3 col-lg-4 col-12">
+
+            <!-- SEASON'S BEST SPOTLIGHT CARD -->
+            <div class="om-right-widget shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-danger text-white rounded-pill px-2 py-1 fw-bold small">
+                        ⭐ Season's Best
+                    </span>
+                    <small class="text-muted fw-bold">Handpicked</small>
+                </div>
+
+                <div class="text-center py-2">
+                    {% if season_best and season_best.image %}
+                    <img
+                        src="{{ season_best.image.url }}"
+                        alt="{{ season_best.name }}"
+                        class="img-fluid rounded-3 mb-2"
+                        style="max-height: 120px; object-fit: contain;"
+                    >
+                    {% else %}
+                    <div class="fs-1 py-2">🍎</div>
+                    {% endif %}
+
+                    <h6 class="fw-bold text-dark mb-1">
+                        {{ season_best.name|default:"Royal Gala Apples" }}
+                    </h6>
+                    <div class="small text-muted mb-2">{{ season_best.unit|default:"1 kg • Farm Crisp" }}</div>
+
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                        <span class="fs-5 fw-bold text-danger">₹{{ season_best.final_price|default:"180" }}</span>
+                        {% if season_best.price %}
+                        <small class="text-muted text-decoration-line-through">₹{{ season_best.price }}</small>
+                        {% endif %}
+                    </div>
+
+                    {% if season_best %}
+                    <a href="{% url 'cart:add' season_best.id %}" class="btn btn-sm btn-danger w-100 rounded-pill fw-bold py-2">
+                        <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                    </a>
+                    {% else %}
+                    <a href="{% url 'products:index' %}" class="btn btn-sm btn-danger w-100 rounded-pill fw-bold py-2">
+                        Explore Fruits
+                    </a>
+                    {% endif %}
+                </div>
             </div>
+
+            <!-- LIVE "YOUR CART" WIDGET -->
+            <div class="om-right-widget shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-cart3 text-danger"></i>
+                        <span>Your Cart</span>
+                    </h6>
+                    <span class="badge bg-danger rounded-pill px-2 py-1">
+                        {{ cart_count|default:0 }} items
+                    </span>
+                </div>
+
+                {% if sidebar_cart_items %}
+                <div class="om-cart-items-list mb-3">
+                    {% for item in sidebar_cart_items %}
+                    <div class="om-cart-row">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="om-cart-thumb">
+                        {% else %}
+                        <div class="om-cart-thumb d-flex align-items-center justify-content-center">🛒</div>
+                        {% endif %}
+
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="small fw-bold text-dark text-truncate" title="{{ item.product.name }}">
+                                {{ item.product.name }}
+                            </div>
+                            <small class="text-muted">₹{{ item.product.final_price }} each</small>
+                        </div>
+
+                        <!-- Stepper controls -->
+                        <div class="d-flex align-items-center gap-1">
+                            <a href="{% url 'cart:decrease_quantity' item.id %}" class="om-stepper-btn" title="Decrease">
+                                −
+                            </a>
+                            <span class="fw-bold small px-1">{{ item.quantity }}</span>
+                            <a href="{% url 'cart:add' item.product.id %}" class="om-stepper-btn" title="Increase">
+                                +
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Subtotal and Proceed CTA -->
+                <div class="pt-2 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted small">Subtotal</span>
+                        <strong class="fs-5 text-dark">₹{{ sidebar_cart_total }}</strong>
+                    </div>
+
+                    <a href="{% url 'orders:checkout' %}" class="btn btn-danger w-100 rounded-pill fw-bold py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                        <span>Proceed to Checkout</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                {% else %}
+                <div class="text-center py-4">
+                    <div class="fs-2 text-muted mb-2">🛒</div>
+                    <strong class="d-block text-dark small mb-1">Your cart is empty</strong>
+                    <p class="text-muted small mb-3">Add fresh groceries to get instant 10-minute delivery!</p>
+                    <a href="{% url 'products:index' %}" class="btn btn-sm btn-outline-danger rounded-pill px-4 fw-bold">
+                        Start Shopping
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PROMO BANNER (FLAT 30% OFF) -->
+            <div class="card border-0 rounded-4 overflow-hidden shadow-sm mb-4 text-white" style="background: linear-gradient(135deg, #991B1B 0%, #DC2626 100%);">
+                <div class="p-3 text-center">
+                    <span class="badge bg-white text-danger fw-bold rounded-pill px-2 py-1 mb-2">LIMITED OFFER</span>
+                    <h5 class="fw-bold mb-1">Flat 30% OFF</h5>
+                    <p class="small text-white text-opacity-90 mb-2">On all seasonal berries, avocados &amp; fruits</p>
+                    <div class="d-inline-block bg-black bg-opacity-25 rounded-pill px-3 py-1 font-monospace small fw-bold">
+                        Code: OMFRESH
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT ORDERS WIDGET -->
+            {% if user.is_authenticated and sidebar_recent_orders %}
+            <div class="om-right-widget shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-receipt text-danger"></i>
+                        <span>Recent Orders</span>
+                    </h6>
+                    <a href="{% url 'orders:my_orders' %}" class="text-danger small fw-bold text-decoration-none">
+                        View All
+                    </a>
+                </div>
+
+                {% for order in sidebar_recent_orders %}
+                <div class="om-order-mini-card">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-dark small">Order #{{ order.id }}</strong>
+                        <span class="badge {% if order.status == 'DELIVERED' %}bg-success{% elif order.status == 'CANCELLED' %}bg-secondary{% else %}bg-warning text-dark{% endif %} rounded-pill" style="font-size: 0.65rem;">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                        <span>{{ order.created_at|date:"d M, H:i" }}</span>
+                        <strong class="text-dark">₹{{ order.total_amount }}</strong>
+                    </div>
+                    <div class="mt-2 pt-2 border-top d-flex justify-content-between">
+                        <a href="{% url 'orders:detail' order.id %}" class="text-muted small text-decoration-none">Details</a>
+                        <a href="{% url 'orders:track' order.id %}" class="text-danger small fw-bold text-decoration-none">
+                            <i class="bi bi-geo-alt me-1"></i> Track Live
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- REFER & EARN SIDEBAR CALLOUT -->
+            <div class="p-3 rounded-4 shadow-sm border text-center" style="background: #FEF2F2; border-color: #FCA5A5 !important;">
+                <span class="fs-2">🎁</span>
+                <h6 class="fw-bold text-danger mb-1">Refer Friends, Get ₹50</h6>
+                <p class="small text-muted mb-2">Give ₹50 to your friends and get ₹50 free OmCash when they join!</p>
+                <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#referModal">
+                    Invite Friends
+                </button>
+            </div>
+            {% endif %}
 
         </div>
 
     </div>
-
-</section>
-
-
-<!-- WHY FRESHMART FEATURES -->
-<section class="py-5 bg-white border-top">
-
-    <div class="container">
-
-        <div class="text-center fm-section-head">
-
-            <span class="fm-kicker">Why Shop With Us</span>
-
-            <h2>Built For Fast, Fresh Everyday Living</h2>
-
-            <p class="text-muted">Here is why thousands of households choose FreshMart every morning</p>
-
-        </div>
-
-        <div class="row g-4">
-
-            <div class="col-md-4">
-
-                <div class="feature-box">
-
-                    <div class="feature-icon-wrap">
-                        <i class="bi bi-truck text-success"></i>
-                    </div>
-
-                    <h4>10-Minute Express</h4>
-
-                    <p>
-                        Our micro-fulfillment centers are situated within 2 km of your home for blazing fast delivery.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <div class="feature-box">
-
-                    <div class="feature-icon-wrap">
-                        <i class="bi bi-shield-check text-success"></i>
-                    </div>
-
-                    <h4>Strict Quality Grading</h4>
-
-                    <p>
-                        Every batch of fruits, vegetables, and milk is quality-checked daily for guaranteed freshness.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <div class="feature-box">
-
-                    <div class="feature-icon-wrap">
-                        <i class="bi bi-robot text-success"></i>
-                    </div>
-
-                    <h4>AI Nutrition Assistant</h4>
-
-                    <p>
-                        Instant guidance on healthy meal plans, protein goals, weight loss diets, and storage tips.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
+</div>
 {% endblock %}

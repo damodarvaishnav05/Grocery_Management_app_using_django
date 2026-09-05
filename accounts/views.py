@@ -21,21 +21,54 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect("home")
 
+    ref_code = request.GET.get("ref", "").strip().upper()
+    initial_data = {}
+    if ref_code:
+        initial_data["referral_code"] = ref_code
+
     form = RegisterForm(
         request.POST or None,
-        request.FILES or None
+        request.FILES or None,
+        initial=initial_data
     )
 
     if request.method == "POST":
 
         if form.is_valid():
 
-            form.save()
+            user = form.save()
 
-            messages.success(
-                request,
-                "Registration successful. Please login."
-            )
+            if user.referred_by:
+                try:
+                    from wallet.models import Wallet
+                    # Welcome bonus for new user
+                    user_wallet, _ = Wallet.objects.get_or_create(user=user)
+                    user_wallet.credit(
+                        50,
+                        description=f"Welcome Bonus: Referred by {user.referred_by.username}",
+                        reference_id=f"REF-BONUS-{user.id}"
+                    )
+                    # Reward for referrer
+                    referrer_wallet, _ = Wallet.objects.get_or_create(user=user.referred_by)
+                    referrer_wallet.credit(
+                        50,
+                        description=f"Referral Reward: {user.username} joined",
+                        reference_id=f"REF-REWARD-{user.id}"
+                    )
+                    messages.success(
+                        request,
+                        "Registration successful! ₹50 OmCash welcome reward credited to your wallet. Please login."
+                    )
+                except Exception:
+                    messages.success(
+                        request,
+                        "Registration successful. Please login."
+                    )
+            else:
+                messages.success(
+                    request,
+                    "Registration successful. Please login."
+                )
 
             return redirect(
                 "accounts:login"
@@ -179,3 +212,33 @@ def edit_profile(request):
             "form": form
         }
     )
+
+
+# =========================================================
+# REFER & EARN
+# =========================================================
+
+@login_required
+def refer_and_earn_view(request):
+    user = request.user
+    referral_code = user.referral_code
+    if not referral_code:
+        referral_code = user.generate_unique_referral_code()
+        user.referral_code = referral_code
+        user.save()
+
+    referral_link = request.build_absolute_uri(f"/accounts/register/?ref={referral_code}")
+    referred_friends = user.referrals.all().order_by("-created_at")
+    total_earned = referred_friends.count() * 50
+
+    return render(
+        request,
+        "accounts/refer.html",
+        {
+            "referral_code": referral_code,
+            "referral_link": referral_link,
+            "referred_friends": referred_friends,
+            "friends_count": referred_friends.count(),
+            "total_earned": total_earned,
+        }
+    )

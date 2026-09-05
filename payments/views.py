@@ -98,10 +98,10 @@ def payment_success(request, payment_id):
     Order ID: {order.id}
     Amount: ₹{order.total_amount}
 
-    Thank you for shopping with FreshMart.
+    Thank you for shopping with Om Super Mart.
     """,
 
-            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "FreshMart <noreply@freshmart.com>"),
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>"),
 
             recipient_list=[request.user.email],
 

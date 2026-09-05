@@ -10,4 +10,5 @@ urlpatterns = [
 
     path("profile/", views.profile, name="profile"),
     path("profile/edit/", views.edit_profile, name="edit_profile"),
+    path("refer/", views.refer_and_earn_view, name="refer"),
 ]

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Live Tracking Order #{{ order.id }} | FreshMart{% endblock %}
+{% block title %}Live Tracking Order #{{ order.id }} | Om Super Mart{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -434,7 +434,7 @@
                         />
                     </g>
 
-                    <!-- START POINT: FRESHMART DARK STORE HUB -->
+                    <!-- START POINT: OM SUPER MART DARK STORE HUB -->
                     <g id="store-marker-group" transform="translate(120, 160)" filter="url(#pinShadow)">
                         <!-- Hub Pulse Ring -->
                         <circle cx="0" cy="0" r="28" fill="none" stroke="#10b981" stroke-width="2" opacity="0.6">
@@ -449,7 +449,7 @@
                         <!-- Store Badge Label -->
                         <rect x="-85" y="-48" width="170" height="26" rx="13" fill="#065f46" stroke="#ffffff" stroke-width="2" />
                         <text x="0" y="-31" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#ffffff">
-                            FreshMart Hub #4 (Kharadi)
+                            Om Super Mart Hub #4 (Indore)
                         </text>
                     </g>
 
@@ -730,7 +730,7 @@
         // Navigation Waypoint Coordinates along realistic city roads
         // Hub (120, 160) -> Kharadi Expressway -> Metro Junction -> Gulmohar Ave -> Lane 1 -> Doorstep (890, 280)
         const waypoints = [
-            { x: 120, y: 160, desc: "Order Packed at FreshMart Hub #4. Preparing for dispatch.", turn: "bi-box-seam", instruction: "Order assembling at Dark Store" },
+            { x: 120, y: 160, desc: "Order Packed at Om Super Mart Hub #4. Preparing for dispatch.", turn: "bi-box-seam", instruction: "Order assembling at Dark Store" },
             { x: 330, y: 160, desc: "Exiting Hub. Heading East along Kharadi Main Expressway.", turn: "bi-arrow-up", instruction: "Continue straight on Kharadi Main Expressway (800m)" },
             { x: 480, y: 180, desc: "Cruising past Metro Station & Tech Park at 32 km/h.", turn: "bi-arrow-up-right", instruction: "Slight right across Metro Expressway Bridge" },
             { x: 640, y: 188, desc: "Approaching River Bridge overpass.", turn: "bi-arrow-right", instruction: "In 200m, turn right onto Gulmohar Avenue" },
@@ -819,7 +819,7 @@
 
             if (progress >= 100) {
                 textElem.innerText = "Package Delivered at Doorstep! 🎉";
-                subElem.innerText = "Order completed • Thank you for choosing FreshMart!";
+                subElem.innerText = "Order completed • Thank you for choosing Om Super Mart!";
                 iconElem.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
                 distElem.innerText = "0 m remaining";
                 speedElem.innerText = "Parked";

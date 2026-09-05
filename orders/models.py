@@ -111,24 +111,24 @@ class OrderDeliveryTracking(models.Model):
 
     dark_store_name = models.CharField(
         max_length=150,
-        default="FreshMart Express Hub #4 - Baner"
+        default="Om Super Mart Express Hub #4 - Indore"
     )
 
     dark_store_address = models.CharField(
         max_length=255,
-        default="Plot 12, Baner High Street, Pune, Maharashtra 411045"
+        default="Plot 12, Main Ring Road, Indore, Madhya Pradesh 452001"
     )
 
     # Coordinates
-    dark_store_lat = models.FloatField(default=18.5590)
-    dark_store_lng = models.FloatField(default=73.7868)
-    customer_lat = models.FloatField(default=18.5685)
-    customer_lng = models.FloatField(default=73.7745)
+    dark_store_lat = models.FloatField(default=22.7196)
+    dark_store_lng = models.FloatField(default=75.8577)
+    customer_lat = models.FloatField(default=22.7290)
+    customer_lng = models.FloatField(default=75.8650)
 
     # Courier partner info
     rider_name = models.CharField(max_length=100, default="Vikram Shinde")
     rider_phone = models.CharField(max_length=20, default="+91 98230 45678")
-    rider_vehicle = models.CharField(max_length=100, default="Ather 450X Electric (MH-12-BF-4892)")
+    rider_vehicle = models.CharField(max_length=100, default="Ather 450X Electric (MP-09-BF-4892)")
     rider_rating = models.DecimalField(max_digits=3, decimal_places=1, default=4.9)
     delivery_pin = models.CharField(max_length=6, default="4821")
 
@@ -149,12 +149,12 @@ class OrderDeliveryTracking(models.Model):
         tracking, _ = cls.objects.get_or_create(
             order=order,
             defaults={
-                "dark_store_name": "FreshMart Express Hub #4 - Baner",
-                "dark_store_address": "Plot 12, Baner High Street, Pune, Maharashtra 411045",
-                "dark_store_lat": 18.5590,
-                "dark_store_lng": 73.7868,
-                "customer_lat": 18.5685,
-                "customer_lng": 73.7745,
+                "dark_store_name": "Om Super Mart Express Hub #4 - Indore",
+                "dark_store_address": "Plot 12, Main Ring Road, Indore, Madhya Pradesh 452001",
+                "dark_store_lat": 22.7196,
+                "dark_store_lng": 75.8577,
+                "customer_lat": 22.7290,
+                "customer_lng": 75.8650,
                 "rider_name": "Vikram Shinde",
                 "rider_phone": "+91 98230 45678",
                 "rider_vehicle": "Ather 450X Electric (MH-12-BF-4892)",
@@ -187,7 +187,7 @@ class OrderDeliveryTracking(models.Model):
                 return {
                     "stage": self.STAGE_DELIVERED,
                     "stage_title": "Order Delivered Successfully!",
-                    "stage_desc": "Delivered to your doorstep. Thank you for shopping fresh at FreshMart!",
+                    "stage_desc": "Delivered to your doorstep. Thank you for shopping fresh at Om Super Mart!",
                     "progress": 100,
                     "eta_minutes": 0,
                     "rider_lat": self.customer_lat,
@@ -256,7 +256,7 @@ class OrderDeliveryTracking(models.Model):
             return {
                 "stage": self.STAGE_DELIVERED,
                 "stage_title": "Order Delivered Successfully!",
-                "stage_desc": "Delivered to your doorstep. Thank you for shopping fresh at FreshMart!",
+                "stage_desc": "Delivered to your doorstep. Thank you for shopping fresh at Om Super Mart!",
                 "progress": 100,
                 "eta_minutes": 0,
                 "rider_lat": self.customer_lat,

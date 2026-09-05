@@ -68,7 +68,7 @@ class WalletViewsAndPaymentTests(TestCase):
         self.client.login(username="shopper1", password="password123")
         response = self.client.get(reverse("wallet:dashboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "FreshMart Cash & Wallet")
+        self.assertContains(response, "OmCash & Wallet")
         self.assertContains(response, "Recharge Wallet")
 
     def test_wallet_top_up_view(self):
