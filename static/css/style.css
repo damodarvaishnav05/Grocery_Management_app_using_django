@@ -2115,12 +2115,12 @@ footer .bg-black{
 /* Hero Banner (Crimson) */
 .om-hero-banner {
     background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 45%, #B91C1C 100%);
-    border-radius: 24px;
-    padding: 40px 36px;
+    border-radius: 20px;
+    padding: 28px 30px;
     color: #ffffff;
     position: relative;
     overflow: hidden;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 .om-hero-banner::after {
@@ -2135,25 +2135,25 @@ footer .bg-black{
 }
 
 .om-hero-tagline {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 12px;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 8px;
 }
 
 .om-hero-heading {
-    font-size: 2.8rem;
+    font-size: 2.3rem;
     font-weight: 800;
-    line-height: 1.12;
+    line-height: 1.15;
     letter-spacing: -0.02em;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .om-hero-subtext {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     max-width: 480px;
 }
 
@@ -2209,7 +2209,7 @@ footer .bg-black{
     align-items: center;
     gap: 16px;
     overflow-x: auto;
-    padding: 10px 4px 20px;
+    padding: 4px 2px 10px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
 }
@@ -2392,9 +2392,9 @@ footer .bg-black{
 .om-right-widget {
     background: #ffffff;
     border: 1px solid var(--om-slate-200);
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 20px;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
 .om-cart-row {
@@ -2489,9 +2489,10 @@ footer .bg-black{
 .om-trust-strip {
     background: #ffffff;
     border: 1px solid var(--om-slate-200);
-    border-radius: 20px;
-    padding: 24px;
-    margin-top: 32px;
+    border-radius: 18px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    margin-bottom: 20px;
 }
 
 .om-trust-item {

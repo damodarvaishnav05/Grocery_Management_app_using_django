@@ -4,8 +4,8 @@
 {% block title %}Om Super Mart | 10-Minute Grocery Delivery{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-2 px-md-4 py-3">
-    <div class="row g-4">
+<div class="container-fluid px-3 px-xl-4 py-2 py-md-3">
+    <div class="row g-3 g-xl-4">
 
         <!-- ======================================================= -->
         <!-- CENTER FEED COLUMN (Hero, Categories, Top Deals, Trust)-->
@@ -81,8 +81,8 @@
             </section>
 
             <!-- CIRCULAR CATEGORY STRIP -->
-            <section class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+            <section class="mb-3 mb-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-2 mb-md-3">
                     <div>
                         <h5 class="fw-bold mb-0 text-dark">Shop By Category</h5>
                         <small class="text-muted">Fresh everyday essentials handpicked for you</small>
@@ -142,8 +142,8 @@
             </section>
 
             <!-- TOP DEALS FOR YOU GRID -->
-            <section class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+            <section class="mb-3 mb-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-2 mb-md-3">
                     <div>
                         <h5 class="fw-bold mb-0 text-dark">Top Deals for You</h5>
                         <small class="text-muted">Direct farm rates with instant doorstep delivery</small>
@@ -154,7 +154,7 @@
                     </a>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-2 g-md-3">
                     {% for product in featured_products %}
                     <div class="col-xl-3 col-lg-4 col-md-4 col-6">
                         <div class="om-product-card">
@@ -230,8 +230,8 @@
             </section>
 
             <!-- TRUST & VALUE PROPOSITIONS STRIP -->
-            <section class="om-trust-strip shadow-sm">
-                <div class="row g-4">
+            <section class="om-trust-strip shadow-sm mb-3 mb-md-4">
+                <div class="row g-3 g-md-4">
                     <div class="col-md-3 col-6">
                         <div class="om-trust-item">
                             <div class="om-trust-icon">
@@ -263,7 +263,7 @@
                             </div>
                             <div>
                                 <strong class="d-block text-dark small">Best Price Promise</strong>
-                                <small class="text-muted">Daily discounts & coupons</small>
+                                <small class="text-muted">Daily discounts &amp; coupons</small>
                             </div>
                         </div>
                     </div>
@@ -283,7 +283,7 @@
             </section>
 
             <!-- DAILY VOUCHER ALERT BANNER -->
-            <section class="card border-0 rounded-4 shadow-sm mt-4 p-4 text-center" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: #ffffff;">
+            <section class="card border-0 rounded-4 shadow-sm mb-3 mb-md-4 p-3 p-md-4 text-center" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: #ffffff;">
                 <div class="d-inline-flex align-items-center justify-content-center gap-2 mb-2">
                     <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold">🔥 TODAY'S SAVINGS</span>
                 </div>
@@ -307,7 +307,7 @@
         <div class="col-xl-3 col-lg-4 col-12">
 
             <!-- SEASON'S BEST SPOTLIGHT CARD -->
-            <div class="om-right-widget shadow-sm">
+            <div class="om-right-widget shadow-sm mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="badge bg-danger text-white rounded-pill px-2 py-1 fw-bold small">
                         ⭐ Season's Best
@@ -352,7 +352,7 @@
             </div>
 
             <!-- LIVE "YOUR CART" WIDGET -->
-            <div class="om-right-widget shadow-sm">
+            <div class="om-right-widget shadow-sm mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
                         <i class="bi bi-cart3 text-danger"></i>
@@ -420,7 +420,7 @@
             </div>
 
             <!-- PROMO BANNER (FLAT 30% OFF) -->
-            <div class="card border-0 rounded-4 overflow-hidden shadow-sm mb-4 text-white" style="background: linear-gradient(135deg, #991B1B 0%, #DC2626 100%);">
+            <div class="card border-0 rounded-4 overflow-hidden shadow-sm mb-3 text-white" style="background: linear-gradient(135deg, #991B1B 0%, #DC2626 100%);">
                 <div class="p-3 text-center">
                     <span class="badge bg-white text-danger fw-bold rounded-pill px-2 py-1 mb-2">LIMITED OFFER</span>
                     <h5 class="fw-bold mb-1">Flat 30% OFF</h5>
@@ -433,7 +433,7 @@
 
             <!-- RECENT ORDERS WIDGET -->
             {% if user.is_authenticated and sidebar_recent_orders %}
-            <div class="om-right-widget shadow-sm">
+            <div class="om-right-widget shadow-sm mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
                         <i class="bi bi-receipt text-danger"></i>
