@@ -121,6 +121,7 @@
                             src="{{ product.image.url }}"
                             alt="{{ product.name }}"
                             loading="lazy"
+                            onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 200\'><rect width=\'200\' height=\'200\' fill=\'%23f7f9f4\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'48\'>🥬</text></svg>';"
                         >
                     </a>
                     {% else %}

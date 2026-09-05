@@ -36,6 +36,7 @@
                         class="rounded-circle"
                         style="width: 80px; height: 80px; object-fit: cover;"
                         alt="{{ category.name }}"
+                        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' rx=\'40\' fill=\'%23e3f2e8\'/><text x=\'50%25\' y=\'55%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'36\'>🧺</text></svg>';"
                     >
                     {% elif category.icon %}
                     <i class="bi {{ category.icon }} fs-1"></i>

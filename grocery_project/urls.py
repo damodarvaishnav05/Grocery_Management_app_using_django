@@ -32,11 +32,14 @@ urlpatterns = [
 from django.views.static import serve
 from django.urls import re_path
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-else:
-    urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-    ]
+static_dir = (
+    settings.STATIC_ROOT
+    if (settings.STATIC_ROOT.exists() and any(settings.STATIC_ROOT.iterdir()))
+    else (settings.BASE_DIR / "static")
+)
+
+urlpatterns += [
+    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': static_dir}),
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
 
