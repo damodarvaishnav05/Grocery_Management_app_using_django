@@ -22,15 +22,16 @@ def common_data(request):
             # Process sidebar cart items
             items_list = []
             total = 0
-            for item in cart_qs[:4]:  # Show top items in right sidebar
+            for item in cart_qs:
                 line_total = item.product.final_price * item.quantity
                 total += line_total
-                items_list.append({
-                    "id": item.id,
-                    "product": item.product,
-                    "quantity": item.quantity,
-                    "line_total": line_total,
-                })
+                if len(items_list) < 4:
+                    items_list.append({
+                        "id": item.id,
+                        "product": item.product,
+                        "quantity": item.quantity,
+                        "line_total": line_total,
+                    })
             sidebar_cart_items = items_list
             sidebar_cart_total = total
 
