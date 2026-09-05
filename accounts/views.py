@@ -241,4 +241,4 @@ def refer_and_earn_view(request):
             "friends_count": referred_friends.count(),
             "total_earned": total_earned,
         }
-    )
+    )
