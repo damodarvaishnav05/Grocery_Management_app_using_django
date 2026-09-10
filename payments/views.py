@@ -26,7 +26,8 @@ def payment(request, order_id):
     )
 
     razorpay_amount = int(order.total_amount * 100)
-    razorpay_order_id = f"order_{order.id}"
+    razorpay_order_id = ""
+    is_real_razorpay_order = False
 
     if settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_SECRET:
         try:
@@ -42,12 +43,14 @@ def payment(request, order_id):
                 "currency": "INR",
                 "payment_capture": 1
             })
-            razorpay_order_id = razorpay_order.get("id", razorpay_order_id)
+            if razorpay_order and "id" in razorpay_order:
+                razorpay_order_id = razorpay_order["id"]
+                is_real_razorpay_order = True
         except Exception:
-            # Fallback for development/demo when Razorpay keys are not configured
+            # Fallback for development/demo when Razorpay keys are not configured or network timeout
             pass
 
-    payment.razorpay_order_id = razorpay_order_id
+    payment.razorpay_order_id = razorpay_order_id or f"order_{order.id}"
     payment.save()
 
     return render(
@@ -57,6 +60,7 @@ def payment(request, order_id):
             "order": order,
             "payment": payment,
             "razorpay_order_id": razorpay_order_id,
+            "is_real_razorpay_order": is_real_razorpay_order,
             "razorpay_key": settings.RAZORPAY_KEY_ID,
             "razorpay_amount": razorpay_amount,
         }
@@ -76,6 +80,12 @@ def payment_success(request, payment_id):
             "orders:success",
             payment.order.id
         )
+
+    if request.method == "POST":
+        payment.razorpay_payment_id = request.POST.get("razorpay_payment_id", payment.razorpay_payment_id)
+        payment.razorpay_signature = request.POST.get("razorpay_signature", payment.razorpay_signature)
+    elif request.GET.get("razorpay_payment_id"):
+        payment.razorpay_payment_id = request.GET.get("razorpay_payment_id")
 
     payment.status = Payment.SUCCESS
     payment.save()

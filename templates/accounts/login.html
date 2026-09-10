@@ -289,23 +289,46 @@ body {
    GOOGLE BUTTON
    ===================================================== */
 
-.google-btn {
-    height: 55px;
-
+.google-btn,
+.google-login-btn {
+    width: 100%;
+    max-width: 360px;
+    height: 52px;
     border-radius: 12px;
-
     font-weight: 600;
-
-    background: white;
-
-    transition: 0.3s ease;
+    font-size: 16px;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
-
-.google-btn:hover {
-    background: #f8f9fa;
-
+.google-btn:hover,
+.google-login-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
     transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    color: #0f172a;
+}
+
+.google-btn:active,
+.google-login-btn:active {
+    transform: scale(0.98);
+}
+
+.google-login-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 
@@ -605,29 +628,27 @@ body {
                             </div>
 
 
-                            <!-- GOOGLE -->
-
+                            <!-- GOOGLE LOGIN -->
                             {% load socialaccount %}
-
-                        
-
-                           <div class="google-login-wrapper">
-
-                            {% load socialaccount %}
-
-                            <a href="{% provider_login_url 'google' %}"
-                            class="google-login-btn">
-
-                                <img
-                                    src="https://developers.google.com/identity/images/g-logo.png"
-                                    alt="Google"
-                                >
-
-                                <span>Continue with Google</span>
-
-                            </a>
-
-                        </div>
+                            <div class="google-login-wrapper">
+                                <form method="post" action="{% provider_login_url 'google' %}" class="w-100 d-flex justify-content-center m-0 p-0">
+                                    {% csrf_token %}
+                                    <button
+                                        type="submit"
+                                        class="google-login-btn border-0 shadow-sm"
+                                        style="cursor: pointer; font-family: inherit;"
+                                        aria-label="Continue with Google"
+                                    >
+                                        <img
+                                            src="https://developers.google.com/identity/images/g-logo.png"
+                                            alt="Google"
+                                            width="22"
+                                            height="22"
+                                        >
+                                        <span>Continue with Google</span>
+                                    </button>
+                                </form>
+                            </div>
                             
 
 

@@ -31,6 +31,8 @@ CSRF_TRUSTED_ORIGINS = list(set([
 ]))
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
 
 # =========================
@@ -156,11 +158,18 @@ USE_I18N = True
 USE_TZ = True
 
 # =========================
-# Allauth
+# Allauth & Social Authentication
 # =========================
 
 SITE_ID = 1
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https" if not DEBUG else "http"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_LOGIN_METHODS = {"email", "username"}
+ACCOUNT_SIGNUP_FIELDS = ["email", "username*", "password1*", "password2*"]
+ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 # =========================
 # Static / Media
@@ -225,7 +234,7 @@ REST_FRAMEWORK = {
 # Razorpay
 # =========================
 
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_TMtTlbX9d4BPW2")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
 
 # =========================
@@ -246,8 +255,13 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "noreply@omsupermart.com")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>")
 
 # =========================
-# Production Security
+# Production & Mobile Cookie Security
 # =========================
+
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
 
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True

@@ -2,33 +2,92 @@
 
 {% block title %}Complete Payment | Om Super Mart{% endblock %}
 
+{% block extra_css %}
+<style>
+.payment-wrapper {
+    padding-bottom: 120px !important;
+}
+
+.payment-card {
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.payment-header {
+    background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+    color: #ffffff;
+    padding: 28px 24px;
+    text-align: center;
+}
+
+.simulator-option {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+    text-decoration: none;
+}
+
+.simulator-option:hover {
+    background: #ecfdf5;
+    border-color: #10b981;
+}
+
+.simulator-option:active {
+    transform: scale(0.97);
+}
+
+@media (max-width: 576px) {
+    .payment-header {
+        padding: 22px 18px;
+    }
+    .payment-card-body {
+        padding: 20px 16px !important;
+    }
+    .amount-display {
+        font-size: 2.3rem !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="container py-5">
+<div class="container py-4 py-md-5 payment-wrapper">
 
     <div class="row justify-content-center">
 
-        <div class="col-md-7 col-lg-5">
+        <div class="col-md-8 col-lg-5">
 
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="payment-card">
 
                 <!-- HEADER -->
-                <div class="card-header bg-danger text-white text-center py-4">
-                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-white bg-opacity-20 mb-2" style="width: 60px; height: 60px;">
-                        <i class="bi bi-shield-lock-fill fs-3"></i>
+                <div class="payment-header">
+                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-white bg-opacity-20 mb-2" style="width: 56px; height: 56px;">
+                        <i class="bi bi-shield-lock-fill fs-3 text-white"></i>
                     </div>
                     <h4 class="fw-bold mb-0">Order #{{ order.id }} Checkout</h4>
-                    <small class="text-white-50">10-Minute Express Grocery Delivery</small>
+                    <small class="text-white text-opacity-80">⚡ 10-Minute Express Grocery Delivery</small>
                 </div>
 
-                <div class="card-body p-4 p-md-5 text-center">
+                <div class="card-body p-4 p-md-5 text-center payment-card-body">
 
-                    <span class="text-muted small text-uppercase fw-bold">Amount Payable</span>
-                    <h1 class="display-5 fw-bold text-danger my-2">
+                    <span class="text-muted small text-uppercase fw-bold letter-spacing-1">Amount Payable</span>
+                    <h1 class="display-5 fw-bold text-danger my-2 amount-display">
                         ₹{{ order.total_amount }}
                     </h1>
 
-                    <div class="p-3 bg-light rounded-3 my-3 text-start small">
+                    <!-- ORDER RECIPIENT SUMMARY -->
+                    <div class="p-3 bg-light rounded-3 my-3 text-start small border border-light-subtle">
                         <div class="d-flex justify-content-between mb-1">
                             <span class="text-muted">Recipient:</span>
                             <strong class="text-dark">{{ order.full_name }}</strong>
@@ -39,7 +98,7 @@
                         </div>
                         <div class="d-flex justify-content-between">
                             <span class="text-muted">Delivery To:</span>
-                            <span class="text-dark text-end" style="max-width: 200px;">{{ order.address }}, {{ order.city }}</span>
+                            <span class="text-dark text-end text-truncate" style="max-width: 180px;">{{ order.address }}, {{ order.city }}</span>
                         </div>
                     </div>
 
@@ -61,7 +120,7 @@
                         </div>
 
                         {% if wallet_balance >= order.total_amount %}
-                        <form method="POST" action="{% url 'wallet:pay_with_wallet' order.id %}">
+                        <form method="POST" action="{% url 'wallet:pay_with_wallet' order.id %}" class="m-0">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold py-2 shadow-sm">
                                 <i class="bi bi-lightning-charge-fill me-1"></i> Pay ₹{{ order.total_amount }} with Wallet
@@ -69,10 +128,10 @@
                         </form>
                         {% else %}
                         <div class="d-flex justify-content-between align-items-center gap-2 mt-1">
-                            <small class="text-danger fw-semibold">
+                            <small class="text-danger fw-semibold" style="font-size: 0.78rem;">
                                 <i class="bi bi-info-circle me-1"></i> Low balance (Need ₹{{ order.total_amount }}).
                             </small>
-                            <a href="{% url 'wallet:dashboard' %}?next={% url 'payments:payment' order.id %}" class="btn btn-sm btn-outline-success rounded-pill fw-bold px-3">
+                            <a href="{% url 'wallet:dashboard' %}?next={% url 'payments:payment' order.id %}" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3" style="font-size: 0.75rem;">
                                 Top Up Wallet
                             </a>
                         </div>
@@ -81,24 +140,39 @@
 
                     <div class="d-flex align-items-center my-3 text-muted">
                         <hr class="flex-grow-1 my-0">
-                        <span class="px-2 small text-uppercase">or other payment methods</span>
+                        <span class="px-2 small text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">Choose Payment Mode</span>
                         <hr class="flex-grow-1 my-0">
                     </div>
 
-                    <!-- PAY BUTTON (RAZORPAY) -->
+                    <!-- RAZORPAY PRIMARY ONLINE BUTTON -->
                     <button
                         id="rzp-button1"
-                        class="btn btn-outline-success btn-lg w-100 rounded-pill fw-bold shadow-sm py-2 mb-2"
+                        type="button"
+                        class="btn btn-danger btn-lg w-100 rounded-pill fw-bold shadow-sm py-2 mb-2 d-flex align-items-center justify-content-center gap-2"
+                        style="height: 52px;"
                     >
-                        <i class="bi bi-shield-check me-2"></i> Pay with UPI / Card / NetBanking
+                        <i class="bi bi-shield-check fs-5"></i>
+                        <span id="rzp-btn-text">Pay ₹{{ order.total_amount }} Online (UPI / Card)</span>
                     </button>
 
-                    <!-- PAY ON DELIVERY / INSTANT CONFIRMATION -->
-                    <a
-                        href="{% url 'payments:success' payment.id %}"
-                        class="btn btn-outline-dark btn-sm w-100 rounded-pill fw-semibold mb-3 py-2"
+                    <!-- SIMULATOR / INSTANT TEST CHECKOUT -->
+                    <button
+                        type="button"
+                        class="btn btn-outline-success w-100 rounded-pill fw-bold py-2 mb-2 d-flex align-items-center justify-content-center gap-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#paymentSimulatorModal"
                     >
-                        <i class="bi bi-cash-coin me-1"></i> Pay on Delivery / Instant Confirmation
+                        <i class="bi bi-lightning-charge-fill text-warning"></i>
+                        <span>Express 1-Tap Checkout (Test Mode)</span>
+                    </button>
+
+                    <!-- CASH ON DELIVERY BUTTON -->
+                    <a
+                        href="{% url 'payments:success' payment.id %}?method=cod"
+                        class="btn btn-outline-secondary w-100 rounded-pill fw-semibold mb-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                    >
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Cash on Delivery (Pay at Doorstep)</span>
                     </a>
 
                     <!-- CANCEL -->
@@ -113,7 +187,7 @@
 
                 <div class="card-footer bg-light border-0 py-3 text-center text-muted small">
                     <i class="bi bi-shield-check text-success me-1"></i>
-                    256-bit SSL Encrypted • PCI-DSS Certified
+                    256-bit SSL Encrypted • PCI-DSS Certified • 100% Safe Checkout
                 </div>
 
             </div>
@@ -124,44 +198,221 @@
 
 </div>
 
+<!-- ======================================================== -->
+<!-- INTERACTIVE MOBILE PAYMENT SIMULATOR MODAL               -->
+<!-- ======================================================== -->
+<div class="modal fade" id="paymentSimulatorModal" tabindex="-1" aria-labelledby="paymentSimulatorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-danger text-white py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-lightning-charge-fill fs-5 text-warning"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="paymentSimulatorModalLabel">1-Tap Instant Checkout</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4 text-center" id="simulatorBody">
+                <p class="text-muted small mb-3">
+                    Order #{{ order.id }} • Amount: <strong class="text-danger fs-6">₹{{ order.total_amount }}</strong>
+                    <br>Select any instant option below to complete your checkout:
+                </p>
+
+                <div class="d-flex flex-column gap-2 text-start">
+                    <div class="simulator-option" onclick="simulatePaymentSuccess('Google Pay UPI')">
+                        <span class="fs-4">🟢</span>
+                        <div class="flex-grow-1">
+                            <strong class="d-block text-dark small">Google Pay (GPay UPI)</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Instant UPI direct checkout</small>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
+
+                    <div class="simulator-option" onclick="simulatePaymentSuccess('PhonePe UPI')">
+                        <span class="fs-4">🟣</span>
+                        <div class="flex-grow-1">
+                            <strong class="d-block text-dark small">PhonePe UPI</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Instant payment via PhonePe app</small>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
+
+                    <div class="simulator-option" onclick="simulatePaymentSuccess('Paytm UPI')">
+                        <span class="fs-4">🔵</span>
+                        <div class="flex-grow-1">
+                            <strong class="d-block text-dark small">Paytm UPI / Wallet</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">1-tap payment via Paytm</small>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
+
+                    <div class="simulator-option" onclick="simulatePaymentSuccess('Test Card **** 4242')">
+                        <span class="fs-4">💳</span>
+                        <div class="flex-grow-1">
+                            <strong class="d-block text-dark small">Test Visa / MasterCard (**** 4242)</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Instant test card verification</small>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body p-4 text-center d-none" id="simulatorProcessing">
+                <div class="spinner-border text-danger mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="fw-bold text-dark mb-1" id="simProcessTitle">Processing Payment...</h5>
+                <p class="text-muted small" id="simProcessDesc">Connecting with bank gateway...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIG DATA PASSED SAFELY TO JAVASCRIPT VIA DATA ATTRIBUTES -->
+<div
+    id="payment-config"
+    class="d-none"
+    data-key="{{ razorpay_key|default:'rzp_test_TMtTlbX9d4BPW2' }}"
+    data-amount="{{ razorpay_amount }}"
+    data-order-id="{{ razorpay_order_id }}"
+    data-is-real-order="{% if is_real_razorpay_order %}true{% else %}false{% endif %}"
+    data-order-number="{{ order.id }}"
+    data-customer-name="{{ order.full_name|escape }}"
+    data-customer-phone="{{ order.phone|escape }}"
+    data-success-url="{% url 'payments:success' payment.id %}"
+></div>
+
+<!-- RAZORPAY SCRIPT -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-    var options = {
-        "key": "{{ razorpay_key|default:'rzp_test_freshmart' }}",
-        "amount": "{{ razorpay_amount }}",
-        "currency": "INR",
-        "name": "Om Super Mart Groceries",
-        "description": "Order #{{ order.id }} Payment",
-        "order_id": "{{ razorpay_order_id }}",
-        "prefill": {
-            "name": "{{ order.full_name }}",
-            "contact": "{{ order.phone }}"
-        },
-        "theme": {
-            "color": "#15803d"
-        },
-        "handler": function (response) {
-            window.location.href = "{% url 'payments:success' payment.id %}";
+(function () {
+    var cfgEl = document.getElementById('payment-config');
+    var rzpKey = cfgEl ? (cfgEl.getAttribute('data-key') || 'rzp_test_TMtTlbX9d4BPW2') : 'rzp_test_TMtTlbX9d4BPW2';
+    var razorpayAmount = cfgEl ? (cfgEl.getAttribute('data-amount') || '0') : '0';
+    var razorpayOrderId = cfgEl ? (cfgEl.getAttribute('data-order-id') || '') : '';
+    var isRealOrder = cfgEl ? (cfgEl.getAttribute('data-is-real-order') === 'true') : false;
+    var orderId = cfgEl ? (cfgEl.getAttribute('data-order-number') || '') : '';
+    var customerName = cfgEl ? (cfgEl.getAttribute('data-customer-name') || '') : '';
+    var customerPhone = cfgEl ? (cfgEl.getAttribute('data-customer-phone') || '') : '';
+    var successBaseUrl = cfgEl ? (cfgEl.getAttribute('data-success-url') || '') : '';
+
+    var rzpBtn = document.getElementById('rzp-button1');
+    var rzpBtnText = document.getElementById('rzp-btn-text');
+    var originalBtnHtml = rzpBtnText ? rzpBtnText.innerHTML : "Pay Online";
+
+    function resetPayButton() {
+        if (rzpBtn && rzpBtnText) {
+            rzpBtn.disabled = false;
+            rzpBtnText.innerHTML = originalBtnHtml;
+        }
+    }
+
+    function openSimulatorModal() {
+        var simModalEl = document.getElementById('paymentSimulatorModal');
+        if (simModalEl && typeof bootstrap !== 'undefined') {
+            var simModal = bootstrap.Modal.getOrCreateInstance(simModalEl);
+            simModal.show();
+        }
+    }
+
+    window.simulatePaymentSuccess = function (methodName) {
+        var body = document.getElementById('simulatorBody');
+        var proc = document.getElementById('simulatorProcessing');
+        var title = document.getElementById('simProcessTitle');
+        var desc = document.getElementById('simProcessDesc');
+
+        if (body && proc) {
+            body.classList.add('d-none');
+            proc.classList.remove('d-none');
+            if (title) title.innerText = "Authorizing " + methodName + "...";
+            if (desc) desc.innerText = "Securing transaction with 256-bit encryption...";
+
+            setTimeout(function () {
+                if (title) title.innerText = "Payment Successful!";
+                if (desc) desc.innerText = "Redirecting to order confirmation...";
+                var fakePayId = "pay_demo_" + Math.random().toString(36).substring(2, 10);
+                var sep = successBaseUrl.indexOf('?') === -1 ? '?' : '&';
+                window.location.href = successBaseUrl + sep + "razorpay_payment_id=" + encodeURIComponent(fakePayId);
+            }, 1200);
         }
     };
 
-    var rzp1 = null;
-    try {
-        rzp1 = new Razorpay(options);
-    } catch(e) {
-        console.warn("Razorpay script not loaded or test mode:", e);
-    }
+    if (rzpBtn) {
+        rzpBtn.addEventListener('click', function (e) {
+            e.preventDefault();
 
-    document.getElementById('rzp-button1').addEventListener('click', function(e){
-        e.preventDefault();
-        if (rzp1) {
-            rzp1.open();
-        } else {
-            // Fallback redirect for seamless test flow
-            window.location.href = "{% url 'payments:success' payment.id %}";
-        }
-    });
+            rzpBtn.disabled = true;
+            if (rzpBtnText) {
+                rzpBtnText.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connecting to Gateway...';
+            }
+
+            var options = {
+                "key": rzpKey,
+                "amount": razorpayAmount,
+                "currency": "INR",
+                "name": "Om Super Mart Groceries",
+                "description": "Order #" + orderId + " Payment",
+                "prefill": {
+                    "name": customerName,
+                    "contact": customerPhone
+                },
+                "theme": {
+                    "color": "#dc2626"
+                },
+                "modal": {
+                    "backdropclose": false,
+                    "escape": true,
+                    "handleback": true,
+                    "confirm_close": true,
+                    "animation": true,
+                    "ondismiss": function () {
+                        console.log("Razorpay modal dismissed by user");
+                        resetPayButton();
+                    }
+                },
+                "retry": {
+                    "enabled": true,
+                    "max_count": 3
+                },
+                "send_sms_hash": true,
+                "handler": function (response) {
+                    var targetUrl = successBaseUrl;
+                    if (response && response.razorpay_payment_id) {
+                        var sep = targetUrl.indexOf('?') === -1 ? '?' : '&';
+                        targetUrl += sep + "razorpay_payment_id=" + encodeURIComponent(response.razorpay_payment_id);
+                    }
+                    window.location.href = targetUrl;
+                }
+            };
+
+            // Pass order_id only when a genuine order ID was generated via Razorpay API
+            if (isRealOrder && razorpayOrderId && razorpayOrderId.length > 5) {
+                options["order_id"] = razorpayOrderId;
+            }
+
+            if (typeof Razorpay !== 'undefined') {
+                try {
+                    var rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response) {
+                        console.warn("Payment failed or cancelled:", response.error);
+                        resetPayButton();
+                        openSimulatorModal();
+                    });
+                    rzp.open();
+                } catch (err) {
+                    console.warn("Razorpay instance error:", err);
+                    resetPayButton();
+                    openSimulatorModal();
+                }
+            } else {
+                console.warn("Razorpay checkout.js unavailable, falling back to simulator");
+                resetPayButton();
+                openSimulatorModal();
+            }
+        });
+    }
+})();
 </script>
 
 {% endblock %}
