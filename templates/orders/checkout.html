@@ -2,34 +2,59 @@
 
 {% block title %}Checkout | Om Super Mart 10-Min Delivery{% endblock %}
 
+{% block extra_css %}
+<style>
+    .checkout-container {
+        padding-bottom: 120px !important;
+    }
+    .checkout-card {
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    @media (max-width: 768px) {
+        .checkout-container {
+            padding-bottom: 130px !important;
+        }
+        .checkout-card {
+            border-radius: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="container py-4">
+<div class="container py-3 py-md-4 checkout-container">
 
     <!-- HEADER -->
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">
-            <i class="bi bi-shield-check text-success me-2"></i> Delivery & Checkout
-        </h2>
-        <p class="text-muted mb-0">
-            Enter your doorstep delivery address and verify your order items.
-        </p>
+    <div class="d-flex align-items-center justify-content-between mb-3 mb-md-4">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark fs-4 fs-md-3 d-flex align-items-center gap-2">
+                <i class="bi bi-shield-check text-success"></i> Delivery &amp; Checkout
+            </h3>
+            <p class="text-muted small mb-0">
+                Doorstep grocery delivery in 10 - 15 minutes
+            </p>
+        </div>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-bold small">
+            ⚡ 10-Min Express
+        </span>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3 g-md-4">
 
         <!-- LEFT COLUMN: DELIVERY ADDRESS FORM -->
         <div class="col-lg-7">
 
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card border-0 checkout-card mb-4 bg-white">
 
                 <div class="card-header bg-white py-3 border-bottom">
-                    <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-geo-alt text-success me-1"></i> Delivery Address
+                    <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-geo-alt-fill text-success"></i> Delivery Address
                     </h5>
                 </div>
 
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
 
                     <form method="POST">
 
@@ -37,59 +62,60 @@
 
                         <div class="row g-3">
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small text-muted">Full Name *</label>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-muted mb-1">Full Name *</label>
                                 {{ form.full_name }}
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold small text-muted">Phone Number *</label>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-muted mb-1">Phone Number *</label>
                                 {{ form.phone }}
                             </div>
 
                             <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label class="form-label fw-semibold small text-muted mb-0">Street Address & Flat / House No *</label>
-                                    <button type="button" id="detect-gps-btn" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1" onclick="detectLiveCheckoutLocation()">
-                                        <i class="bi bi-crosshair me-1"></i> Detect Live Location
+                                <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+                                    <label class="form-label fw-semibold small text-muted mb-0">Street Address &amp; Flat / House No *</label>
+                                    <button type="button" id="detect-gps-btn" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold text-nowrap d-inline-flex align-items-center gap-1 shadow-none" onclick="detectLiveCheckoutLocation()">
+                                        <i class="bi bi-crosshair"></i>
+                                        <span>Detect Live Location</span>
                                     </button>
                                 </div>
                                 {{ form.address }}
-                                <div id="gps-status-hint" class="small text-muted mt-1 d-none"></div>
+                                <div id="gps-status-hint" class="d-none mt-2"></div>
                             </div>
 
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small text-muted">City *</label>
+                            <div class="col-6 col-md-4">
+                                <label class="form-label fw-semibold small text-muted mb-1">City *</label>
                                 {{ form.city }}
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small text-muted">State *</label>
+                            <div class="col-6 col-md-4">
+                                <label class="form-label fw-semibold small text-muted mb-1">State *</label>
                                 {{ form.state }}
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold small text-muted">Pincode *</label>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold small text-muted mb-1">Pincode *</label>
                                 {{ form.pincode }}
                             </div>
 
                         </div>
 
-                        <div class="mt-4 p-3 bg-light rounded-3 d-flex align-items-center gap-3">
-                            <i class="bi bi-lightning-charge-fill text-warning fs-3"></i>
+                        <div class="mt-3 p-3 bg-light rounded-3 d-flex align-items-center gap-3 border">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-3 flex-shrink-0"></i>
                             <div>
-                                <strong class="text-dark d-block">Estimated Arrival: 10 - 15 Minutes</strong>
-                                <small class="text-muted">Packed directly from the nearest neighborhood dark store</small>
+                                <strong class="text-dark d-block small">Estimated Arrival: 10 - 15 Minutes</strong>
+                                <small class="text-muted" style="font-size: 0.78rem;">Packed directly from the nearest neighborhood dark store</small>
                             </div>
                         </div>
 
                         <div class="mt-4">
                             <button
                                 type="submit"
-                                class="btn btn-success w-100 btn-lg rounded-pill fw-bold shadow-sm py-3"
+                                class="btn btn-success w-100 btn-lg rounded-pill fw-bold shadow py-3 d-flex align-items-center justify-content-center gap-2"
                             >
-                                <i class="bi bi-credit-card me-1"></i> Continue to Payment (₹{{ total }})
+                                <i class="bi bi-credit-card-2-front-fill fs-5"></i>
+                                <span>Continue to Payment (₹{{ total }})</span>
                             </button>
                         </div>
 
@@ -105,7 +131,7 @@
         <!-- RIGHT COLUMN: ORDER SUMMARY -->
         <div class="col-lg-5">
 
-            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 90px;">
+            <div class="card border-0 checkout-card sticky-top bg-white" style="top: 80px;">
 
                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0 text-dark">
@@ -116,7 +142,7 @@
                     </a>
                 </div>
 
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
 
                     <!-- LIST OF CART ITEMS -->
                     <div class="cart-items-preview mb-3 overflow-y-auto" style="max-height: 250px;">
@@ -140,19 +166,19 @@
 
                     <!-- BILL BREAKDOWN -->
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Items Subtotal</span>
-                        <strong class="text-dark">₹{{ subtotal }}</strong>
+                        <span class="text-muted small">Items Subtotal</span>
+                        <strong class="text-dark small">₹{{ subtotal }}</strong>
                     </div>
 
                     {% if discount > 0 %}
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Voucher Discount</span>
-                        <strong class="text-success">-₹{{ discount }}</strong>
+                        <span class="text-muted small">Voucher Discount</span>
+                        <strong class="text-success small">-₹{{ discount }}</strong>
                     </div>
                     {% endif %}
 
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Delivery Charges</span>
+                        <span class="text-muted small">Delivery Charges</span>
                         <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">
                             FREE (Express)
                         </span>
@@ -180,6 +206,8 @@
 
 </div>
 
+{% endblock %}
+
 {% block extra_js %}
 <script>
     function detectLiveCheckoutLocation() {
@@ -192,16 +220,16 @@
         }
 
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Locating...';
-        hint.className = "small text-muted mt-1";
-        hint.innerText = "Requesting device GPS coordinates...";
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span><span>Locating...</span>';
+        hint.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-light text-muted border";
+        hint.innerHTML = '<span class="spinner-border spinner-border-sm text-success flex-shrink-0"></span><span>Detecting device GPS coordinates...</span>';
         hint.classList.remove("d-none");
 
         navigator.geolocation.getCurrentPosition(
             async function(position) {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-                hint.innerText = `GPS Found: ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E. Resolving street address...`;
+                hint.innerHTML = '<span class="spinner-border spinner-border-sm text-success flex-shrink-0"></span><span>GPS found. Resolving address...</span>';
 
                 try {
                     // Free reverse geocoding via OpenStreetMap Nominatim
@@ -227,31 +255,30 @@
                         if (stateInput && addr.state) stateInput.value = addr.state;
                         if (pincodeInput && addr.postcode) pincodeInput.value = addr.postcode;
 
-                        hint.className = "small text-success mt-1 fw-semibold";
-                        hint.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Live location detected: ${streetParts || 'Location acquired'}`;
+                        hint.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-success-subtle text-success border border-success-subtle fw-semibold";
+                        hint.innerHTML = `<i class="bi bi-check-circle-fill fs-6 flex-shrink-0"></i><span>Live address applied: ${streetParts || 'Location acquired'}</span>`;
                     } else {
-                        hint.className = "small text-success mt-1 fw-semibold";
-                        hint.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> GPS Coordinates locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        hint.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-success-subtle text-success border border-success-subtle fw-semibold";
+                        hint.innerHTML = `<i class="bi bi-check-circle-fill fs-6 flex-shrink-0"></i><span>GPS locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}</span>`;
                     }
                 } catch(err) {
                     console.warn("Reverse geocode warning:", err);
-                    hint.className = "small text-success mt-1";
-                    hint.innerText = `GPS coordinates acquired: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    hint.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-success-subtle text-success border border-success-subtle";
+                    hint.innerHTML = `<i class="bi bi-check-circle-fill fs-6 flex-shrink-0"></i><span>GPS coordinates acquired: ${lat.toFixed(4)}, ${lng.toFixed(4)}</span>`;
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Location Updated';
+                    btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i><span>Location Updated</span>';
                 }
             },
             function(err) {
                 console.warn("Geolocation error:", err);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-crosshair me-1"></i> Try Again';
-                hint.className = "small text-danger mt-1";
-                hint.innerText = "Location permission denied or unavailable. Please enter address manually.";
+                btn.innerHTML = '<i class="bi bi-crosshair me-1"></i><span>Try Again</span>';
+                hint.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-danger-subtle text-danger border border-danger-subtle";
+                hint.innerHTML = '<i class="bi bi-geo-alt-slash-fill fs-6 flex-shrink-0"></i><span>Location access not granted or unavailable. Please type your address manually.</span>';
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
 </script>
-{% endblock %}
 {% endblock %}

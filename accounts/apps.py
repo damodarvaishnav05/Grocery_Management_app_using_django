@@ -5,16 +5,17 @@ import os
 
 def configure_social_auth_and_site(sender, **kwargs):
     try:
-        from django.contrib.sites.models import Site
+        render_host = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+        target_domain = render_host if render_host else "om-super-mart.onrender.com"
         site, _ = Site.objects.get_or_create(
             id=1,
             defaults={
-                "domain": "om-super-mart.onrender.com",
+                "domain": target_domain,
                 "name": "Om Super Mart",
             }
         )
-        if site.domain in ["example.com", "localhost:8000"]:
-            site.domain = "om-super-mart.onrender.com"
+        if site.domain != target_domain:
+            site.domain = target_domain
             site.name = "Om Super Mart"
             site.save()
 

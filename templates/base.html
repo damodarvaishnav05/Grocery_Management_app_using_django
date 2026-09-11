@@ -115,7 +115,7 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<body class="{% if cart_count and cart_count > 0 %}has-floating-cart{% endif %}">
+<body class="{% if cart_count and cart_count > 0 and '/orders/checkout/' not in request.path and '/cart/' not in request.path and '/payments/' not in request.path and '/orders/success/' not in request.path %}has-floating-cart{% endif %}">
 
 <div class="om-app-wrapper">
 
@@ -610,7 +610,8 @@
                     </div>
                 </div>
 
-                <!-- Row 2: Full-Width Search Input with Barcode & Mic -->
+                <!-- Row 2: Full-Width Search Input with Barcode & Mic (Hidden on Checkout & Payment) -->
+                {% if '/orders/checkout/' not in request.path and '/payments/' not in request.path %}
                 <div class="om-mobile-search-row">
                     <form method="GET" action="{% url 'products:index' %}" role="search">
                         <div class="om-mobile-search-box">
@@ -631,6 +632,7 @@
                         </div>
                     </form>
                 </div>
+                {% endif %}
             </div>
 
         </header>
@@ -716,7 +718,7 @@
 <!-- ======================================================= -->
 <!-- FLOATING MOBILE QUICK CART BAR (Zepto/Blinkit Signature) -->
 <!-- ======================================================= -->
-{% if cart_count and cart_count > 0 %}
+{% if cart_count and cart_count > 0 and '/orders/checkout/' not in request.path and '/cart/' not in request.path and '/payments/' not in request.path and '/orders/success/' not in request.path %}
 <aside class="om-floating-cart-bar d-lg-none" aria-label="Quick Cart">
     <a href="{% url 'cart:index' %}" class="om-floating-cart-inner">
         <div class="d-flex align-items-center gap-2">
