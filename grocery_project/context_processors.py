@@ -57,6 +57,6 @@ def common_data(request):
         "sidebar_cart_total": sidebar_cart_total,
         "sidebar_recent_orders": sidebar_recent_orders,
         "user_referral_code": user_referral_code,
-        "delivery_location": "Indore, Madhya Pradesh 452001",
+        "delivery_location": request.session.get("delivery_location", "Indore, Madhya Pradesh 452001"),
     }
 

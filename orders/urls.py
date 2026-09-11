@@ -58,5 +58,10 @@ urlpatterns = [
         views.simulate_tracking_stage,
         name="simulate_track"
     ),
+    path(
+        "api/set-location/",
+        views.set_user_location_api,
+        name="set_user_location_api"
+    ),
 
 ]

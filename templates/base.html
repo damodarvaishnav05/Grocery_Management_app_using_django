@@ -540,7 +540,7 @@
                             <span class="om-express-badge">
                                 <i class="bi bi-lightning-charge-fill"></i> 10 MINS
                             </span>
-                            <span class="om-mobile-loc-text">
+                            <span class="om-mobile-loc-text" id="mobileHeaderLocationText">
                                 {{ delivery_location|default:"Indore"|slice:":16" }}...
                             </span>
                             <i class="bi bi-chevron-down text-muted" style="font-size: 0.65rem;"></i>
@@ -855,6 +855,31 @@
                 Select your area to see items in stock with 10-minute instant delivery:
             </p>
 
+            <!-- REAL-TIME LIVE GPS LOCATION BUTTON (BLINKIT / ZEPTO STYLE) -->
+            <div class="card border-success border-opacity-50 bg-success bg-opacity-10 rounded-4 p-3 mb-3">
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center gap-2 gap-md-3">
+                        <div class="p-2 rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 42px; height: 42px;">
+                            <i class="bi bi-crosshair fs-4"></i>
+                        </div>
+                        <div>
+                            <strong class="text-dark d-block small fw-bold">Use Real-Time Live Location</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Detect your neighborhood via device GPS</small>
+                        </div>
+                    </div>
+                    <button type="button" id="modalGpsBtn" class="btn btn-success btn-sm rounded-pill fw-bold px-3 py-2 text-nowrap shadow-sm" onclick="detectLiveModalLocation()">
+                        <i class="bi bi-geo-fill me-1"></i> Detect Live
+                    </button>
+                </div>
+                <div id="modalGpsStatus" class="small mt-2 d-none"></div>
+            </div>
+
+            <div class="d-flex align-items-center my-3 text-muted">
+                <hr class="flex-grow-1 my-0">
+                <span class="px-2 small text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Or Search Manually</span>
+                <hr class="flex-grow-1 my-0">
+            </div>
+
             <div class="input-group mb-3">
                 <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                 <input type="text" id="manualLocationInput" class="form-control border-start-0" placeholder="Enter Pincode or City (e.g. 452001)" value="Indore 452001">
@@ -974,18 +999,49 @@
     document.addEventListener('DOMContentLoaded', () => {
         const savedLoc = localStorage.getItem('om_delivery_location');
         if (savedLoc) {
-            const headerEl = document.getElementById('headerLocationText');
-            if (headerEl) headerEl.innerText = savedLoc;
+            applyLocationToUI(savedLoc);
         }
     });
 
-    function selectCity(cityName) {
-        localStorage.setItem('om_delivery_location', cityName);
+    function applyLocationToUI(loc) {
+        if (!loc) return;
         const headerEl = document.getElementById('headerLocationText');
-        if (headerEl) headerEl.innerText = cityName;
+        if (headerEl) headerEl.innerText = loc;
+
+        const mobileEl = document.getElementById('mobileHeaderLocationText');
+        if (mobileEl) {
+            const shortLoc = loc.length > 18 ? loc.slice(0, 16) + '...' : loc;
+            mobileEl.innerText = shortLoc;
+        }
+
+        document.querySelectorAll('.om-mobile-loc-text').forEach(el => {
+            el.innerText = loc.length > 18 ? loc.slice(0, 16) + '...' : loc;
+        });
+
+        const manualInput = document.getElementById('manualLocationInput');
+        if (manualInput) manualInput.value = loc;
+    }
+
+    function selectCity(cityName) {
+        if (!cityName) return;
+        localStorage.setItem('om_delivery_location', cityName);
+        applyLocationToUI(cityName);
+
+        // Sync to backend session
+        fetch('/orders/api/set-location/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({ location: cityName })
+        }).catch(err => console.log('Location sync note:', err));
+
         const modalEl = document.getElementById('locationModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
     }
 
     function saveCustomLocation() {
@@ -993,6 +1049,91 @@
         if (val) {
             selectCity(val);
         }
+    }
+
+    function detectLiveModalLocation() {
+        const btn = document.getElementById("modalGpsBtn");
+        const status = document.getElementById("modalGpsStatus");
+
+        if (!navigator.geolocation) {
+            if (status) {
+                status.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-danger-subtle text-danger border border-danger-subtle";
+                status.innerHTML = '<i class="bi bi-exclamation-circle-fill flex-shrink-0"></i><span>GPS not supported by your browser.</span>';
+                status.classList.remove("d-none");
+            }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span><span>Locating...</span>';
+        }
+        if (status) {
+            status.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-light text-muted border";
+            status.innerHTML = '<span class="spinner-border spinner-border-sm text-success flex-shrink-0"></span><span>Accessing live GPS coordinates...</span>';
+            status.classList.remove("d-none");
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                if (status) {
+                    status.innerHTML = '<span class="spinner-border spinner-border-sm text-success flex-shrink-0"></span><span>GPS locked. Resolving area details...</span>';
+                }
+
+                try {
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                    const data = await resp.json();
+
+                    let areaName = "";
+                    if (data && data.address) {
+                        const a = data.address;
+                        const locality = a.suburb || a.neighbourhood || a.residential || a.road || "";
+                        const city = a.city || a.town || a.county || a.state_district || "";
+                        const pincode = a.postcode || "";
+
+                        const parts = [locality, city, pincode].filter(Boolean);
+                        areaName = parts.join(", ");
+                    }
+
+                    if (!areaName) {
+                        areaName = `Location (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`;
+                    }
+
+                    if (status) {
+                        status.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-success-subtle text-success border border-success-subtle fw-semibold";
+                        status.innerHTML = `<i class="bi bi-check-circle-fill fs-6 flex-shrink-0"></i><span>Live: ${areaName}</span>`;
+                    }
+
+                    setTimeout(() => {
+                        selectCity(areaName);
+                    }, 500);
+
+                } catch(err) {
+                    console.warn("Reverse geocode note:", err);
+                    const fallbackName = `GPS Location (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`;
+                    selectCity(fallbackName);
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i><span>Location Set</span>';
+                    }
+                }
+            },
+            function(err) {
+                console.warn("Geolocation permission error:", err);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-crosshair me-1"></i><span>Try Again</span>';
+                }
+                if (status) {
+                    status.className = "d-flex align-items-center gap-2 mt-2 p-2 rounded-3 small bg-danger-subtle text-danger border border-danger-subtle";
+                    status.innerHTML = '<i class="bi bi-geo-alt-slash-fill fs-6 flex-shrink-0"></i><span>Location permission denied. Please search or pick a city below.</span>';
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
     }
 
     // Referral Copy helper

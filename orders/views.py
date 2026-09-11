@@ -701,3 +701,18 @@ def update_live_location_api(request, order_id):
             })
 
     return JsonResponse({"status": "error", "message": "Invalid GPS coordinates."}, status=400)
+
+
+def set_user_location_api(request):
+    """Save user selected or GPS detected delivery location into session"""
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8") if request.body else "{}")
+        except Exception:
+            body = request.POST
+        loc = body.get("location", "").strip()
+        if loc:
+            request.session["delivery_location"] = loc
+            return JsonResponse({"status": "success", "location": loc})
+    return JsonResponse({"status": "error", "message": "Invalid location"}, status=400)
+
