@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Unauthorized - Delivery Partner Portal{% endblock %}
+{% block title %}Access Restricted - Delivery Partner Portal{% endblock %}
 {% block content %}
-<div class="min-h-[70vh] flex items-center justify-center px-4 py-12">
-  <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 text-center">
-    <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl">
+<div class="container py-5">
+  <div class="card border-0 shadow-sm rounded-4 p-5 mx-auto text-center" style="max-width: 480px;">
+    <div class="rounded-circle bg-warning-subtle text-warning mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; font-size: 32px;">
       🔒
     </div>
-    <h2 class="text-2xl font-black text-gray-900 mb-2">Access Restricted</h2>
-    <p class="text-gray-600 text-sm mb-6 leading-relaxed">
+    <h3 class="fw-bold mb-2">Access Restricted</h3>
+    <p class="text-muted small mb-4 leading-relaxed">
       This is the private <strong>Om Super Mart Delivery Partner Console</strong> for Order #{{ order.id }}. 
       To access, please use the direct link sent to your registered partner email (damodar4162@gmail.com) or log in as an authorized admin.
     </p>
-    <a href="{% url 'accounts:login' %}" class="inline-flex items-center justify-center w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-600/20">
+    <a href="{% url 'accounts:login' %}" class="btn btn-success btn-lg rounded-pill fw-bold w-100 shadow-sm">
       Log In with Partner Account
     </a>
   </div>

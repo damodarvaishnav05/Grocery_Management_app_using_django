@@ -9,62 +9,32 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <style>
-  /* Blinkit Color Palette & Express Theme */
-  :root {
-    --blinkit-yellow: #f8cb46;
-    --blinkit-yellow-light: #fff8e7;
-    --blinkit-green: #0c831f;
-    --blinkit-green-dark: #096818;
-    --blinkit-text-dark: #1c1c1c;
-    --blinkit-gray-bg: #f4f6fb;
-  }
-
-  .blinkit-header-badge {
-    background: linear-gradient(135deg, #0c831f 0%, #16a34a 100%);
-  }
-
-  #live-tracking-map {
-    height: 380px;
-    width: 100%;
-    border-radius: 1.5rem;
-    z-index: 1;
-  }
-
-  @media (min-width: 768px) {
-    #live-tracking-map {
-      height: 480px;
-    }
-  }
-
-  /* Custom Leaflet Map Markers */
+  /* Custom Leaflet Map Pins */
   .custom-pin {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9999px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
+    border-radius: 50%;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    border: 3px solid #ffffff;
   }
 
   .scooter-marker {
     background: #0c831f;
-    border: 3px solid #ffffff;
-    color: white;
     width: 44px;
     height: 44px;
     font-size: 22px;
-    animation: scooterFloat 2s ease-in-out infinite;
+    position: relative;
+    animation: scooterBounce 2s ease-in-out infinite;
   }
 
-  @keyframes scooterFloat {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-4px) scale(1.04); }
+  @keyframes scooterBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
   }
 
   .store-marker {
     background: #1e293b;
-    border: 3px solid #ffffff;
-    color: white;
     width: 38px;
     height: 38px;
     font-size: 18px;
@@ -72,8 +42,6 @@
 
   .dest-marker {
     background: #f59e0b;
-    border: 3px solid #ffffff;
-    color: white;
     width: 38px;
     height: 38px;
     font-size: 18px;
@@ -81,243 +49,263 @@
 
   .pulse-ring {
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    background: rgba(12, 131, 31, 0.25);
+    background: rgba(12, 131, 31, 0.3);
     animation: pulseGps 2s infinite;
     z-index: -1;
   }
 
   @keyframes pulseGps {
     0% { transform: scale(0.6); opacity: 0.9; }
-    100% { transform: scale(1.8); opacity: 0; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  /* 4-Step Timeline */
+  .step-track-item {
+    position: relative;
+    padding-left: 36px;
+    padding-bottom: 24px;
+  }
+  .step-track-item:last-child {
+    padding-bottom: 0;
+  }
+  .step-track-item::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 26px;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+  }
+  .step-track-item:last-child::before {
+    display: none;
+  }
+  .step-icon-badge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-[#f4f6fb] py-6 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-4xl mx-auto space-y-6">
+<div class="container py-4">
+  <div class="mx-auto" style="max-width: 860px;">
 
-    <!-- Top Blinkit Express Banner -->
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3">
-          <a href="{% url 'orders:my_orders' %}" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
-            </svg>
+    <!-- TOP BLINKIT EXPRESS HEADER -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <a href="{% url 'orders:my_orders' %}" class="btn btn-light rounded-circle border d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px; flex-shrink: 0;" title="Back to Orders">
+            <i class="bi bi-chevron-left fs-5 text-dark"></i>
           </a>
           <div>
-            <div class="flex items-center space-x-2">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-yellow-400 text-yellow-950 uppercase tracking-wide">
-                ⚡ 10-Minute Express
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <span class="badge text-bg-warning fw-bold px-2.5 py-1.5 rounded-pill">
+                <i class="bi bi-lightning-charge-fill me-1"></i> 10-MINUTE EXPRESS
               </span>
-              <span id="liveGpsIndicator" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 {% if not telemetry.is_live_gps %}hidden{% endif %}">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                Live GPS Active
+              <span id="liveGpsIndicator" class="badge text-bg-success px-2.5 py-1.5 rounded-pill {% if not telemetry.is_live_gps %}d-none{% endif %}">
+                <i class="bi bi-broadcast me-1"></i> Live GPS Active
               </span>
             </div>
-            <h1 id="headlineEta" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1 tracking-tight">
+            <h2 id="headlineEta" class="fw-bold mb-0 text-dark">
               {% if telemetry.is_delivered %}
                 Delivered at Doorstep! 🎉
               {% elif telemetry.stage == 'ARRIVING' %}
                 Arriving at your doorstep now! 🔔
               {% else %}
-                Arriving in <span class="text-[#0c831f]">{{ telemetry.eta_minutes }}-{{ telemetry.eta_minutes|add:2 }} Mins</span>
+                Arriving in <span class="text-success">{{ telemetry.eta_minutes }}-{{ telemetry.eta_minutes|add:2 }} Mins</span>
               {% endif %}
-            </h1>
-            <p id="headlineDesc" class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+            </h2>
+            <p id="headlineDesc" class="text-muted small mb-0 mt-1">
               {{ telemetry.stage_desc }}
             </p>
           </div>
         </div>
 
-        <div class="text-right sm:border-l sm:border-slate-100 sm:pl-6">
-          <span class="text-xs text-slate-500 font-bold uppercase tracking-wider block">Order ID</span>
-          <span class="text-xl font-black text-slate-900">#{{ order.id }}</span>
-          <span class="text-xs text-slate-500 block mt-0.5 font-medium">{{ order.items.count }} items • ₹{{ order.total_amount }}</span>
+        <div class="text-end">
+          <span class="text-muted text-uppercase small fw-bold d-block">Order ID</span>
+          <span class="fs-4 fw-bold text-dark">#{{ order.id }}</span>
+          <small class="text-muted d-block">{{ order.items.count }} items • ₹{{ order.total_amount }}</small>
         </div>
       </div>
 
       <!-- Express Progress Bar -->
-      <div class="mt-5 pt-4 border-t border-slate-100">
-        <div class="flex items-center justify-between text-xs font-bold text-slate-600 mb-1.5">
-          <span id="progressLabel">{{ telemetry.stage_title }}</span>
-          <span id="progressPercentage">{{ telemetry.progress }}% Complete</span>
+      <div class="pt-3 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-1.5">
+          <span id="progressLabel" class="small fw-bold text-dark">{{ telemetry.stage_title }}</span>
+          <span id="progressPercentage" class="small fw-bold text-success">{{ telemetry.progress }}% Complete</span>
         </div>
-        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-          <div id="progressBar" class="h-full bg-gradient-to-r from-yellow-400 via-emerald-500 to-[#0c831f] transition-all duration-700 ease-out rounded-full" style="width: {{ telemetry.progress }}%;"></div>
+        <div class="progress rounded-pill" style="height: 10px;">
+          <div id="progressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated rounded-pill" role="progressbar" style="width: {{ telemetry.progress }}%;"></div>
         </div>
       </div>
     </div>
 
-    <!-- Real-World Map Card -->
-    <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200/80 relative overflow-hidden">
-      <div class="flex items-center justify-between mb-3 px-1">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🗺️</span>
-          <h2 class="font-extrabold text-slate-900 text-sm sm:text-base">Real-Time Express Delivery Route</h2>
-        </div>
-        <button id="recenterBtn" type="button" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-1.5">
-          <span>🎯</span> Fit All
+    <!-- REAL-WORLD LEAFLET MAP CARD -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
+          <i class="bi bi-map-fill text-success me-2"></i> Real-Time Express Delivery Route
+        </h5>
+        <button id="recenterBtn" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+          <i class="bi bi-crosshair me-1"></i> Recenter Map
         </button>
       </div>
 
-      <!-- Leaflet Map Container -->
-      <div id="live-tracking-map" class="shadow-inner border border-slate-100"></div>
+      <!-- Leaflet Map Canvas -->
+      <div id="live-tracking-map" style="height: 400px; width: 100%; border-radius: 1rem;" class="border"></div>
 
-      <div class="mt-3 flex items-center justify-between text-xs text-slate-500 px-2">
-        <div class="flex items-center gap-4 flex-wrap">
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span> Micro-Hub Store</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#0c831f]"></span> Damodar Vaishnav (Rider)</span>
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Your Home</span>
+      <div class="d-flex justify-content-between align-items-center mt-3 small text-muted flex-wrap gap-2 px-1">
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+          <span><span class="badge bg-dark rounded-circle p-1 me-1">&nbsp;</span> Micro-Hub Store</span>
+          <span><span class="badge bg-success rounded-circle p-1 me-1">&nbsp;</span> Damodar Vaishnav (Rider)</span>
+          <span><span class="badge bg-warning rounded-circle p-1 me-1">&nbsp;</span> Your Home</span>
         </div>
-        <span id="mapLastUpdated" class="text-[11px] text-slate-400">Live GPS tracking</span>
+        <span id="mapLastUpdated" class="text-secondary small">Live GPS active</span>
       </div>
     </div>
 
-    <!-- Quick Info Cards Grid (Rider + Delivery PIN) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <!-- QUICK INFO CARDS: RIDER & DELIVERY PIN -->
+    <div class="row g-3 mb-4">
 
-      <!-- Delivery Partner Card (Damodar Vaishnav) -->
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Delivery Partner</span>
-          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-            ✓ Verified Partner
-          </span>
-        </div>
-
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center space-x-3.5">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-100/70 border border-emerald-200 flex items-center justify-center text-3xl shadow-sm">
-              🛵
-            </div>
-            <div>
-              <h3 class="text-lg font-black text-slate-900">{{ tracking.rider_name }}</h3>
-              <p class="text-xs text-slate-500 font-medium">{{ tracking.rider_vehicle }}</p>
-              <div class="flex items-center gap-1 mt-1">
-                <span class="text-xs font-bold text-amber-500">★ 5.0</span>
-                <span class="text-[11px] text-slate-400">• 1,450+ deliveries</span>
+      <!-- Courier Partner Card (Damodar Vaishnav) -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted text-uppercase fw-bold small">Delivery Partner</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1">
+              <i class="bi bi-patch-check-fill me-1"></i> Verified Express Rider
+            </span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-4 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 28px; flex-shrink: 0;">
+                🛵
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0 text-dark">{{ tracking.rider_name }}</h5>
+                <p class="text-muted small mb-1">{{ tracking.rider_vehicle }}</p>
+                <div class="d-flex align-items-center gap-1 small">
+                  <span class="text-warning fw-bold">★ 5.0</span>
+                  <span class="text-muted">• 1,450+ deliveries</span>
+                </div>
               </div>
             </div>
+            <a href="tel:{{ tracking.rider_phone }}" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center shadow flex-shrink-0" style="width: 46px; height: 46px;" title="Call Damodar">
+              <i class="bi bi-telephone-fill fs-5 text-white"></i>
+            </a>
           </div>
-
-          <a href="tel:{{ tracking.rider_phone }}" class="w-12 h-12 rounded-2xl bg-[#0c831f] hover:bg-[#096818] text-white flex items-center justify-center shadow-lg shadow-emerald-700/20 transition transform active:scale-95">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-            </svg>
-          </a>
         </div>
       </div>
 
-      <!-- Delivery PIN Card -->
-      <div class="bg-gradient-to-br from-yellow-50 via-amber-50 to-emerald-50/40 rounded-3xl p-6 shadow-sm border border-yellow-200/80 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold uppercase tracking-wider text-amber-900">Delivery Confirmation PIN</span>
-          <span class="text-lg">🔒</span>
-        </div>
-
-        <div class="my-3 text-center sm:text-left">
-          <div class="text-3xl sm:text-4xl font-black text-slate-900 tracking-widest font-mono">
-            {{ tracking.delivery_pin }}
+      <!-- Delivery Confirmation PIN Card -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #fde68a !important;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-warning-emphasis text-uppercase fw-bold small">Delivery Confirmation PIN</span>
+            <i class="bi bi-shield-lock-fill text-warning-emphasis fs-5"></i>
           </div>
-          <p class="text-xs text-amber-900/80 font-medium mt-1">
-            Share this 4-digit PIN with Damodar at your doorstep to receive your groceries safely.
-          </p>
-        </div>
-
-        <div class="text-[11px] text-slate-500 font-medium">
-          Zero-contact delivery supported upon request
+          <div class="my-2 text-center text-md-start">
+            <div class="display-6 fw-bold font-monospace text-dark letter-spacing-2">
+              {{ tracking.delivery_pin }}
+            </div>
+            <p class="small text-warning-emphasis mb-0 mt-1">
+              Share this 4-digit PIN with Damodar at your doorstep to collect your groceries.
+            </p>
+          </div>
+          <small class="text-muted mt-auto pt-2">Zero-contact delivery supported upon request</small>
         </div>
       </div>
 
     </div>
 
-    <!-- Blinkit Express 4-Step Milestone Timeline -->
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
-      <h3 class="text-sm font-extrabold text-slate-900 mb-5 uppercase tracking-wider">Order Journey</h3>
+    <!-- 4-STEP ORDER JOURNEY TIMELINE -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <h6 class="fw-bold text-dark text-uppercase small mb-4">Order Journey</h6>
 
-      <div class="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
+      <div class="timeline-container">
 
-        <!-- Stage 1: Order Placed -->
-        <div class="relative flex items-start gap-4">
-          <div class="w-7 h-7 rounded-full bg-[#0c831f] text-white flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white">
-            ✓
+        <!-- Stage 1 -->
+        <div class="step-track-item">
+          <div class="step-icon-badge bg-success text-white">
+            <i class="bi bi-check2"></i>
           </div>
-          <div class="flex-1">
-            <h4 class="text-sm font-bold text-slate-900">Order Confirmed & Micro-Hub Assigned</h4>
-            <p class="text-xs text-slate-500 mt-0.5">{{ tracking.dark_store_name }}</p>
-          </div>
+          <h6 class="fw-bold mb-0 text-dark">Order Confirmed & Micro-Hub Assigned</h6>
+          <small class="text-muted">{{ tracking.dark_store_name }}</small>
         </div>
 
-        <!-- Stage 2: Packed -->
-        <div class="relative flex items-start gap-4">
-          <div id="stepPackedDot" class="w-7 h-7 rounded-full {% if telemetry.stage == 'RECEIVED' %}bg-slate-200 text-slate-500{% else %}bg-[#0c831f] text-white{% endif %} flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white">
-            {% if telemetry.stage == 'RECEIVED' %}2{% else %}✓{% endif %}
+        <!-- Stage 2 -->
+        <div class="step-track-item">
+          <div id="stepPackedDot" class="step-icon-badge {% if telemetry.stage == 'RECEIVED' %}bg-light text-secondary border{% else %}bg-success text-white{% endif %}">
+            {% if telemetry.stage == 'RECEIVED' %}2{% else %}<i class="bi bi-check2"></i>{% endif %}
           </div>
-          <div class="flex-1">
-            <h4 class="text-sm font-bold text-slate-900">Quality Checked & Packed</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Fresh items packed in insulated, sanitized bags</p>
-          </div>
+          <h6 class="fw-bold mb-0 text-dark">Quality Checked & Packed</h6>
+          <small class="text-muted">Fresh items packed in insulated, sanitized bags</small>
         </div>
 
-        <!-- Stage 3: On The Way -->
-        <div class="relative flex items-start gap-4">
-          <div id="stepWayDot" class="w-7 h-7 rounded-full {% if telemetry.stage in 'RECEIVED,PACKED' %}bg-slate-200 text-slate-500{% else %}bg-[#0c831f] text-white{% endif %} flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white">
-            {% if telemetry.stage in 'RECEIVED,PACKED' %}3{% else %}✓{% endif %}
+        <!-- Stage 3 -->
+        <div class="step-track-item">
+          <div id="stepWayDot" class="step-icon-badge {% if telemetry.stage in 'RECEIVED,PACKED' %}bg-light text-secondary border{% else %}bg-success text-white{% endif %}">
+            {% if telemetry.stage in 'RECEIVED,PACKED' %}3{% else %}<i class="bi bi-check2"></i>{% endif %}
           </div>
-          <div class="flex-1">
-            <h4 class="text-sm font-bold text-slate-900">Damodar Vaishnav is on the way</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Riding along express corridor with your groceries</p>
-          </div>
+          <h6 class="fw-bold mb-0 text-dark">Damodar Vaishnav is on the way</h6>
+          <small class="text-muted">Riding along express corridor with your groceries</small>
         </div>
 
-        <!-- Stage 4: Delivered -->
-        <div class="relative flex items-start gap-4">
-          <div id="stepDeliveredDot" class="w-7 h-7 rounded-full {% if telemetry.is_delivered %}bg-[#0c831f] text-white{% else %}bg-slate-200 text-slate-500{% endif %} flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white">
-            {% if telemetry.is_delivered %}✓{% else %}4{% endif %}
+        <!-- Stage 4 -->
+        <div class="step-track-item">
+          <div id="stepDeliveredDot" class="step-icon-badge {% if telemetry.is_delivered %}bg-success text-white{% else %}bg-light text-secondary border{% endif %}">
+            {% if telemetry.is_delivered %}<i class="bi bi-check2"></i>{% else %}4{% endif %}
           </div>
-          <div class="flex-1">
-            <h4 class="text-sm font-bold text-slate-900">Delivered to Doorstep</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Doorstep delivery completed upon PIN verification</p>
-          </div>
+          <h6 class="fw-bold mb-0 text-dark">Delivered at Doorstep</h6>
+          <small class="text-muted">Doorstep handover completed upon PIN verification</small>
         </div>
 
       </div>
     </div>
 
-    <!-- Delivery Address & Items Summary -->
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Delivery Details & Receipt</h3>
-        <a href="{% url 'orders:download_invoice' order.id %}" class="text-xs font-bold text-[#0c831f] hover:underline flex items-center gap-1">
-          <span>📄</span> Download Invoice
+    <!-- DELIVERY DETAILS & RECEIPT -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold text-dark text-uppercase small mb-0">Delivery Details & Receipt</h6>
+        <a href="{% url 'orders:download_invoice' order.id %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+          <i class="bi bi-file-earmark-pdf me-1"></i> Download Invoice
         </a>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-100">
-        <div>
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Delivering To</span>
-          <h4 class="text-sm font-black text-slate-900">{{ order.full_name }}</h4>
-          <p class="text-xs text-slate-600 mt-1 leading-relaxed">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
-          <p class="text-xs text-slate-500 mt-1">📞 {{ order.phone }}</p>
+      <div class="row g-4 pt-2 border-top">
+        <div class="col-md-6">
+          <span class="text-muted small fw-bold text-uppercase d-block mb-1">Delivering To</span>
+          <h6 class="fw-bold mb-1 text-dark">{{ order.full_name }}</h6>
+          <p class="text-muted small mb-1 leading-relaxed">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+          <small class="text-muted">📞 {{ order.phone }}</small>
         </div>
 
-        <div>
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Items in this Order ({{ items.count }})</span>
-          <div class="space-y-2 mt-2">
+        <div class="col-md-6">
+          <span class="text-muted small fw-bold text-uppercase d-block mb-2">Items Ordered ({{ order.items.count }})</span>
+          <div class="space-y-1">
             {% for item in items %}
-            <div class="flex items-center justify-between text-xs py-1">
-              <span class="text-slate-700 font-medium">{{ item.product.name }} <strong class="text-slate-900">x{{ item.quantity }}</strong></span>
-              <span class="font-bold text-slate-900">₹{{ item.subtotal }}</span>
+            <div class="d-flex justify-content-between small py-1 border-bottom border-light">
+              <span>{{ item.product.name }} <strong class="text-dark">x{{ item.quantity }}</strong></span>
+              <span class="fw-bold text-dark">₹{{ item.subtotal }}</span>
             </div>
             {% endfor %}
-            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-sm font-black text-slate-900">
+            <div class="d-flex justify-content-between pt-2 fw-bold">
               <span>Total Paid</span>
-              <span class="text-[#0c831f]">₹{{ order.total_amount }}</span>
+              <span class="text-success fs-6">₹{{ order.total_amount }}</span>
             </div>
           </div>
         </div>
@@ -328,7 +316,6 @@
 </div>
 
 <script>
-  // Dynamic Real-World Leaflet Map Implementation
   document.addEventListener("DOMContentLoaded", function () {
     const storeLat = {{ tracking.dark_store_lat }};
     const storeLng = {{ tracking.dark_store_lng }};
@@ -337,16 +324,16 @@
     let riderLat = {{ telemetry.rider_lat }};
     let riderLng = {{ telemetry.rider_lng }};
 
-    // Initialize Leaflet Map centered on Indore/City coordinates
+    // Initialize Leaflet Map
     const map = L.map('live-tracking-map', {
       zoomControl: true,
       scrollWheelZoom: false
     }).setView([riderLat, riderLng], 14);
 
-    // OpenStreetMap high-definition tile layer
+    // High definition OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors • Om Super Mart Express'
+      attribution: '&copy; OpenStreetMap &bull; Om Super Mart Express'
     }).addTo(map);
 
     // Custom Icon Definitions
@@ -417,7 +404,6 @@
         .then(res => res.json())
         .then(data => {
           if (data.status === "success") {
-            // Update rider marker position
             if (data.rider_lat && data.rider_lng) {
               riderLat = data.rider_lat;
               riderLng = data.rider_lng;
@@ -429,13 +415,11 @@
               ]);
             }
 
-            // Update GPS active badge
             const gpsBadge = document.getElementById("liveGpsIndicator");
             if (data.is_live_gps) {
-              gpsBadge.classList.remove("hidden");
+              gpsBadge.classList.remove("d-none");
             }
 
-            // Update Header ETA & Desc
             const headlineEta = document.getElementById("headlineEta");
             const headlineDesc = document.getElementById("headlineDesc");
             if (data.is_delivered) {
@@ -445,31 +429,29 @@
               headlineEta.innerHTML = "Arriving at your doorstep now! 🔔";
               headlineDesc.textContent = data.stage_desc;
             } else {
-              headlineEta.innerHTML = 'Arriving in <span class="text-[#0c831f]">' + data.eta_minutes + '-' + (data.eta_minutes + 2) + ' Mins</span>';
+              headlineEta.innerHTML = 'Arriving in <span class="text-success">' + data.eta_minutes + '-' + (data.eta_minutes + 2) + ' Mins</span>';
               headlineDesc.textContent = data.stage_desc;
             }
 
-            // Update Progress Bar
             document.getElementById("progressLabel").textContent = data.stage_title;
             document.getElementById("progressPercentage").textContent = data.progress + "% Complete";
             document.getElementById("progressBar").style.width = data.progress + "%";
 
-            // Update Step timeline dots
             const stepPacked = document.getElementById("stepPackedDot");
             const stepWay = document.getElementById("stepWayDot");
             const stepDelivered = document.getElementById("stepDeliveredDot");
 
             if (data.stage !== "RECEIVED") {
-              stepPacked.className = "w-7 h-7 rounded-full bg-[#0c831f] text-white flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white";
-              stepPacked.textContent = "✓";
+              stepPacked.className = "step-icon-badge bg-success text-white";
+              stepPacked.innerHTML = '<i class="bi bi-check2"></i>';
             }
             if (["ON_THE_WAY", "ARRIVING", "DELIVERED"].includes(data.stage)) {
-              stepWay.className = "w-7 h-7 rounded-full bg-[#0c831f] text-white flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white";
-              stepWay.textContent = "✓";
+              stepWay.className = "step-icon-badge bg-success text-white";
+              stepWay.innerHTML = '<i class="bi bi-check2"></i>';
             }
             if (data.is_delivered) {
-              stepDelivered.className = "w-7 h-7 rounded-full bg-[#0c831f] text-white flex items-center justify-center text-xs font-bold z-10 ring-4 ring-white";
-              stepDelivered.textContent = "✓";
+              stepDelivered.className = "step-icon-badge bg-success text-white";
+              stepDelivered.innerHTML = '<i class="bi bi-check2"></i>';
             }
 
             document.getElementById("mapLastUpdated").textContent = "Updated " + new Date().toLocaleTimeString();
@@ -480,7 +462,6 @@
         });
     }
 
-    // Interval polling
     setInterval(pollLiveTracking, 3500);
   });
 </script>

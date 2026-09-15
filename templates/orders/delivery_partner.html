@@ -3,188 +3,213 @@
 
 {% block title %}Delivery Partner Console - Order #{{ order.id }} | Om Super Mart{% endblock %}
 
-{% block content %}
-<div class="min-h-screen bg-slate-900 text-slate-100 pb-20 pt-6 px-4">
-  <div class="max-w-2xl mx-auto space-y-6">
+{% block extra_head %}
+<style>
+  .partner-console-card {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    color: #f8fafc;
+  }
+  .partner-console-card .text-muted {
+    color: #94a3b8 !important;
+  }
+  .pulse-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .pulse-dot.active {
+    background-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+    animation: pulseGpsDot 1.5s infinite;
+  }
+  @keyframes pulseGpsDot {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+</style>
+{% endblock %}
 
-    <!-- Top Partner Badge -->
-    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-3xl p-5 shadow-2xl shadow-emerald-950/50 border border-emerald-500/30">
-      <div class="flex items-center justify-between flex-wrap gap-4">
-        <div class="flex items-center space-x-3">
-          <div class="w-13 h-13 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner border border-white/20">
+{% block content %}
+<div class="container py-4">
+  <div class="mx-auto" style="max-width: 680px;">
+
+    <!-- TOP PARTNER HERO BADGE -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4 text-white" style="background: linear-gradient(135deg, #0c831f 0%, #15803d 100%);">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-4 bg-white bg-opacity-20 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; font-size: 28px;">
             🛵
           </div>
           <div>
-            <div class="flex items-center space-x-2">
-              <span class="text-xs font-black tracking-wider uppercase px-2.5 py-0.5 bg-yellow-300 text-yellow-950 rounded-full">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge text-bg-warning fw-bold px-2 py-1 rounded-pill">
                 Verified Fleet Rider
               </span>
-              <span class="text-xs font-bold text-emerald-100">★ 5.0 Rating</span>
+              <small class="fw-semibold">★ 5.0 Rating</small>
             </div>
-            <h1 class="text-xl font-black text-white mt-1">Damodar Vaishnav</h1>
-            <p class="text-xs text-emerald-100 font-medium">Om Super Mart Express Fleet • {{ tracking.rider_vehicle }}</p>
+            <h4 class="fw-bold mb-0">Damodar Vaishnav</h4>
+            <small class="text-white-50">Om Super Mart Express Fleet &bull; {{ tracking.rider_vehicle }}</small>
           </div>
         </div>
-        <div class="text-right">
-          <span class="text-xs text-emerald-200 uppercase tracking-widest block font-semibold">Order ID</span>
-          <span class="text-2xl font-black text-white">#{{ order.id }}</span>
+        <div class="text-end">
+          <span class="small text-white-50 text-uppercase fw-bold d-block">Order ID</span>
+          <span class="fs-4 fw-bold">#{{ order.id }}</span>
         </div>
       </div>
     </div>
 
-    <!-- GPS Broadcasting Control Center -->
-    <div class="bg-slate-800/90 rounded-3xl p-6 border border-slate-700/80 shadow-xl backdrop-blur-sm">
-      <div class="flex items-center justify-between mb-4">
+    <!-- GPS BROADCASTING CONTROL CENTER -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 partner-console-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <span class="relative flex h-3 w-3">
-              <span id="gpsPulseRing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 hidden"></span>
-              <span id="gpsStatusDot" class="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
-            </span>
+          <h5 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+            <span id="gpsStatusDot" class="pulse-dot bg-warning"></span>
             Real-Time GPS Broadcast
-          </h2>
-          <p class="text-xs text-slate-400 mt-0.5">Transmits your real location so customer sees you moving on the live map</p>
+          </h5>
+          <small class="text-muted">Transmits your live GPS so the customer sees you moving on the map</small>
         </div>
-        <span id="gpsStatusBadge" class="text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">
+        <span id="gpsStatusBadge" class="badge text-bg-warning rounded-pill px-3 py-1.5 fw-bold">
           Standby
         </span>
       </div>
 
-      <!-- Live GPS Coordinates Output -->
-      <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800 mb-5">
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-          <div>
-            <span class="text-slate-500 block uppercase tracking-wider font-semibold">Latitude</span>
-            <span id="latDisplay" class="text-slate-200 font-mono font-bold text-sm">--.------</span>
+      <!-- Live GPS Coordinates Box -->
+      <div class="bg-dark bg-opacity-50 rounded-3 p-3 mb-3 border border-secondary border-opacity-25">
+        <div class="row g-2 text-center small">
+          <div class="col-4">
+            <span class="text-muted d-block text-uppercase fw-bold">Latitude</span>
+            <span id="latDisplay" class="font-monospace fw-bold text-light">--.------</span>
           </div>
-          <div>
-            <span class="text-slate-500 block uppercase tracking-wider font-semibold">Longitude</span>
-            <span id="lngDisplay" class="text-slate-200 font-mono font-bold text-sm">--.------</span>
+          <div class="col-4">
+            <span class="text-muted d-block text-uppercase fw-bold">Longitude</span>
+            <span id="lngDisplay" class="font-monospace fw-bold text-light">--.------</span>
           </div>
-          <div>
-            <span class="text-slate-500 block uppercase tracking-wider font-semibold">Accuracy / Ping</span>
-            <span id="accuracyDisplay" class="text-emerald-400 font-mono font-bold text-sm">Waiting</span>
+          <div class="col-4">
+            <span class="text-muted d-block text-uppercase fw-bold">Accuracy / Ping</span>
+            <span id="accuracyDisplay" class="font-monospace fw-bold text-success">Waiting</span>
           </div>
         </div>
-        <div id="gpsFeedbackMsg" class="mt-2 text-xs text-slate-400">
+        <div id="gpsFeedbackMsg" class="small text-muted mt-2 text-center">
           Tap the button below to allow browser GPS and broadcast live tracking to the customer.
         </div>
       </div>
 
-      <!-- Action Buttons for GPS -->
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button id="toggleGpsBtn" type="button" class="flex-1 py-3.5 px-6 rounded-2xl font-black text-sm text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-300 hover:from-yellow-300 hover:to-amber-200 shadow-lg shadow-yellow-500/20 transition flex items-center justify-center gap-2">
+      <!-- Action Buttons -->
+      <div class="d-grid d-sm-flex gap-2">
+        <button id="toggleGpsBtn" type="button" class="btn btn-warning btn-lg rounded-pill fw-bold flex-grow-1 shadow-sm">
           <span id="gpsBtnIcon">📡</span>
           <span id="gpsBtnText">Start Live GPS Broadcasting</span>
         </button>
-
-        <a href="{{ google_maps_nav_url }}" target="_blank" rel="noopener noreferrer" class="py-3.5 px-6 rounded-2xl font-bold text-sm text-white bg-slate-700 hover:bg-slate-600 border border-slate-600 shadow transition flex items-center justify-center gap-2">
-          <span>🧭</span>
-          <span>Google Maps Turn-by-Turn</span>
+        <a href="{{ google_maps_nav_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg rounded-pill fw-bold">
+          <i class="bi bi-compass me-1"></i> Open Google Maps
         </a>
       </div>
     </div>
 
-    <!-- Customer & Destination Card -->
-    <div class="bg-slate-800/90 rounded-3xl p-6 border border-slate-700/80 shadow-xl">
-      <h3 class="text-xs uppercase tracking-wider font-extrabold text-slate-400 mb-4 flex items-center gap-2">
-        <span>📍</span> Customer & Delivery Location
-      </h3>
+    <!-- CUSTOMER & DESTINATION CARD -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold text-uppercase text-muted small mb-0">
+          <i class="bi bi-geo-alt-fill text-danger me-1"></i> Customer & Delivery Destination
+        </h6>
+        <a href="tel:{{ order.phone }}" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
+          <i class="bi bi-telephone-fill me-1"></i> Call Customer
+        </a>
+      </div>
 
-      <div class="space-y-3">
-        <div class="flex items-start justify-between flex-wrap gap-2">
-          <div>
-            <h4 class="text-lg font-black text-white">{{ order.full_name }}</h4>
-            <p class="text-sm text-slate-300 mt-1 leading-relaxed">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
-          </div>
-          <a href="tel:{{ order.phone }}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">
-            <span>📞</span> Call Customer
-          </a>
-        </div>
-
-        <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
-          <span>Payment: <strong class="text-white font-semibold">{{ order.payment_method|default:'Paid Online' }}</strong></span>
-          <span>Order Amount: <strong class="text-emerald-400 font-bold text-sm">₹{{ order.total_amount }}</strong></span>
+      <div>
+        <h5 class="fw-bold mb-1 text-dark">{{ order.full_name }}</h5>
+        <p class="text-muted mb-2">{{ order.address }}, {{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top small">
+          <span class="text-muted">Payment: <strong class="text-dark">{{ order.payment_method|default:'Paid Online' }}</strong></span>
+          <span class="text-muted">Total: <strong class="text-success fs-6">₹{{ order.total_amount }}</strong></span>
         </div>
       </div>
     </div>
 
-    <!-- Stage Controls -->
-    <div class="bg-slate-800/90 rounded-3xl p-6 border border-slate-700/80 shadow-xl space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-sm font-black text-white flex items-center gap-2">
-          <span>⚡</span> Quick Status Progression
-        </h3>
-        <span class="text-xs font-bold px-2.5 py-1 bg-slate-700 text-slate-300 rounded-lg">
-          Current: {{ telemetry.stage }}
-        </span>
+    <!-- STAGE PROGRESSION BUTTONS -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold text-uppercase text-muted small mb-0">Delivery Stage Control</h6>
+        <span class="badge text-bg-light border text-dark fw-bold">Current: {{ telemetry.stage }}</span>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="row g-2">
         <!-- Stage: Packed -->
-        <form method="POST">
-          {% csrf_token %}
-          <input type="hidden" name="token" value="{{ token }}">
-          <input type="hidden" name="action" value="update_stage">
-          <input type="hidden" name="stage" value="PACKED">
-          <button type="submit" class="w-full py-3 px-4 rounded-xl text-xs font-bold text-left transition flex items-center justify-between {% if telemetry.stage == 'PACKED' %}bg-emerald-600 text-white ring-2 ring-emerald-400{% else %}bg-slate-700/70 hover:bg-slate-700 text-slate-200{% endif %}">
-            <span>📦 1. Quality Checked & Packed</span>
-            {% if telemetry.stage == 'PACKED' %}<span>✓ Active</span>{% endif %}
-          </button>
-        </form>
+        <div class="col-sm-6">
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="token" value="{{ token }}">
+            <input type="hidden" name="action" value="update_stage">
+            <input type="hidden" name="stage" value="PACKED">
+            <button type="submit" class="btn w-100 py-2.5 rounded-3 fw-bold text-start d-flex justify-content-between align-items-center {% if telemetry.stage == 'PACKED' %}btn-success{% else %}btn-outline-secondary{% endif %}">
+              <span>📦 1. Mark Packed</span>
+              {% if telemetry.stage == 'PACKED' %}<i class="bi bi-check-lg"></i>{% endif %}
+            </button>
+          </form>
+        </div>
 
         <!-- Stage: On The Way -->
-        <form method="POST">
-          {% csrf_token %}
-          <input type="hidden" name="token" value="{{ token }}">
-          <input type="hidden" name="action" value="update_stage">
-          <input type="hidden" name="stage" value="ON_THE_WAY">
-          <button type="submit" class="w-full py-3 px-4 rounded-xl text-xs font-bold text-left transition flex items-center justify-between {% if telemetry.stage == 'ON_THE_WAY' %}bg-emerald-600 text-white ring-2 ring-emerald-400{% else %}bg-slate-700/70 hover:bg-slate-700 text-slate-200{% endif %}">
-            <span>🛵 2. Out For Delivery (On The Way)</span>
-            {% if telemetry.stage == 'ON_THE_WAY' %}<span>✓ Active</span>{% endif %}
-          </button>
-        </form>
+        <div class="col-sm-6">
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="token" value="{{ token }}">
+            <input type="hidden" name="action" value="update_stage">
+            <input type="hidden" name="stage" value="ON_THE_WAY">
+            <button type="submit" class="btn w-100 py-2.5 rounded-3 fw-bold text-start d-flex justify-content-between align-items-center {% if telemetry.stage == 'ON_THE_WAY' %}btn-success{% else %}btn-outline-secondary{% endif %}">
+              <span>🛵 2. Out For Delivery</span>
+              {% if telemetry.stage == 'ON_THE_WAY' %}<i class="bi bi-check-lg"></i>{% endif %}
+            </button>
+          </form>
+        </div>
 
-        <!-- Stage: Arriving -->
-        <form method="POST">
-          {% csrf_token %}
-          <input type="hidden" name="token" value="{{ token }}">
-          <input type="hidden" name="action" value="update_stage">
-          <input type="hidden" name="stage" value="ARRIVING">
-          <button type="submit" class="w-full py-3 px-4 rounded-xl text-xs font-bold text-left transition flex items-center justify-between {% if telemetry.stage == 'ARRIVING' %}bg-emerald-600 text-white ring-2 ring-emerald-400{% else %}bg-slate-700/70 hover:bg-slate-700 text-slate-200{% endif %}">
-            <span>🔔 3. Arrived at Customer Doorstep</span>
-            {% if telemetry.stage == 'ARRIVING' %}<span>✓ Active</span>{% endif %}
-          </button>
-        </form>
+        <!-- Stage: Arrived -->
+        <div class="col-sm-6">
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="token" value="{{ token }}">
+            <input type="hidden" name="action" value="update_stage">
+            <input type="hidden" name="stage" value="ARRIVING">
+            <button type="submit" class="btn w-100 py-2.5 rounded-3 fw-bold text-start d-flex justify-content-between align-items-center {% if telemetry.stage == 'ARRIVING' %}btn-success{% else %}btn-outline-secondary{% endif %}">
+              <span>🔔 3. Arrived at Doorstep</span>
+              {% if telemetry.stage == 'ARRIVING' %}<i class="bi bi-check-lg"></i>{% endif %}
+            </button>
+          </form>
+        </div>
 
-        <!-- Stage: Complete with PIN Modal Trigger -->
-        <button type="button" onclick="openPinModal()" class="w-full py-3 px-4 rounded-xl text-xs font-black text-left transition flex items-center justify-between {% if telemetry.is_delivered %}bg-emerald-600 text-white ring-2 ring-emerald-400{% else %}bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:brightness-110 shadow-lg shadow-emerald-900/30{% endif %}">
-          <span>✅ 4. Enter PIN & Complete</span>
-          {% if telemetry.is_delivered %}<span>✓ Delivered</span>{% else %}<span>Verify PIN →</span>{% endif %}
-        </button>
+        <!-- Stage: Delivered with PIN -->
+        <div class="col-sm-6">
+          <button type="button" class="btn w-100 py-2.5 rounded-3 fw-bold text-start d-flex justify-content-between align-items-center {% if telemetry.is_delivered %}btn-success{% else %}btn-primary{% endif %}" data-bs-toggle="modal" data-bs-target="#pinVerifyModal">
+            <span>✅ 4. Enter PIN & Complete</span>
+            {% if telemetry.is_delivered %}<i class="bi bi-check2-all"></i>{% else %}<span>Verify &rarr;</span>{% endif %}
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Items Packing Checklist -->
-    <div class="bg-slate-800/90 rounded-3xl p-6 border border-slate-700/80 shadow-xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xs uppercase tracking-wider font-extrabold text-slate-400 flex items-center gap-2">
-          <span>🛒</span> Grocery Packing Checklist ({{ items.count }} items)
-        </h3>
-        <span class="text-xs text-slate-400">Check off items before leaving micro-hub</span>
+    <!-- PACKING CHECKLIST -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold text-uppercase text-muted small mb-0">
+          <i class="bi bi-basket2-fill text-success me-1"></i> Packing Checklist ({{ items.count }} items)
+        </h6>
+        <small class="text-muted">Check off items before leaving store</small>
       </div>
 
-      <div class="divide-y divide-slate-700/60">
+      <div class="list-group list-group-flush">
         {% for item in items %}
-        <label class="flex items-center justify-between py-3.5 cursor-pointer hover:bg-slate-700/20 px-2 rounded-xl transition">
-          <div class="flex items-center gap-3">
-            <input type="checkbox" class="w-5 h-5 rounded-lg text-emerald-500 bg-slate-900 border-slate-700 focus:ring-emerald-500 focus:ring-offset-slate-900">
+        <label class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-light cursor-pointer">
+          <div class="d-flex align-items-center gap-3">
+            <input class="form-check-input mt-0" type="checkbox" style="width: 20px; height: 20px;">
             <div>
-              <p class="text-sm font-bold text-white">{{ item.product.name }}</p>
-              <p class="text-xs text-slate-400">₹{{ item.price }} each</p>
+              <span class="fw-semibold text-dark">{{ item.product.name }}</span>
+              <small class="text-muted d-block">₹{{ item.price }} each</small>
             </div>
           </div>
-          <span class="text-sm font-extrabold px-3 py-1 bg-slate-900 rounded-lg text-yellow-300">
+          <span class="badge text-bg-light border text-dark fw-bold px-2.5 py-1">
             x{{ item.quantity }}
           </span>
         </label>
@@ -195,36 +220,34 @@
   </div>
 </div>
 
-<!-- Customer Delivery PIN Verification Modal -->
-<div id="pinModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-  <div class="max-w-sm w-full bg-slate-900 rounded-3xl p-6 border border-slate-700 shadow-2xl text-center space-y-4">
-    <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-3xl text-emerald-400">
-      🔑
+<!-- PIN VERIFICATION MODAL -->
+<div class="modal fade" id="pinVerifyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow p-4 text-center">
+      <div class="rounded-circle bg-success-subtle text-success mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 28px;">
+        🔑
+      </div>
+      <h5 class="fw-bold mb-1">Complete Delivery</h5>
+      <p class="text-muted small mb-3">
+        Ask <strong>{{ order.full_name }}</strong> for their 4-digit Delivery PIN to confirm doorstep handover.
+      </p>
+
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ token }}">
+        <input type="hidden" name="action" value="update_stage">
+        <input type="hidden" name="stage" value="DELIVERED">
+
+        <div class="mb-3">
+          <input type="text" name="delivery_pin" maxlength="6" placeholder="Enter PIN" required class="form-control form-control-lg text-center fw-bold fs-3 font-monospace letter-spacing-2 rounded-3 border-2">
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-light rounded-pill flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success rounded-pill fw-bold flex-grow-1">Confirm Handover</button>
+        </div>
+      </form>
     </div>
-    <h3 class="text-lg font-black text-white">Complete Delivery</h3>
-    <p class="text-xs text-slate-400 leading-relaxed">
-      Ask <strong>{{ order.full_name }}</strong> for their 4-digit Delivery PIN to confirm parcel handover.
-    </p>
-
-    <form method="POST" class="space-y-4">
-      {% csrf_token %}
-      <input type="hidden" name="token" value="{{ token }}">
-      <input type="hidden" name="action" value="update_stage">
-      <input type="hidden" name="stage" value="DELIVERED">
-
-      <div>
-        <input type="text" name="delivery_pin" maxlength="6" placeholder="Enter PIN" required class="w-full text-center tracking-widest text-2xl font-black py-3 bg-slate-950 border border-slate-700 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-      </div>
-
-      <div class="flex gap-3">
-        <button type="button" onclick="closePinModal()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-sm transition">
-          Cancel
-        </button>
-        <button type="submit" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-sm transition shadow-lg shadow-emerald-600/30">
-          Confirm Delivery
-        </button>
-      </div>
-    </form>
   </div>
 </div>
 
@@ -239,7 +262,6 @@
   const gpsBtnIcon = document.getElementById("gpsBtnIcon");
   const gpsStatusBadge = document.getElementById("gpsStatusBadge");
   const gpsStatusDot = document.getElementById("gpsStatusDot");
-  const gpsPulseRing = document.getElementById("gpsPulseRing");
   const latDisplay = document.getElementById("latDisplay");
   const lngDisplay = document.getElementById("lngDisplay");
   const accuracyDisplay = document.getElementById("accuracyDisplay");
@@ -270,14 +292,14 @@
     .then(res => res.json())
     .then(data => {
       if (data.status === "success") {
-        gpsFeedbackMsg.innerHTML = "✅ <span class='text-emerald-400'>Broadcasting Live GPS:</span> Customer tracking map is updating in real time (" + accuracy + "m accuracy).";
+        gpsFeedbackMsg.innerHTML = "<span class='text-success fw-bold'>✓ Broadcasting Live GPS:</span> Customer map updating in real time (" + accuracy + "m accuracy).";
       } else {
-        gpsFeedbackMsg.innerHTML = "⚠️ " + (data.message || "Failed to update location.");
+        gpsFeedbackMsg.innerHTML = "<span class='text-warning'>⚠️ " + (data.message || "Failed to update location.") + "</span>";
       }
     })
     .catch(err => {
       console.error("GPS Broadcast error:", err);
-      gpsFeedbackMsg.textContent = "⚠️ Network issue broadcasting coordinates. Retrying next tick...";
+      gpsFeedbackMsg.textContent = "⚠️ Network issue broadcasting coordinates. Retrying...";
     });
   }
 
@@ -287,7 +309,7 @@
     if (err.code === 1) msg = "Permission denied. Please allow location access in your mobile browser.";
     else if (err.code === 2) msg = "Position unavailable. Please ensure GPS/Location is enabled.";
     else if (err.code === 3) msg = "GPS timed out. Retrying...";
-    gpsFeedbackMsg.textContent = "❌ " + msg;
+    gpsFeedbackMsg.innerHTML = "<span class='text-danger fw-bold'>❌ " + msg + "</span>";
     stopBroadcasting();
   }
 
@@ -301,22 +323,19 @@
     isBroadcasting = true;
 
     gpsStatusBadge.textContent = "LIVE GPS ACTIVE";
-    gpsStatusBadge.className = "text-xs font-bold px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-500/40";
-    gpsStatusDot.className = "relative inline-flex rounded-full h-3 w-3 bg-emerald-400";
-    gpsPulseRing.classList.remove("hidden");
+    gpsStatusBadge.className = "badge text-bg-success rounded-pill px-3 py-1.5 fw-bold";
+    gpsStatusDot.className = "pulse-dot active";
 
     gpsBtnText.textContent = "Stop GPS Broadcasting";
     gpsBtnIcon.textContent = "⏸️";
-    toggleGpsBtn.className = "flex-1 py-3.5 px-6 rounded-2xl font-black text-sm text-white bg-rose-600 hover:bg-rose-500 shadow-lg shadow-rose-600/30 transition flex items-center justify-center gap-2";
+    toggleGpsBtn.className = "btn btn-danger btn-lg rounded-pill fw-bold flex-grow-1 shadow-sm";
 
-    // Immediate initial fix
     navigator.geolocation.getCurrentPosition(sendCoordinates, handleGpsError, {
       enableHighAccuracy: true,
       timeout: 10000,
       maximumAge: 0
     });
 
-    // Continuous watch
     watchId = navigator.geolocation.watchPosition(sendCoordinates, handleGpsError, {
       enableHighAccuracy: true,
       timeout: 15000,
@@ -331,14 +350,13 @@
     }
     isBroadcasting = false;
 
-    gpsStatusBadge.textContent = "Paused";
-    gpsStatusBadge.className = "text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30";
-    gpsStatusDot.className = "relative inline-flex rounded-full h-3 w-3 bg-amber-400";
-    gpsPulseRing.classList.add("hidden");
+    gpsStatusBadge.textContent = "Standby";
+    gpsStatusBadge.className = "badge text-bg-warning rounded-pill px-3 py-1.5 fw-bold";
+    gpsStatusDot.className = "pulse-dot bg-warning";
 
     gpsBtnText.textContent = "Start Live GPS Broadcasting";
     gpsBtnIcon.textContent = "📡";
-    toggleGpsBtn.className = "flex-1 py-3.5 px-6 rounded-2xl font-black text-sm text-slate-900 bg-gradient-to-r from-yellow-400 to-amber-300 hover:from-yellow-300 hover:to-amber-200 shadow-lg shadow-yellow-500/20 transition flex items-center justify-center gap-2";
+    toggleGpsBtn.className = "btn btn-warning btn-lg rounded-pill fw-bold flex-grow-1 shadow-sm";
   }
 
   toggleGpsBtn.addEventListener("click", function() {
@@ -348,13 +366,5 @@
       startBroadcasting();
     }
   });
-
-  // Modal controls
-  function openPinModal() {
-    document.getElementById("pinModal").classList.remove("hidden");
-  }
-  function closePinModal() {
-    document.getElementById("pinModal").classList.add("hidden");
-  }
 </script>
 {% endblock %}

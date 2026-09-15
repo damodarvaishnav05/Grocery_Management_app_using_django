@@ -210,3 +210,4 @@ Your delivery partner Damodar Vaishnav will deliver your order in 10-15 minutes.
     except Exception as e:
         print(f"Customer confirmation email error: {e}")
         return False
+
