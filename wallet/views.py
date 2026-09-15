@@ -136,25 +136,10 @@ def pay_with_wallet(request, order_id):
                     note=f"Wallet 1-Click Order #{order.id}"
                 )
 
-            # 5. Send Email Confirmation
-            if request.user.email:
-                send_mail(
-                    subject=f"Order #{order.id} Confirmed (Paid via Om Super Mart Wallet)",
-                    message=f"""
-Hello {order.full_name},
-
-Thank you for your order! Payment of ₹{order.total_amount} was successfully processed via your Om Super Mart Wallet.
-
-Order ID: #{order.id}
-Delivery Address: {order.address}, {order.city} - {order.pincode}
-Remaining Wallet Balance: ₹{wallet.balance}
-
-Om Super Mart express delivery will arrive in 10-15 minutes!
-""",
-                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>"),
-                    recipient_list=[request.user.email],
-                    fail_silently=True
-                )
+            # 5. Send Email Confirmation & Owner Alert
+            from orders.emails import send_owner_new_order_email, send_customer_order_confirmation
+            send_owner_new_order_email(order, payment_method="Om Super Mart Wallet (1-Click)")
+            send_customer_order_confirmation(order, payment_method="Om Super Mart Wallet (1-Click)")
 
         messages.success(
             request,

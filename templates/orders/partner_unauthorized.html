@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Unauthorized - Delivery Partner Portal{% endblock %}
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-4 py-12">
+  <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 text-center">
+    <div class="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl">
+      🔒
+    </div>
+    <h2 class="text-2xl font-black text-gray-900 mb-2">Access Restricted</h2>
+    <p class="text-gray-600 text-sm mb-6 leading-relaxed">
+      This is the private <strong>Om Super Mart Delivery Partner Console</strong> for Order #{{ order.id }}. 
+      To access, please use the direct link sent to your registered partner email (damodar4162@gmail.com) or log in as an authorized admin.
+    </p>
+    <a href="{% url 'accounts:login' %}" class="inline-flex items-center justify-center w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-600/20">
+      Log In with Partner Account
+    </a>
+  </div>
+</div>
+{% endblock %}

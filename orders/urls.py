@@ -63,5 +63,14 @@ urlpatterns = [
         views.set_user_location_api,
         name="set_user_location_api"
     ),
-
+    path(
+        "delivery-partner/<int:order_id>/",
+        views.delivery_partner_portal,
+        name="delivery_partner_portal"
+    ),
+    path(
+        "api/track/<int:order_id>/update-rider-location/",
+        views.update_rider_live_location_api,
+        name="update_rider_live_location"
+    ),
 ]

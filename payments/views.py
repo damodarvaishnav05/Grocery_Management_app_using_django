@@ -95,28 +95,10 @@ def payment_success(request, payment_id):
     order.status = Order.CONFIRMED
     order.save()
 
-    if request.user.email:
-
-        send_mail(
-            subject=f"Order #{order.id} Confirmed",
-
-            message=f"""
-    Hello {order.full_name},
-
-    Your order has been confirmed.
-
-    Order ID: {order.id}
-    Amount: ₹{order.total_amount}
-
-    Thank you for shopping with Om Super Mart.
-    """,
-
-            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>"),
-
-            recipient_list=[request.user.email],
-
-            fail_silently=True,
-        )
+    pay_method = "Cash on Delivery" if request.GET.get("method") == "cod" else "Razorpay Online (UPI/Card)"
+    from orders.emails import send_owner_new_order_email, send_customer_order_confirmation
+    send_owner_new_order_email(order, payment_method=pay_method)
+    send_customer_order_confirmation(order, payment_method=pay_method)
 
     # Reduce stock
     for item in order.items.all():

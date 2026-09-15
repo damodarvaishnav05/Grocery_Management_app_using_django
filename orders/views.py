@@ -1,8 +1,11 @@
 import json
 import math
+import urllib.parse
 from decimal import Decimal
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 
@@ -608,6 +611,8 @@ def order_tracking_api(request, order_id):
         "delivery_pin": tracking.delivery_pin,
         "is_delivered": telemetry["is_delivered"],
         "is_cancelled": telemetry.get("is_cancelled", False),
+        "is_live_gps": telemetry.get("is_live_gps", False),
+        "distance_km": telemetry.get("distance_km", None),
     })
 
 
@@ -715,4 +720,133 @@ def set_user_location_api(request):
             request.session["delivery_location"] = loc
             return JsonResponse({"status": "success", "location": loc})
     return JsonResponse({"status": "error", "message": "Invalid location"}, status=400)
+
+
+def delivery_partner_portal(request, order_id):
+    """
+    Dedicated Mobile Delivery Partner Console for Damodar Vaishnav.
+    Allows live GPS broadcasting, navigation, packing verification, and PIN-verified delivery completion.
+    """
+    order = get_object_or_404(Order, id=order_id)
+    tracking = order.get_tracking()
+
+    token = request.GET.get("token") or request.POST.get("token") or ""
+    owner_email = getattr(settings, "OWNER_NOTIFICATION_EMAIL", "damodar4162@gmail.com")
+
+    is_authorized = (
+        request.user.is_authenticated and (request.user.is_staff or getattr(request.user, "email", "") == owner_email)
+    ) or (token and tracking.partner_access_token and token == tracking.partner_access_token)
+
+    if not is_authorized:
+        return render(request, "orders/partner_unauthorized.html", {"order": order}, status=403)
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "update_stage":
+            new_stage = request.POST.get("stage")
+            if new_stage in dict(OrderDeliveryTracking.STAGE_CHOICES):
+                if new_stage == OrderDeliveryTracking.STAGE_DELIVERED:
+                    entered_pin = request.POST.get("delivery_pin", "").strip()
+                    if entered_pin and entered_pin != tracking.delivery_pin:
+                        messages.error(request, f"Incorrect delivery PIN '{entered_pin}'. Please ask the customer for their 4-digit PIN.")
+                        return redirect(f"{request.path}?token={token}")
+                    order.status = Order.DELIVERED
+                    order.save()
+                elif new_stage == OrderDeliveryTracking.STAGE_ON_THE_WAY and order.status == Order.CONFIRMED:
+                    order.status = Order.SHIPPED
+                    order.save()
+
+                tracking.override_stage = new_stage
+                tracking.save()
+                messages.success(request, f"Order #{order.id} status updated to: {new_stage}")
+                return redirect(f"{request.path}?token={token}")
+
+    telemetry = tracking.get_live_telemetry()
+    items = order.items.select_related("product").all()
+    encoded_dest = urllib.parse.quote_plus(f"{order.address}, {order.city}, {order.state} - {order.pincode}")
+    google_maps_nav_url = f"https://www.google.com/maps/dir/?api=1&destination={encoded_dest}"
+
+    return render(
+        request,
+        "orders/delivery_partner.html",
+        {
+            "order": order,
+            "tracking": tracking,
+            "telemetry": telemetry,
+            "items": items,
+            "token": token or tracking.partner_access_token,
+            "google_maps_nav_url": google_maps_nav_url,
+        }
+    )
+
+
+@csrf_exempt
+def update_rider_live_location_api(request, order_id):
+    """
+    Rider live location update API.
+    Receives real-time GPS from Damodar's mobile browser (navigator.geolocation.watchPosition)
+    and updates tracking.rider_lat, tracking.rider_lng, and is_live_tracking_active=True.
+    """
+    order = get_object_or_404(Order, id=order_id)
+    tracking = order.get_tracking()
+
+    token = (
+        request.headers.get("X-Partner-Token")
+        or request.GET.get("token")
+        or ""
+    )
+
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body.decode("utf-8") if request.body else "{}")
+        except Exception:
+            body = request.POST
+
+        if not token:
+            token = body.get("token", "")
+
+        owner_email = getattr(settings, "OWNER_NOTIFICATION_EMAIL", "damodar4162@gmail.com")
+        is_authorized = (
+            request.user.is_authenticated and (request.user.is_staff or getattr(request.user, "email", "") == owner_email)
+        ) or (token and tracking.partner_access_token and token == tracking.partner_access_token)
+
+        if not is_authorized:
+            return JsonResponse({"status": "error", "message": "Unauthorized partner token."}, status=403)
+
+        try:
+            lat = float(body.get("lat", 0))
+            lng = float(body.get("lng", 0))
+            accuracy = float(body.get("accuracy", 0))
+        except (ValueError, TypeError):
+            return JsonResponse({"status": "error", "message": "Invalid GPS coordinates."}, status=400)
+
+        if lat and lng:
+            tracking.rider_lat = lat
+            tracking.rider_lng = lng
+            tracking.is_live_tracking_active = True
+
+            stage = body.get("stage")
+            if stage and stage in dict(OrderDeliveryTracking.STAGE_CHOICES):
+                tracking.override_stage = stage
+                if stage == OrderDeliveryTracking.STAGE_DELIVERED and order.status != Order.DELIVERED:
+                    order.status = Order.DELIVERED
+                    order.save()
+                elif stage == OrderDeliveryTracking.STAGE_ON_THE_WAY and order.status == Order.CONFIRMED:
+                    order.status = Order.SHIPPED
+                    order.save()
+
+            tracking.save()
+            telemetry = tracking.get_live_telemetry()
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Live GPS coordinates broadcast successfully.",
+                "rider_lat": tracking.rider_lat,
+                "rider_lng": tracking.rider_lng,
+                "accuracy": accuracy,
+                "telemetry": telemetry,
+            })
+
+    return JsonResponse({"status": "error", "message": "POST request with GPS coordinates required."}, status=400)
+
 

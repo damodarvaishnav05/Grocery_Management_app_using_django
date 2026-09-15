@@ -131,13 +131,13 @@ class OrderAndCartTests(TestCase):
 
         tracking = order.get_tracking()
         self.assertIsNotNone(tracking)
-        self.assertEqual(tracking.rider_name, "Vikram Shinde")
+        self.assertEqual(tracking.rider_name, "Damodar Vaishnav")
         self.assertTrue(len(tracking.delivery_pin) >= 4)
 
         # Test view render
         response = self.client.get(reverse("orders:track", args=[order.id]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "FreshTrack")
+        self.assertContains(response, "Live Delivery Tracking")
         self.assertContains(response, tracking.rider_name)
         self.assertContains(response, tracking.delivery_pin)
 
@@ -237,14 +237,14 @@ class OrderAndCartTests(TestCase):
         url = reverse("orders:update_location", args=[order.id])
         response = self.client.post(
             url,
-            data={"lat": 18.5204, "lng": 73.8567, "accuracy": 15},
+            data={"lat": 18.5350, "lng": 73.8680, "accuracy": 15},
             content_type="application/json"
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["status"], "success")
-        self.assertEqual(data["customer_lat"], 18.5204)
-        self.assertEqual(data["customer_lng"], 73.8567)
+        self.assertEqual(data["customer_lat"], 18.5350)
+        self.assertEqual(data["customer_lng"], 73.8680)
         self.assertGreater(data["distance_km"], 0)
 
     def test_update_live_location_api_invalid_coords(self):
@@ -267,6 +267,55 @@ class OrderAndCartTests(TestCase):
             content_type="application/json"
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_delivery_partner_portal_and_gps_broadcast(self):
+        order = Order.objects.create(
+            user=self.user,
+            full_name="Test Shopper",
+            phone="9876543210",
+            address="123 Fresh Lane",
+            city="Indore",
+            state="Madhya Pradesh",
+            pincode="452001",
+            total_amount=Decimal("350.00"),
+            status=Order.CONFIRMED
+        )
+        tracking = order.get_tracking()
+
+        # 1. Access without token should be 403
+        portal_url = reverse("orders:delivery_partner_portal", args=[order.id])
+        resp_unauth = self.client.get(portal_url)
+        self.assertEqual(resp_unauth.status_code, 403)
+
+        # 2. Access with valid partner token should be 200
+        resp_auth = self.client.get(f"{portal_url}?token={tracking.partner_access_token}")
+        self.assertEqual(resp_auth.status_code, 200)
+        self.assertContains(resp_auth, "Damodar Vaishnav")
+        self.assertContains(resp_auth, "Broadcast")
+
+        # 3. Broadcast real GPS coordinates
+        gps_url = reverse("orders:update_rider_live_location", args=[order.id])
+        gps_resp = self.client.post(
+            gps_url,
+            data={
+                "lat": 22.7250,
+                "lng": 75.8620,
+                "accuracy": 8,
+                "token": tracking.partner_access_token,
+                "stage": "ON_THE_WAY"
+            },
+            content_type="application/json"
+        )
+        self.assertEqual(gps_resp.status_code, 200)
+        gps_data = gps_resp.json()
+        self.assertEqual(gps_data["status"], "success")
+
+        tracking.refresh_from_db()
+        self.assertTrue(tracking.is_live_tracking_active)
+        self.assertEqual(tracking.rider_lat, 22.7250)
+        self.assertEqual(tracking.rider_lng, 75.8620)
+        self.assertEqual(tracking.override_stage, "ON_THE_WAY")
+
 
 
 
