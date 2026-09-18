@@ -948,7 +948,7 @@ footer .bg-black{
 .product-img-container{
     position:relative;
     overflow:hidden;
-    background:var(--fm-cream);
+    background:#ffffff;
     border-radius:18px 18px 0 0;
     height:210px;
     display:flex;
