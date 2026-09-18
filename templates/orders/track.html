@@ -3,11 +3,8 @@
 
 {% block title %}⚡ Live Delivery Tracking - Order #{{ order.id }} | Om Super Mart{% endblock %}
 
-{% block extra_head %}
 {% block extra_css %}
 <!-- Leaflet.js Real-World Interactive Maps -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <style>
   /* Blinkit-inspired Live Tracking Palette */
@@ -18,8 +15,6 @@
     --om-yellow-light: #fff9db;
   }
 
-<style>
-  /* Custom Leaflet Map Pins */
   /* Map Container & Custom Leaflet Markers */
   #live-tracking-map {
     height: 440px;
@@ -34,7 +29,6 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
     border: 3px solid #ffffff;
     transition: transform 0.4s ease-out;
@@ -42,26 +36,13 @@
 
   .scooter-marker {
     background: #0c831f;
-    width: 44px;
-    height: 44px;
-    font-size: 22px;
     width: 46px;
     height: 46px;
     font-size: 24px;
     position: relative;
-    animation: scooterBounce 2s ease-in-out infinite;
-  }
-
-  @keyframes scooterBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
   }
 
   .store-marker {
-    background: #1e293b;
-    width: 38px;
-    height: 38px;
-    font-size: 18px;
     background: #0f172a;
     width: 40px;
     height: 40px;
@@ -70,9 +51,6 @@
 
   .dest-marker {
     background: #f59e0b;
-    width: 38px;
-    height: 38px;
-    font-size: 18px;
     width: 40px;
     height: 40px;
     font-size: 20px;
@@ -80,13 +58,9 @@
 
   .pulse-ring {
     position: absolute;
-    width: 58px;
-    height: 58px;
     width: 66px;
     height: 66px;
     border-radius: 50%;
-    background: rgba(12, 131, 31, 0.3);
-    animation: pulseGps 2s infinite;
     background: rgba(12, 131, 31, 0.35);
     animation: pulseGps 1.8s infinite;
     z-index: -1;
@@ -94,42 +68,20 @@
 
   @keyframes pulseGps {
     0% { transform: scale(0.6); opacity: 0.9; }
-    100% { transform: scale(1.6); opacity: 0; }
     100% { transform: scale(1.7); opacity: 0; }
-  }
-
-  /* 4-Step Timeline */
-  .step-track-item {
-  .rider-floating-label {
-    background: #0c831f;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 999px;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    border: 1.5px solid #ffffff;
-    margin-top: -8px;
   }
 
   /* 4-Step Order Journey Timeline */
   .timeline-step-row {
     display: flex;
     position: relative;
-    padding-left: 36px;
     padding-bottom: 24px;
   }
-  .step-track-item:last-child {
   .timeline-step-row:last-child {
     padding-bottom: 0;
   }
-  .step-track-item::before {
-    content: '';
   .timeline-step-track {
     position: absolute;
-    left: 13px;
-    top: 26px;
     left: 17px;
     top: 36px;
     bottom: 0;
@@ -137,16 +89,9 @@
     background: #e2e8f0;
     z-index: 1;
   }
-  .step-track-item:last-child::before {
   .timeline-step-row:last-child .timeline-step-track {
     display: none;
   }
-  .step-icon-badge {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 28px;
-    height: 28px;
   .timeline-step-track.completed {
     background: #0c831f;
   }
@@ -157,8 +102,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
     font-weight: 800;
     font-size: 14px;
     flex-shrink: 0;
@@ -183,10 +126,8 @@
 
 {% block content %}
 <div class="container py-4">
-  <div class="mx-auto" style="max-width: 860px;">
   <div class="mx-auto" style="max-width: 880px;">
 
-    <!-- TOP BLINKIT EXPRESS HEADER -->
     <!-- TOP BLINKIT EXPRESS BANNER -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
@@ -200,7 +141,6 @@
                 <i class="bi bi-lightning-charge-fill me-1"></i> 10-MINUTE EXPRESS
               </span>
               <span id="liveGpsIndicator" class="badge text-bg-success px-2.5 py-1.5 rounded-pill {% if not telemetry.is_live_gps %}d-none{% endif %}">
-                <i class="bi bi-broadcast me-1"></i> Live GPS Active
                 <i class="bi bi-broadcast me-1"></i> Live GPS Connected
               </span>
             </div>
@@ -222,7 +162,6 @@
         <div class="text-end">
           <span class="text-muted text-uppercase small fw-bold d-block">Order ID</span>
           <span class="fs-4 fw-bold text-dark">#{{ order.id }}</span>
-          <small class="text-muted d-block">{{ order.items.count }} items • ₹{{ order.total_amount }}</small>
           <small class="text-muted d-block">{{ order.items.count }} items &bull; ₹{{ order.total_amount }}</small>
         </div>
       </div>
@@ -239,7 +178,6 @@
       </div>
     </div>
 
-    <!-- REAL-WORLD LEAFLET MAP CARD -->
     <!-- DELIVERY PARTNER MOBILE SHORTCUT (IF ADMIN OR DAMODAR) -->
     <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-success-subtle border border-success-subtle">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -258,15 +196,10 @@
 
     <!-- REAL-TIME INTERACTIVE LEAFLET MAP CARD -->
     <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white">
-      <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
-          <i class="bi bi-map-fill text-success me-2"></i> Real-Time Express Delivery Route
           <i class="bi bi-geo-alt-fill text-success me-2"></i> Real-Time Express Delivery Route
         </h5>
-        <button id="recenterBtn" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-          <i class="bi bi-crosshair me-1"></i> Recenter Map
-        </button>
 
         <!-- Map Quick Controls -->
         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -283,7 +216,6 @@
       </div>
 
       <!-- Leaflet Map Canvas -->
-      <div id="live-tracking-map" style="height: 400px; width: 100%; border-radius: 1rem;" class="border"></div>
       <div id="live-tracking-map" class="border shadow-inner"></div>
 
       <!-- Route Status Legend -->
@@ -291,10 +223,8 @@
         <div class="d-flex gap-3 align-items-center flex-wrap">
           <span><span class="badge bg-dark rounded-circle p-1 me-1">&nbsp;</span> Micro-Hub Store</span>
           <span><span class="badge bg-success rounded-circle p-1 me-1">&nbsp;</span> Damodar Vaishnav (Rider)</span>
-          <span><span class="badge bg-warning rounded-circle p-1 me-1">&nbsp;</span> Your Home</span>
           <span><span class="badge bg-warning rounded-circle p-1 me-1">&nbsp;</span> Your Doorstep</span>
         </div>
-        <span id="mapLastUpdated" class="text-secondary small">Live GPS active</span>
         <span id="mapLastUpdated" class="text-secondary small">Live GPS ready</span>
       </div>
     </div>
@@ -313,7 +243,6 @@
           </div>
           <div class="d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
-              <div class="rounded-4 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 28px; flex-shrink: 0;">
               <div class="rounded-4 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-center" style="width: 58px; height: 58px; font-size: 30px; flex-shrink: 0;">
                 🛵
               </div>
@@ -322,12 +251,10 @@
                 <p class="text-muted small mb-1">{{ tracking.rider_vehicle }}</p>
                 <div class="d-flex align-items-center gap-1 small">
                   <span class="text-warning fw-bold">★ 5.0</span>
-                  <span class="text-muted">• 1,450+ deliveries</span>
                   <span class="text-muted">&bull; 1,450+ deliveries</span>
                 </div>
               </div>
             </div>
-            <a href="tel:{{ tracking.rider_phone }}" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center shadow flex-shrink-0" style="width: 46px; height: 46px;" title="Call Damodar">
             <a href="tel:{{ tracking.rider_phone }}" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center shadow flex-shrink-0" style="width: 48px; height: 48px;" title="Call Damodar">
               <i class="bi bi-telephone-fill fs-5 text-white"></i>
             </a>
@@ -343,7 +270,6 @@
             <i class="bi bi-shield-lock-fill text-warning-emphasis fs-5"></i>
           </div>
           <div class="my-2 text-center text-md-start">
-            <div class="display-6 fw-bold font-monospace text-dark letter-spacing-2">
             <div class="display-6 fw-bold font-monospace text-dark" style="letter-spacing: 4px;">
               {{ tracking.delivery_pin }}
             </div>
@@ -357,25 +283,18 @@
 
     </div>
 
-    <!-- 4-STEP ORDER JOURNEY TIMELINE -->
     <!-- 4-STEP ORDER JOURNEY TIMELINE (CLEAN BLINKIT DESIGN) -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
       <h6 class="fw-bold text-dark text-uppercase small mb-4">Order Journey</h6>
 
-      <div class="timeline-container">
       <div class="timeline-wrapper">
 
         <!-- Stage 1 -->
-        <div class="step-track-item">
-          <div class="step-icon-badge bg-success text-white">
-            <i class="bi bi-check2"></i>
         <div class="timeline-step-row">
           <div class="timeline-step-track completed"></div>
           <div class="timeline-step-icon completed">
             <i class="bi bi-check-lg"></i>
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Order Confirmed & Micro-Hub Assigned</h6>
-          <small class="text-muted">{{ tracking.dark_store_name }}</small>
           <div class="ms-3 flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0 text-dark">Order Confirmed & Micro-Hub Assigned</h6>
@@ -386,16 +305,11 @@
         </div>
 
         <!-- Stage 2 -->
-        <div class="step-track-item">
-          <div id="stepPackedDot" class="step-icon-badge {% if telemetry.stage == 'RECEIVED' %}bg-light text-secondary border{% else %}bg-success text-white{% endif %}">
-            {% if telemetry.stage == 'RECEIVED' %}2{% else %}<i class="bi bi-check2"></i>{% endif %}
         <div class="timeline-step-row">
           <div id="stepPackedTrack" class="timeline-step-track {% if telemetry.stage != 'RECEIVED' %}completed{% endif %}"></div>
           <div id="stepPackedIcon" class="timeline-step-icon {% if telemetry.stage == 'RECEIVED' %}active{% else %}completed{% endif %}">
             {% if telemetry.stage == 'RECEIVED' %}2{% else %}<i class="bi bi-check-lg"></i>{% endif %}
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Quality Checked & Packed</h6>
-          <small class="text-muted">Fresh items packed in insulated, sanitized bags</small>
           <div class="ms-3 flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0 text-dark">Quality Checked & Packed</h6>
@@ -408,16 +322,11 @@
         </div>
 
         <!-- Stage 3 -->
-        <div class="step-track-item">
-          <div id="stepWayDot" class="step-icon-badge {% if telemetry.stage in 'RECEIVED,PACKED' %}bg-light text-secondary border{% else %}bg-success text-white{% endif %}">
-            {% if telemetry.stage in 'RECEIVED,PACKED' %}3{% else %}<i class="bi bi-check2"></i>{% endif %}
         <div class="timeline-step-row">
           <div id="stepWayTrack" class="timeline-step-track {% if telemetry.stage in 'ON_THE_WAY,ARRIVING,DELIVERED' %}completed{% endif %}"></div>
           <div id="stepWayIcon" class="timeline-step-icon {% if telemetry.stage in 'RECEIVED,PACKED' %}{% elif telemetry.stage in 'ON_THE_WAY,ARRIVING' %}active{% else %}completed{% endif %}">
             {% if telemetry.stage in 'RECEIVED,PACKED' %}3{% elif telemetry.stage in 'ON_THE_WAY,ARRIVING' %}🛵{% else %}<i class="bi bi-check-lg"></i>{% endif %}
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Damodar Vaishnav is on the way</h6>
-          <small class="text-muted">Riding along express corridor with your groceries</small>
           <div class="ms-3 flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0 text-dark">Damodar Vaishnav is on the way</h6>
@@ -430,16 +339,11 @@
         </div>
 
         <!-- Stage 4 -->
-        <div class="step-track-item">
-          <div id="stepDeliveredDot" class="step-icon-badge {% if telemetry.is_delivered %}bg-success text-white{% else %}bg-light text-secondary border{% endif %}">
-            {% if telemetry.is_delivered %}<i class="bi bi-check2"></i>{% else %}4{% endif %}
         <div class="timeline-step-row">
           <div class="timeline-step-track"></div>
           <div id="stepDeliveredIcon" class="timeline-step-icon {% if telemetry.is_delivered %}completed{% else %}{% endif %}">
             {% if telemetry.is_delivered %}<i class="bi bi-check-lg"></i>{% else %}4{% endif %}
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Delivered at Doorstep</h6>
-          <small class="text-muted">Doorstep handover completed upon PIN verification</small>
           <div class="ms-3 flex-grow-1">
             <div class="d-flex justify-content-between align-items-center">
               <h6 class="fw-bold mb-0 text-dark">Delivered at Doorstep</h6>
@@ -473,7 +377,6 @@
 
         <div class="col-md-6">
           <span class="text-muted small fw-bold text-uppercase d-block mb-2">Items Ordered ({{ order.items.count }})</span>
-          <div class="space-y-1">
           <div>
             {% for item in items %}
             <div class="d-flex justify-content-between small py-1 border-bottom border-light">
@@ -507,8 +410,6 @@
   document.addEventListener("DOMContentLoaded", function () {
     const storeLat = {{ tracking.dark_store_lat }};
     const storeLng = {{ tracking.dark_store_lng }};
-    const customerLat = {{ tracking.customer_lat }};
-    const customerLng = {{ tracking.customer_lng }};
     let customerLat = {{ tracking.customer_lat }};
     let customerLng = {{ tracking.customer_lng }};
     let riderLat = {{ telemetry.rider_lat }};
@@ -525,12 +426,9 @@
       scrollWheelZoom: false
     }).setView([riderLat, riderLng], 14);
 
-    // High definition OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     // High quality CartoDB Voyager tiles (crisp & clean) with OSM fallback
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &bull; Om Super Mart Express'
       subdomains: 'abcd',
       attribution: '&copy; CartoDB &bull; OpenStreetMap contributors &bull; Om Super Mart Express'
     }).addTo(map);
@@ -543,8 +441,6 @@
     const storeIcon = L.divIcon({
       className: 'custom-pin store-marker',
       html: '🏪',
-      iconSize: [38, 38],
-      iconAnchor: [19, 19]
       iconSize: [40, 40],
       iconAnchor: [20, 20]
     });
@@ -552,8 +448,6 @@
     const scooterIcon = L.divIcon({
       className: 'custom-pin scooter-marker',
       html: '🛵<div class="pulse-ring"></div>',
-      iconSize: [44, 44],
-      iconAnchor: [22, 22]
       iconSize: [46, 46],
       iconAnchor: [23, 23]
     });
@@ -561,8 +455,6 @@
     const homeIcon = L.divIcon({
       className: 'custom-pin dest-marker',
       html: '🏠',
-      iconSize: [38, 38],
-      iconAnchor: [19, 19]
       iconSize: [40, 40],
       iconAnchor: [20, 20]
     });
@@ -574,12 +466,10 @@
 
     const homeMarker = L.marker([customerLat, customerLng], { icon: homeIcon })
       .addTo(map)
-      .bindPopup("<b>Delivery Destination</b><br>{{ order.full_name }}");
       .bindPopup("<b>Delivery Destination</b><br>{{ order.full_name }}<br><small>{{ order.address }}</small>");
 
     const riderMarker = L.marker([riderLat, riderLng], { icon: scooterIcon })
       .addTo(map)
-      .bindPopup("<b>Damodar Vaishnav 🛵</b><br>Verified Express Courier");
       .bindPopup("<b>Damodar Vaishnav 🛵</b><br>Verified Express Delivery Partner");
 
     // Route Polyline
@@ -591,11 +481,9 @@
       color: '#0c831f',
       weight: 4,
       dashArray: '8, 8',
-      opacity: 0.8
       opacity: 0.85
     }).addTo(map);
 
-    // Fit Bounds
     // Fit Map Bounds
     function fitMapBounds() {
       const bounds = L.latLngBounds([
@@ -609,7 +497,6 @@
 
     document.getElementById("recenterBtn").addEventListener("click", fitMapBounds);
 
-    // Live Tracking API Polling (every 3.5 seconds)
     // Real-Time Polling Engine
     const trackingApiUrl = "{% url 'orders:api_track' order.id %}";
 
@@ -693,46 +580,16 @@
     }
 
     function pollLiveTracking() {
-      if (simulationActive) return; // don't overwrite during interactive simulation
+      if (simulationActive) return;
       fetch(trackingApiUrl)
         .then(res => res.json())
-        .then(data => {
-          if (data.status === "success") {
-            if (data.rider_lat && data.rider_lng) {
-              riderLat = data.rider_lat;
-              riderLng = data.rider_lng;
-              riderMarker.setLatLng([riderLat, riderLng]);
-              routeLine.setLatLngs([
-                [storeLat, storeLng],
-                [riderLat, riderLng],
-                [customerLat, customerLng]
-              ]);
-            }
         .then(data => updateTrackingUI(data))
         .catch(err => console.warn("Live telemetry polling error:", err));
     }
 
-            const gpsBadge = document.getElementById("liveGpsIndicator");
-            if (data.is_live_gps) {
-              gpsBadge.classList.remove("d-none");
-            }
     let pollInterval = setInterval(pollLiveTracking, 3500);
 
-            const headlineEta = document.getElementById("headlineEta");
-            const headlineDesc = document.getElementById("headlineDesc");
-            if (data.is_delivered) {
-              headlineEta.innerHTML = "Delivered at Doorstep! 🎉";
-              headlineDesc.textContent = data.stage_desc;
-            } else if (data.stage === "ARRIVING") {
-              headlineEta.innerHTML = "Arriving at your doorstep now! 🔔";
-              headlineDesc.textContent = data.stage_desc;
-            } else {
-              headlineEta.innerHTML = 'Arriving in <span class="text-success">' + data.eta_minutes + '-' + (data.eta_minutes + 2) + ' Mins</span>';
-              headlineDesc.textContent = data.stage_desc;
-            }
-    // ==========================================
-    // 1. CUSTOMER EXACT GPS DETECTION
-    // ==========================================
+    // 1. Customer exact GPS detection
     const detectGpsBtn = document.getElementById("detectCustomerGpsBtn");
     detectGpsBtn.addEventListener("click", function () {
       if (!navigator.geolocation) {
@@ -740,33 +597,15 @@
         return;
       }
 
-            document.getElementById("progressLabel").textContent = data.stage_title;
-            document.getElementById("progressPercentage").textContent = data.progress + "% Complete";
-            document.getElementById("progressBar").style.width = data.progress + "%";
       detectGpsBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Locating...';
       detectGpsBtn.disabled = true;
 
-            const stepPacked = document.getElementById("stepPackedDot");
-            const stepWay = document.getElementById("stepWayDot");
-            const stepDelivered = document.getElementById("stepDeliveredDot");
       navigator.geolocation.getCurrentPosition(
         function (pos) {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const accuracy = Math.round(pos.coords.accuracy);
 
-            if (data.stage !== "RECEIVED") {
-              stepPacked.className = "step-icon-badge bg-success text-white";
-              stepPacked.innerHTML = '<i class="bi bi-check2"></i>';
-            }
-            if (["ON_THE_WAY", "ARRIVING", "DELIVERED"].includes(data.stage)) {
-              stepWay.className = "step-icon-badge bg-success text-white";
-              stepWay.innerHTML = '<i class="bi bi-check2"></i>';
-            }
-            if (data.is_delivered) {
-              stepDelivered.className = "step-icon-badge bg-success text-white";
-              stepDelivered.innerHTML = '<i class="bi bi-check2"></i>';
-            }
           fetch("{% url 'orders:update_location' order.id %}", {
             method: "POST",
             headers: {
@@ -803,14 +642,7 @@
       );
     });
 
-            document.getElementById("mapLastUpdated").textContent = "Updated " + new Date().toLocaleTimeString();
-          }
-        })
-        .catch(err => {
-          console.warn("Telemetry polling warning:", err);
-    // ==========================================
-    // 2. REAL-TIME LIVE SCOOTER RIDE SIMULATOR
-    // ==========================================
+    // 2. Real-Time Live Scooter Ride Simulator
     let simulationActive = false;
     let simStep = 0;
     const totalSimSteps = 30;
@@ -819,7 +651,6 @@
 
     simulateBtn.addEventListener("click", function () {
       if (simulationActive) {
-        // Pause/stop
         clearInterval(simTimer);
         simulationActive = false;
         simulateBtn.innerHTML = '<i class="bi bi-play-circle-fill me-1"></i> Resume Ride';
@@ -835,7 +666,6 @@
         simStep++;
         const fraction = simStep / totalSimSteps;
 
-        // Linear interpolation with slight curve for road effect
         const curvedOffset = Math.sin(fraction * Math.PI) * 0.0035;
         const currentLat = storeLat + fraction * (customerLat - storeLat) + curvedOffset;
         const currentLng = storeLng + fraction * (customerLng - storeLng);
@@ -849,7 +679,6 @@
           [customerLat, customerLng]
         ]);
 
-        // Calculate simulated distance and ETA
         const remainingDist = (1.8 * (1 - fraction)).toFixed(2);
         const remainingEta = Math.max(1, Math.ceil(remainingDist * 3));
         const progressPct = Math.min(100, Math.round(35 + fraction * 65));
@@ -880,9 +709,7 @@
           is_delivered: fraction >= 1.0,
           is_live_gps: true
         });
-    }
 
-    setInterval(pollLiveTracking, 3500);
         if (fraction >= 1.0) {
           clearInterval(simTimer);
           simulationActive = false;
