@@ -426,11 +426,10 @@
       scrollWheelZoom: false
     }).setView([riderLat, riderLng], 14);
 
-    // High quality CartoDB Voyager tiles (crisp & clean) with OSM fallback
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // High-performance OpenStreetMap tiles (100% Free, NO API key required, Zero watermarks)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd',
-      attribution: '&copy; CartoDB &bull; OpenStreetMap contributors &bull; Om Super Mart Express'
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &bull; Om Super Mart Express'
     }).addTo(map);
 
     // Invalidate size once DOM finishes rendering
