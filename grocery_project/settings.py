@@ -249,10 +249,11 @@ RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_TMtTlbX9d4BPW2")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
 
 # =========================
-# AI
+# AI & Maps
 # =========================
 
 AI_API_KEY = os.getenv("AI_API_KEY", "")
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
 
 # =========================
 # Email

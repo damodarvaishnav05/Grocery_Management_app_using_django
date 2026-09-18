@@ -565,6 +565,7 @@ def track_order(request, order_id):
     owner_email = getattr(settings, "OWNER_NOTIFICATION_EMAIL", "damodar4162@gmail.com")
     is_owner_or_staff = request.user.is_staff or getattr(request.user, "email", "") == owner_email
     partner_portal_url = reverse("orders:delivery_partner_portal", args=[order.id]) + f"?token={tracking.partner_access_token}"
+    google_maps_api_key = getattr(settings, "GOOGLE_MAPS_API_KEY", "")
 
     return render(
         request,
@@ -576,6 +577,7 @@ def track_order(request, order_id):
             "items": items,
             "is_owner_or_staff": is_owner_or_staff,
             "partner_portal_url": partner_portal_url,
+            "google_maps_api_key": google_maps_api_key,
         }
     )
 
