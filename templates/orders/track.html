@@ -426,11 +426,36 @@
       scrollWheelZoom: false
     }).setView([riderLat, riderLng], 14);
 
-    // High-performance OpenStreetMap tiles (100% Free, NO API key required, Zero watermarks)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Multi-Layer Map Engine (Google Maps & Esri CDN - 100% Watermark-Free & No 403 Blocks)
+    const userApiKey = "{{ google_maps_api_key|default:'' }}";
+    const googleKeyParam = userApiKey ? `&key=${encodeURIComponent(userApiKey)}` : '';
+
+    const googleStreets = L.tileLayer(`https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}${googleKeyParam}`, {
+      maxZoom: 20,
+      subdomains: ['0', '1', '2', '3'],
+      attribution: '&copy; Google Maps &bull; Om Super Mart Express'
+    });
+
+    const googleSatellite = L.tileLayer(`https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}${googleKeyParam}`, {
+      maxZoom: 20,
+      subdomains: ['0', '1', '2', '3'],
+      attribution: '&copy; Google Maps Satellite &bull; Om Super Mart Express'
+    });
+
+    const esriStreets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &bull; Om Super Mart Express'
-    }).addTo(map);
+      attribution: 'Tiles &copy; Esri &bull; Om Super Mart Express'
+    });
+
+    // Default to crisp Google Street View
+    googleStreets.addTo(map);
+
+    // Interactive View Switcher (Top Right)
+    L.control.layers({
+      "🗺️ Google Streets": googleStreets,
+      "🛰️ Satellite": googleSatellite,
+      "🏢 City Map (Esri)": esriStreets
+    }, null, { position: 'topright' }).addTo(map);
 
     // Invalidate size once DOM finishes rendering
     setTimeout(() => { map.invalidateSize(); }, 250);
