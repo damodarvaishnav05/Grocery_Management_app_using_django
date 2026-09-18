@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
+from django.urls import reverse
 
 from coupons.models import Coupon
 from cart.models import Cart
@@ -561,6 +562,9 @@ def track_order(request, order_id):
     tracking = order.get_tracking()
     telemetry = tracking.get_live_telemetry()
     items = order.items.select_related("product").all()
+    owner_email = getattr(settings, "OWNER_NOTIFICATION_EMAIL", "damodar4162@gmail.com")
+    is_owner_or_staff = request.user.is_staff or getattr(request.user, "email", "") == owner_email
+    partner_portal_url = reverse("orders:delivery_partner_portal", args=[order.id]) + f"?token={tracking.partner_access_token}"
 
     return render(
         request,
@@ -570,6 +574,8 @@ def track_order(request, order_id):
             "tracking": tracking,
             "telemetry": telemetry,
             "items": items,
+            "is_owner_or_staff": is_owner_or_staff,
+            "partner_portal_url": partner_portal_url,
         }
     )
 

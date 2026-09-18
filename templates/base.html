@@ -114,6 +114,7 @@
     </style>
 
     {% block extra_css %}{% endblock %}
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if cart_count and cart_count > 0 and '/orders/checkout/' not in request.path and '/cart/' not in request.path and '/payments/' not in request.path and '/orders/success/' not in request.path %}has-floating-cart{% endif %}">
 

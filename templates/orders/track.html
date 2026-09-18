@@ -3,108 +3,145 @@
 
 {% block title %}⚡ Live Delivery Tracking - Order #{{ order.id }} | Om Super Mart{% endblock %}
 
-{% block extra_head %}
+{% block extra_css %}
 <!-- Leaflet.js Real-World Interactive Maps -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <style>
-  /* Custom Leaflet Map Pins */
+  /* Blinkit-inspired Live Tracking Palette */
+  :root {
+    --om-green: #0c831f;
+    --om-green-light: #e8f5e9;
+    --om-yellow: #f8cb46;
+    --om-yellow-light: #fff9db;
+  }
+
+  /* Map Container & Custom Leaflet Markers */
+  #live-tracking-map {
+    height: 440px;
+    width: 100%;
+    border-radius: 1.25rem;
+    z-index: 1;
+    background-color: #f1f5f9;
+  }
+
   .custom-pin {
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
     border: 3px solid #ffffff;
+    transition: transform 0.4s ease-out;
   }
 
   .scooter-marker {
     background: #0c831f;
-    width: 44px;
-    height: 44px;
-    font-size: 22px;
+    width: 46px;
+    height: 46px;
+    font-size: 24px;
     position: relative;
-    animation: scooterBounce 2s ease-in-out infinite;
-  }
-
-  @keyframes scooterBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
   }
 
   .store-marker {
-    background: #1e293b;
-    width: 38px;
-    height: 38px;
-    font-size: 18px;
+    background: #0f172a;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
 
   .dest-marker {
     background: #f59e0b;
-    width: 38px;
-    height: 38px;
-    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
 
   .pulse-ring {
     position: absolute;
-    width: 58px;
-    height: 58px;
+    width: 66px;
+    height: 66px;
     border-radius: 50%;
-    background: rgba(12, 131, 31, 0.3);
-    animation: pulseGps 2s infinite;
+    background: rgba(12, 131, 31, 0.35);
+    animation: pulseGps 1.8s infinite;
     z-index: -1;
   }
 
   @keyframes pulseGps {
     0% { transform: scale(0.6); opacity: 0.9; }
-    100% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1.7); opacity: 0; }
   }
 
-  /* 4-Step Timeline */
-  .step-track-item {
+  .rider-floating-label {
+    background: #0c831f;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    border: 1.5px solid #ffffff;
+    margin-top: -8px;
+  }
+
+  /* 4-Step Order Journey Timeline */
+  .timeline-step-row {
+    display: flex;
     position: relative;
-    padding-left: 36px;
     padding-bottom: 24px;
   }
-  .step-track-item:last-child {
+  .timeline-step-row:last-child {
     padding-bottom: 0;
   }
-  .step-track-item::before {
-    content: '';
+  .timeline-step-track {
     position: absolute;
-    left: 13px;
-    top: 26px;
+    left: 17px;
+    top: 36px;
     bottom: 0;
     width: 2px;
     background: #e2e8f0;
+    z-index: 1;
   }
-  .step-track-item:last-child::before {
+  .timeline-step-row:last-child .timeline-step-track {
     display: none;
   }
-  .step-icon-badge {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 28px;
-    height: 28px;
+  .timeline-step-track.completed {
+    background: #0c831f;
+  }
+  .timeline-step-icon {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
     z-index: 2;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    color: #64748b;
+  }
+  .timeline-step-icon.active {
+    background: #0c831f;
+    border-color: #0c831f;
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(12, 131, 31, 0.2);
+  }
+  .timeline-step-icon.completed {
+    background: #0c831f;
+    border-color: #0c831f;
+    color: #ffffff;
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
-  <div class="mx-auto" style="max-width: 860px;">
+  <div class="mx-auto" style="max-width: 880px;">
 
-    <!-- TOP BLINKIT EXPRESS HEADER -->
+    <!-- TOP BLINKIT EXPRESS BANNER -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
         <div class="d-flex align-items-center gap-3">
@@ -117,7 +154,7 @@
                 <i class="bi bi-lightning-charge-fill me-1"></i> 10-MINUTE EXPRESS
               </span>
               <span id="liveGpsIndicator" class="badge text-bg-success px-2.5 py-1.5 rounded-pill {% if not telemetry.is_live_gps %}d-none{% endif %}">
-                <i class="bi bi-broadcast me-1"></i> Live GPS Active
+                <i class="bi bi-broadcast me-1"></i> Live GPS Connected
               </span>
             </div>
             <h2 id="headlineEta" class="fw-bold mb-0 text-dark">
@@ -138,7 +175,7 @@
         <div class="text-end">
           <span class="text-muted text-uppercase small fw-bold d-block">Order ID</span>
           <span class="fs-4 fw-bold text-dark">#{{ order.id }}</span>
-          <small class="text-muted d-block">{{ order.items.count }} items • ₹{{ order.total_amount }}</small>
+          <small class="text-muted d-block">{{ order.items.count }} items &bull; ₹{{ order.total_amount }}</small>
         </div>
       </div>
 
@@ -154,27 +191,54 @@
       </div>
     </div>
 
-    <!-- REAL-WORLD LEAFLET MAP CARD -->
+    <!-- DELIVERY PARTNER MOBILE SHORTCUT (IF ADMIN OR DAMODAR) -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-success-subtle border border-success-subtle">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="fs-4">🛵</span>
+          <div>
+            <strong class="text-success-emphasis d-block" style="font-size: 0.92rem;">Rider Console &bull; Damodar Vaishnav</strong>
+            <small class="text-success-emphasis opacity-75">Open on your mobile phone to broadcast your real-world GPS coordinates.</small>
+          </div>
+        </div>
+        <a href="{{ partner_portal_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-sm rounded-pill px-3 fw-bold shadow-sm">
+          <i class="bi bi-broadcast me-1"></i> Open Rider Console
+        </a>
+      </div>
+    </div>
+
+    <!-- REAL-TIME INTERACTIVE LEAFLET MAP CARD -->
     <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white">
-      <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
-          <i class="bi bi-map-fill text-success me-2"></i> Real-Time Express Delivery Route
+          <i class="bi bi-geo-alt-fill text-success me-2"></i> Real-Time Express Delivery Route
         </h5>
-        <button id="recenterBtn" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-          <i class="bi bi-crosshair me-1"></i> Recenter Map
-        </button>
+
+        <!-- Map Quick Controls -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <button id="detectCustomerGpsBtn" type="button" class="btn btn-sm btn-light border rounded-pill px-3 fw-semibold text-dark shadow-sm" title="Update destination with your exact phone/browser GPS">
+            <i class="bi bi-crosshair2 text-danger me-1"></i> Detect My GPS
+          </button>
+          <button id="simulateRideBtn" type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold" title="Watch Damodar's live scooter riding in real-time">
+            <i class="bi bi-play-circle-fill me-1"></i> Simulate Ride
+          </button>
+          <button id="recenterBtn" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Fit all markers in view">
+            <i class="bi bi-arrows-fullscreen me-1"></i> Fit Route
+          </button>
+        </div>
       </div>
 
       <!-- Leaflet Map Canvas -->
-      <div id="live-tracking-map" style="height: 400px; width: 100%; border-radius: 1rem;" class="border"></div>
+      <div id="live-tracking-map" class="border shadow-inner"></div>
 
+      <!-- Route Status Legend -->
       <div class="d-flex justify-content-between align-items-center mt-3 small text-muted flex-wrap gap-2 px-1">
         <div class="d-flex gap-3 align-items-center flex-wrap">
           <span><span class="badge bg-dark rounded-circle p-1 me-1">&nbsp;</span> Micro-Hub Store</span>
           <span><span class="badge bg-success rounded-circle p-1 me-1">&nbsp;</span> Damodar Vaishnav (Rider)</span>
-          <span><span class="badge bg-warning rounded-circle p-1 me-1">&nbsp;</span> Your Home</span>
+          <span><span class="badge bg-warning rounded-circle p-1 me-1">&nbsp;</span> Your Doorstep</span>
         </div>
-        <span id="mapLastUpdated" class="text-secondary small">Live GPS active</span>
+        <span id="mapLastUpdated" class="text-secondary small">Live GPS ready</span>
       </div>
     </div>
 
@@ -192,7 +256,7 @@
           </div>
           <div class="d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
-              <div class="rounded-4 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 28px; flex-shrink: 0;">
+              <div class="rounded-4 bg-success-subtle border border-success-subtle d-flex align-items-center justify-content-center" style="width: 58px; height: 58px; font-size: 30px; flex-shrink: 0;">
                 🛵
               </div>
               <div>
@@ -200,11 +264,11 @@
                 <p class="text-muted small mb-1">{{ tracking.rider_vehicle }}</p>
                 <div class="d-flex align-items-center gap-1 small">
                   <span class="text-warning fw-bold">★ 5.0</span>
-                  <span class="text-muted">• 1,450+ deliveries</span>
+                  <span class="text-muted">&bull; 1,450+ deliveries</span>
                 </div>
               </div>
             </div>
-            <a href="tel:{{ tracking.rider_phone }}" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center shadow flex-shrink-0" style="width: 46px; height: 46px;" title="Call Damodar">
+            <a href="tel:{{ tracking.rider_phone }}" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center shadow flex-shrink-0" style="width: 48px; height: 48px;" title="Call Damodar">
               <i class="bi bi-telephone-fill fs-5 text-white"></i>
             </a>
           </div>
@@ -219,7 +283,7 @@
             <i class="bi bi-shield-lock-fill text-warning-emphasis fs-5"></i>
           </div>
           <div class="my-2 text-center text-md-start">
-            <div class="display-6 fw-bold font-monospace text-dark letter-spacing-2">
+            <div class="display-6 fw-bold font-monospace text-dark" style="letter-spacing: 4px;">
               {{ tracking.delivery_pin }}
             </div>
             <p class="small text-warning-emphasis mb-0 mt-1">
@@ -232,46 +296,76 @@
 
     </div>
 
-    <!-- 4-STEP ORDER JOURNEY TIMELINE -->
+    <!-- 4-STEP ORDER JOURNEY TIMELINE (CLEAN BLINKIT DESIGN) -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
       <h6 class="fw-bold text-dark text-uppercase small mb-4">Order Journey</h6>
 
-      <div class="timeline-container">
+      <div class="timeline-wrapper">
 
         <!-- Stage 1 -->
-        <div class="step-track-item">
-          <div class="step-icon-badge bg-success text-white">
-            <i class="bi bi-check2"></i>
+        <div class="timeline-step-row">
+          <div class="timeline-step-track completed"></div>
+          <div class="timeline-step-icon completed">
+            <i class="bi bi-check-lg"></i>
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Order Confirmed & Micro-Hub Assigned</h6>
-          <small class="text-muted">{{ tracking.dark_store_name }}</small>
+          <div class="ms-3 flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-dark">Order Confirmed & Micro-Hub Assigned</h6>
+              <span class="badge bg-success-subtle text-success small rounded-pill">Completed</span>
+            </div>
+            <small class="text-muted d-block mt-0.5">{{ tracking.dark_store_name }}</small>
+          </div>
         </div>
 
         <!-- Stage 2 -->
-        <div class="step-track-item">
-          <div id="stepPackedDot" class="step-icon-badge {% if telemetry.stage == 'RECEIVED' %}bg-light text-secondary border{% else %}bg-success text-white{% endif %}">
-            {% if telemetry.stage == 'RECEIVED' %}2{% else %}<i class="bi bi-check2"></i>{% endif %}
+        <div class="timeline-step-row">
+          <div id="stepPackedTrack" class="timeline-step-track {% if telemetry.stage != 'RECEIVED' %}completed{% endif %}"></div>
+          <div id="stepPackedIcon" class="timeline-step-icon {% if telemetry.stage == 'RECEIVED' %}active{% else %}completed{% endif %}">
+            {% if telemetry.stage == 'RECEIVED' %}2{% else %}<i class="bi bi-check-lg"></i>{% endif %}
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Quality Checked & Packed</h6>
-          <small class="text-muted">Fresh items packed in insulated, sanitized bags</small>
+          <div class="ms-3 flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-dark">Quality Checked & Packed</h6>
+              <span id="stepPackedBadge" class="badge {% if telemetry.stage == 'RECEIVED' %}bg-warning-subtle text-warning-emphasis{% else %}bg-success-subtle text-success{% endif %} small rounded-pill">
+                {% if telemetry.stage == 'RECEIVED' %}Assembling{% else %}Completed{% endif %}
+              </span>
+            </div>
+            <small class="text-muted d-block mt-0.5">Fresh items packed in insulated, sanitized bags</small>
+          </div>
         </div>
 
         <!-- Stage 3 -->
-        <div class="step-track-item">
-          <div id="stepWayDot" class="step-icon-badge {% if telemetry.stage in 'RECEIVED,PACKED' %}bg-light text-secondary border{% else %}bg-success text-white{% endif %}">
-            {% if telemetry.stage in 'RECEIVED,PACKED' %}3{% else %}<i class="bi bi-check2"></i>{% endif %}
+        <div class="timeline-step-row">
+          <div id="stepWayTrack" class="timeline-step-track {% if telemetry.stage in 'ON_THE_WAY,ARRIVING,DELIVERED' %}completed{% endif %}"></div>
+          <div id="stepWayIcon" class="timeline-step-icon {% if telemetry.stage in 'RECEIVED,PACKED' %}{% elif telemetry.stage in 'ON_THE_WAY,ARRIVING' %}active{% else %}completed{% endif %}">
+            {% if telemetry.stage in 'RECEIVED,PACKED' %}3{% elif telemetry.stage in 'ON_THE_WAY,ARRIVING' %}🛵{% else %}<i class="bi bi-check-lg"></i>{% endif %}
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Damodar Vaishnav is on the way</h6>
-          <small class="text-muted">Riding along express corridor with your groceries</small>
+          <div class="ms-3 flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-dark">Damodar Vaishnav is on the way</h6>
+              <span id="stepWayBadge" class="badge {% if telemetry.stage in 'ON_THE_WAY,ARRIVING' %}bg-primary-subtle text-primary{% elif telemetry.stage == 'DELIVERED' %}bg-success-subtle text-success{% else %}bg-light text-muted border{% endif %} small rounded-pill">
+                {% if telemetry.stage in 'ON_THE_WAY,ARRIVING' %}In Transit{% elif telemetry.stage == 'DELIVERED' %}Completed{% else %}Upcoming{% endif %}
+              </span>
+            </div>
+            <small class="text-muted d-block mt-0.5">Riding along express delivery corridor with your groceries</small>
+          </div>
         </div>
 
         <!-- Stage 4 -->
-        <div class="step-track-item">
-          <div id="stepDeliveredDot" class="step-icon-badge {% if telemetry.is_delivered %}bg-success text-white{% else %}bg-light text-secondary border{% endif %}">
-            {% if telemetry.is_delivered %}<i class="bi bi-check2"></i>{% else %}4{% endif %}
+        <div class="timeline-step-row">
+          <div class="timeline-step-track"></div>
+          <div id="stepDeliveredIcon" class="timeline-step-icon {% if telemetry.is_delivered %}completed{% else %}{% endif %}">
+            {% if telemetry.is_delivered %}<i class="bi bi-check-lg"></i>{% else %}4{% endif %}
           </div>
-          <h6 class="fw-bold mb-0 text-dark">Delivered at Doorstep</h6>
-          <small class="text-muted">Doorstep handover completed upon PIN verification</small>
+          <div class="ms-3 flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0 text-dark">Delivered at Doorstep</h6>
+              <span id="stepDeliveredBadge" class="badge {% if telemetry.is_delivered %}bg-success text-white{% else %}bg-light text-muted border{% endif %} small rounded-pill">
+                {% if telemetry.is_delivered %}Delivered{% else %}Doorstep Handover{% endif %}
+              </span>
+            </div>
+            <small class="text-muted d-block mt-0.5">Doorstep delivery completed upon 4-digit PIN verification</small>
+          </div>
         </div>
 
       </div>
@@ -296,7 +390,7 @@
 
         <div class="col-md-6">
           <span class="text-muted small fw-bold text-uppercase d-block mb-2">Items Ordered ({{ order.items.count }})</span>
-          <div class="space-y-1">
+          <div>
             {% for item in items %}
             <div class="d-flex justify-content-between small py-1 border-bottom border-light">
               <span>{{ item.product.name }} <strong class="text-dark">x{{ item.quantity }}</strong></span>
@@ -314,15 +408,30 @@
 
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Guaranteed Leaflet JS with CDN Fallback -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+  if (typeof L === 'undefined') {
+    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"><\/script>');
+  }
+</script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const storeLat = {{ tracking.dark_store_lat }};
     const storeLng = {{ tracking.dark_store_lng }};
-    const customerLat = {{ tracking.customer_lat }};
-    const customerLng = {{ tracking.customer_lng }};
+    let customerLat = {{ tracking.customer_lat }};
+    let customerLng = {{ tracking.customer_lng }};
     let riderLat = {{ telemetry.rider_lat }};
     let riderLng = {{ telemetry.rider_lng }};
+
+    if (typeof L === 'undefined') {
+      console.error("Leaflet library failed to load.");
+      return;
+    }
 
     // Initialize Leaflet Map
     const map = L.map('live-tracking-map', {
@@ -330,32 +439,37 @@
       scrollWheelZoom: false
     }).setView([riderLat, riderLng], 14);
 
-    // High definition OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // High quality CartoDB Voyager tiles (crisp & clean) with OSM fallback
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &bull; Om Super Mart Express'
+      subdomains: 'abcd',
+      attribution: '&copy; CartoDB &bull; OpenStreetMap contributors &bull; Om Super Mart Express'
     }).addTo(map);
+
+    // Invalidate size once DOM finishes rendering
+    setTimeout(() => { map.invalidateSize(); }, 250);
+    window.addEventListener('resize', () => { map.invalidateSize(); });
 
     // Custom Icon Definitions
     const storeIcon = L.divIcon({
       className: 'custom-pin store-marker',
       html: '🏪',
-      iconSize: [38, 38],
-      iconAnchor: [19, 19]
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
 
     const scooterIcon = L.divIcon({
       className: 'custom-pin scooter-marker',
       html: '🛵<div class="pulse-ring"></div>',
-      iconSize: [44, 44],
-      iconAnchor: [22, 22]
+      iconSize: [46, 46],
+      iconAnchor: [23, 23]
     });
 
     const homeIcon = L.divIcon({
       className: 'custom-pin dest-marker',
       html: '🏠',
-      iconSize: [38, 38],
-      iconAnchor: [19, 19]
+      iconSize: [40, 40],
+      iconAnchor: [20, 20]
     });
 
     // Add Markers
@@ -365,11 +479,11 @@
 
     const homeMarker = L.marker([customerLat, customerLng], { icon: homeIcon })
       .addTo(map)
-      .bindPopup("<b>Delivery Destination</b><br>{{ order.full_name }}");
+      .bindPopup("<b>Delivery Destination</b><br>{{ order.full_name }}<br><small>{{ order.address }}</small>");
 
     const riderMarker = L.marker([riderLat, riderLng], { icon: scooterIcon })
       .addTo(map)
-      .bindPopup("<b>Damodar Vaishnav 🛵</b><br>Verified Express Courier");
+      .bindPopup("<b>Damodar Vaishnav 🛵</b><br>Verified Express Delivery Partner");
 
     // Route Polyline
     const routeLine = L.polyline([
@@ -380,10 +494,10 @@
       color: '#0c831f',
       weight: 4,
       dashArray: '8, 8',
-      opacity: 0.8
+      opacity: 0.85
     }).addTo(map);
 
-    // Fit Bounds
+    // Fit Map Bounds
     function fitMapBounds() {
       const bounds = L.latLngBounds([
         [storeLat, storeLng],
@@ -396,73 +510,236 @@
 
     document.getElementById("recenterBtn").addEventListener("click", fitMapBounds);
 
-    // Live Tracking API Polling (every 3.5 seconds)
+    // Real-Time Polling Engine
     const trackingApiUrl = "{% url 'orders:api_track' order.id %}";
 
-    function pollLiveTracking() {
-      fetch(trackingApiUrl)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === "success") {
-            if (data.rider_lat && data.rider_lng) {
-              riderLat = data.rider_lat;
-              riderLng = data.rider_lng;
-              riderMarker.setLatLng([riderLat, riderLng]);
-              routeLine.setLatLngs([
-                [storeLat, storeLng],
-                [riderLat, riderLng],
-                [customerLat, customerLng]
-              ]);
-            }
+    function updateTrackingUI(data) {
+      if (data.status === "success") {
+        if (data.rider_lat && data.rider_lng) {
+          riderLat = data.rider_lat;
+          riderLng = data.rider_lng;
+          riderMarker.setLatLng([riderLat, riderLng]);
+          routeLine.setLatLngs([
+            [storeLat, storeLng],
+            [riderLat, riderLng],
+            [customerLat, customerLng]
+          ]);
+        }
 
-            const gpsBadge = document.getElementById("liveGpsIndicator");
-            if (data.is_live_gps) {
-              gpsBadge.classList.remove("d-none");
-            }
+        const gpsBadge = document.getElementById("liveGpsIndicator");
+        if (data.is_live_gps) {
+          gpsBadge.classList.remove("d-none");
+        }
 
-            const headlineEta = document.getElementById("headlineEta");
-            const headlineDesc = document.getElementById("headlineDesc");
-            if (data.is_delivered) {
-              headlineEta.innerHTML = "Delivered at Doorstep! 🎉";
-              headlineDesc.textContent = data.stage_desc;
-            } else if (data.stage === "ARRIVING") {
-              headlineEta.innerHTML = "Arriving at your doorstep now! 🔔";
-              headlineDesc.textContent = data.stage_desc;
-            } else {
-              headlineEta.innerHTML = 'Arriving in <span class="text-success">' + data.eta_minutes + '-' + (data.eta_minutes + 2) + ' Mins</span>';
-              headlineDesc.textContent = data.stage_desc;
-            }
+        const headlineEta = document.getElementById("headlineEta");
+        const headlineDesc = document.getElementById("headlineDesc");
+        if (data.is_delivered) {
+          headlineEta.innerHTML = "Delivered at Doorstep! 🎉";
+          headlineDesc.textContent = data.stage_desc;
+        } else if (data.stage === "ARRIVING") {
+          headlineEta.innerHTML = "Arriving at your doorstep now! 🔔";
+          headlineDesc.textContent = data.stage_desc;
+        } else {
+          headlineEta.innerHTML = 'Arriving in <span class="text-success">' + data.eta_minutes + '-' + (data.eta_minutes + 2) + ' Mins</span>';
+          headlineDesc.textContent = data.stage_desc;
+        }
 
-            document.getElementById("progressLabel").textContent = data.stage_title;
-            document.getElementById("progressPercentage").textContent = data.progress + "% Complete";
-            document.getElementById("progressBar").style.width = data.progress + "%";
+        document.getElementById("progressLabel").textContent = data.stage_title;
+        document.getElementById("progressPercentage").textContent = data.progress + "% Complete";
+        document.getElementById("progressBar").style.width = data.progress + "%";
 
-            const stepPacked = document.getElementById("stepPackedDot");
-            const stepWay = document.getElementById("stepWayDot");
-            const stepDelivered = document.getElementById("stepDeliveredDot");
+        // Update 4-step Timeline
+        const stepPackedTrack = document.getElementById("stepPackedTrack");
+        const stepPackedIcon = document.getElementById("stepPackedIcon");
+        const stepPackedBadge = document.getElementById("stepPackedBadge");
 
-            if (data.stage !== "RECEIVED") {
-              stepPacked.className = "step-icon-badge bg-success text-white";
-              stepPacked.innerHTML = '<i class="bi bi-check2"></i>';
-            }
-            if (["ON_THE_WAY", "ARRIVING", "DELIVERED"].includes(data.stage)) {
-              stepWay.className = "step-icon-badge bg-success text-white";
-              stepWay.innerHTML = '<i class="bi bi-check2"></i>';
-            }
-            if (data.is_delivered) {
-              stepDelivered.className = "step-icon-badge bg-success text-white";
-              stepDelivered.innerHTML = '<i class="bi bi-check2"></i>';
-            }
+        const stepWayTrack = document.getElementById("stepWayTrack");
+        const stepWayIcon = document.getElementById("stepWayIcon");
+        const stepWayBadge = document.getElementById("stepWayBadge");
 
-            document.getElementById("mapLastUpdated").textContent = "Updated " + new Date().toLocaleTimeString();
+        const stepDeliveredIcon = document.getElementById("stepDeliveredIcon");
+        const stepDeliveredBadge = document.getElementById("stepDeliveredBadge");
+
+        if (data.stage !== "RECEIVED") {
+          stepPackedTrack.classList.add("completed");
+          stepPackedIcon.className = "timeline-step-icon completed";
+          stepPackedIcon.innerHTML = '<i class="bi bi-check-lg"></i>';
+          stepPackedBadge.className = "badge bg-success-subtle text-success small rounded-pill";
+          stepPackedBadge.textContent = "Completed";
+        }
+        if (["ON_THE_WAY", "ARRIVING", "DELIVERED"].includes(data.stage)) {
+          stepWayTrack.classList.add("completed");
+          if (data.stage === "DELIVERED") {
+            stepWayIcon.className = "timeline-step-icon completed";
+            stepWayIcon.innerHTML = '<i class="bi bi-check-lg"></i>';
+            stepWayBadge.className = "badge bg-success-subtle text-success small rounded-pill";
+            stepWayBadge.textContent = "Completed";
+          } else {
+            stepWayIcon.className = "timeline-step-icon active";
+            stepWayIcon.textContent = "🛵";
+            stepWayBadge.className = "badge bg-primary-subtle text-primary small rounded-pill";
+            stepWayBadge.textContent = "In Transit";
           }
-        })
-        .catch(err => {
-          console.warn("Telemetry polling warning:", err);
-        });
+        }
+        if (data.is_delivered) {
+          stepDeliveredIcon.className = "timeline-step-icon completed";
+          stepDeliveredIcon.innerHTML = '<i class="bi bi-check-lg"></i>';
+          stepDeliveredBadge.className = "badge bg-success text-white small rounded-pill";
+          stepDeliveredBadge.textContent = "Delivered";
+        }
+
+        document.getElementById("mapLastUpdated").textContent = "Live GPS &bull; Updated " + new Date().toLocaleTimeString();
+      }
     }
 
-    setInterval(pollLiveTracking, 3500);
+    function pollLiveTracking() {
+      if (simulationActive) return; // don't overwrite during interactive simulation
+      fetch(trackingApiUrl)
+        .then(res => res.json())
+        .then(data => updateTrackingUI(data))
+        .catch(err => console.warn("Live telemetry polling error:", err));
+    }
+
+    let pollInterval = setInterval(pollLiveTracking, 3500);
+
+    // ==========================================
+    // 1. CUSTOMER EXACT GPS DETECTION
+    // ==========================================
+    const detectGpsBtn = document.getElementById("detectCustomerGpsBtn");
+    detectGpsBtn.addEventListener("click", function () {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+
+      detectGpsBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Locating...';
+      detectGpsBtn.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const accuracy = Math.round(pos.coords.accuracy);
+
+          fetch("{% url 'orders:update_location' order.id %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ lat: lat, lng: lng, accuracy: accuracy })
+          })
+          .then(res => res.json())
+          .then(data => {
+            detectGpsBtn.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i> Located!';
+            customerLat = lat;
+            customerLng = lng;
+            homeMarker.setLatLng([customerLat, customerLng]);
+            fitMapBounds();
+            alert("Your exact doorstep GPS was updated successfully! Route and distance recalculated.");
+            setTimeout(() => {
+              detectGpsBtn.innerHTML = '<i class="bi bi-crosshair2 text-danger me-1"></i> Detect My GPS';
+              detectGpsBtn.disabled = false;
+            }, 3000);
+          })
+          .catch(err => {
+            console.error(err);
+            detectGpsBtn.innerHTML = '<i class="bi bi-crosshair2 text-danger me-1"></i> Detect My GPS';
+            detectGpsBtn.disabled = false;
+          });
+        },
+        function (err) {
+          alert("Could not detect GPS location. Please allow location permissions in your browser.");
+          detectGpsBtn.innerHTML = '<i class="bi bi-crosshair2 text-danger me-1"></i> Detect My GPS';
+          detectGpsBtn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+
+    // ==========================================
+    // 2. REAL-TIME LIVE SCOOTER RIDE SIMULATOR
+    // ==========================================
+    let simulationActive = false;
+    let simStep = 0;
+    const totalSimSteps = 30;
+    let simTimer = null;
+    const simulateBtn = document.getElementById("simulateRideBtn");
+
+    simulateBtn.addEventListener("click", function () {
+      if (simulationActive) {
+        // Pause/stop
+        clearInterval(simTimer);
+        simulationActive = false;
+        simulateBtn.innerHTML = '<i class="bi bi-play-circle-fill me-1"></i> Resume Ride';
+        simulateBtn.className = "btn btn-sm btn-outline-success rounded-pill px-3 fw-bold";
+        return;
+      }
+
+      simulationActive = true;
+      simulateBtn.innerHTML = '<i class="bi bi-pause-circle-fill me-1"></i> Pause Ride';
+      simulateBtn.className = "btn btn-sm btn-warning rounded-pill px-3 fw-bold";
+
+      simTimer = setInterval(function () {
+        simStep++;
+        const fraction = simStep / totalSimSteps;
+
+        // Linear interpolation with slight curve for road effect
+        const curvedOffset = Math.sin(fraction * Math.PI) * 0.0035;
+        const currentLat = storeLat + fraction * (customerLat - storeLat) + curvedOffset;
+        const currentLng = storeLng + fraction * (customerLng - storeLng);
+
+        riderLat = currentLat;
+        riderLng = currentLng;
+        riderMarker.setLatLng([riderLat, riderLng]);
+        routeLine.setLatLngs([
+          [storeLat, storeLng],
+          [riderLat, riderLng],
+          [customerLat, customerLng]
+        ]);
+
+        // Calculate simulated distance and ETA
+        const remainingDist = (1.8 * (1 - fraction)).toFixed(2);
+        const remainingEta = Math.max(1, Math.ceil(remainingDist * 3));
+        const progressPct = Math.min(100, Math.round(35 + fraction * 65));
+
+        let currentStage = "ON_THE_WAY";
+        let stageTitle = "Damodar Vaishnav is riding to your doorstep 🛵";
+        let stageDesc = "Live GPS active &bull; Approx " + remainingDist + " km away (" + remainingEta + " mins)";
+
+        if (fraction >= 0.92 && fraction < 1.0) {
+          currentStage = "ARRIVING";
+          stageTitle = "Arrived at Your Gate / Doorstep! 🔔";
+          stageDesc = "Damodar is right outside. Share Delivery PIN {{ tracking.delivery_pin }} to collect order.";
+        } else if (fraction >= 1.0) {
+          currentStage = "DELIVERED";
+          stageTitle = "Order Delivered Successfully! 🎉";
+          stageDesc = "Delivered to your doorstep. Thank you for shopping with Om Super Mart!";
+        }
+
+        updateTrackingUI({
+          status: "success",
+          rider_lat: currentLat,
+          rider_lng: currentLng,
+          progress: progressPct,
+          eta_minutes: remainingEta,
+          stage: currentStage,
+          stage_title: stageTitle,
+          stage_desc: stageDesc,
+          is_delivered: fraction >= 1.0,
+          is_live_gps: true
+        });
+
+        if (fraction >= 1.0) {
+          clearInterval(simTimer);
+          simulationActive = false;
+          simulateBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise me-1"></i> Restart Demo';
+          simulateBtn.className = "btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold";
+          simStep = 0;
+        }
+      }, 1000);
+    });
+
   });
 </script>
 {% endblock %}
