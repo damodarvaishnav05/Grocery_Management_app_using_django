@@ -170,6 +170,10 @@ ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_ADAPTER = "accounts.adapter.CustomSocialAccountAdapter"
+_google_client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+_google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": [
@@ -181,6 +185,13 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
+
+if _google_client_id and _google_client_secret:
+    SOCIALACCOUNT_PROVIDERS["google"]["APP"] = {
+        "client_id": _google_client_id,
+        "secret": _google_client_secret,
+        "key": "",
+    }
 
 # =========================
 # Static / Media

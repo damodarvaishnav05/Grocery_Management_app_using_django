@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Authentication Notice | Om Super Mart{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: radial-gradient(circle at top right, #f0fdf4 0%, #ffffff 60%);
+        min-height: 100vh;
+    }
+    .auth-error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+    .auth-error-card {
+        max-width: 520px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px -15px rgba(22, 101, 52, 0.12), 0 0 0 1px rgba(22, 101, 52, 0.08);
+        padding: 40px 32px;
+        text-align: center;
+    }
+    .auth-error-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #fef2f2;
+        color: #dc2626;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+    .auth-error-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: #fef2f2;
+        color: #dc2626;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-radius: 999px;
+        margin-bottom: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-error-container">
+    <div class="auth-error-card">
+        <div class="auth-error-icon">
+            <i class="bi bi-shield-exclamation"></i>
+        </div>
+        <div class="auth-error-badge">
+            <i class="bi bi-exclamation-triangle-fill"></i> Google Sign-In Notice
+        </div>
+        <h2 class="fw-bold mb-3" style="color: #0f172a;">Sign-In Incomplete</h2>
+        <p class="text-muted mb-4" style="line-height: 1.6;">
+            We couldn't complete your sign-in via Google. This usually happens if the sign-in prompt was closed, or if your Google account requires access authorization.
+        </p>
+
+        <div class="d-flex flex-column gap-2 mb-4">
+            <a href="{% url 'accounts:login' %}" class="btn btn-success py-2 rounded-pill fw-semibold shadow-sm">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Try Again / Log In
+            </a>
+            <a href="{% url 'accounts:register' %}" class="btn btn-outline-success py-2 rounded-pill fw-semibold">
+                <i class="bi bi-person-plus me-1"></i> Create Account with Email
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-light py-2 rounded-pill text-secondary fw-semibold">
+                <i class="bi bi-shop me-1"></i> Continue Shopping as Guest
+            </a>
+        </div>
+
+        <small class="text-muted d-block" style="font-size: 0.8rem;">
+            Need help? Contact our instant support team anytime.
+        </small>
+    </div>
+</div>
+{% endblock %}
