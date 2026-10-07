@@ -40,3 +40,4 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             exception=exception,
             extra_context=extra_context,
         )
+
