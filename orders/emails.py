@@ -1,7 +1,10 @@
+import logging
 import urllib.parse
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 def get_site_base_url():
@@ -19,6 +22,7 @@ def send_owner_new_order_email(order, payment_method="Online Payment"):
     """
     owner_email = getattr(settings, "OWNER_NOTIFICATION_EMAIL", "damodar4162@gmail.com")
     if not owner_email:
+        logger.warning(f"No owner email configured for Order #{order.id}")
         return False
 
     full_address = f"{order.address}, {order.city}, {order.state} - {order.pincode}"
@@ -157,7 +161,8 @@ Om Super Mart Express Fleet
 """
 
     try:
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <damodar4162@gmail.com>")
+        logger.info(f"Sending order #{order.id} alert to owner {owner_email} via {settings.EMAIL_BACKEND}")
         msg = EmailMultiAlternatives(
             subject=subject,
             body=text_body,
@@ -165,10 +170,11 @@ Om Super Mart Express Fleet
             to=[owner_email],
         )
         msg.attach_alternative(html_body, "text/html")
-        msg.send(fail_silently=True)
+        msg.send(fail_silently=False)
+        logger.info(f"Owner notification email for Order #{order.id} delivered to {owner_email}")
         return True
     except Exception as e:
-        print(f"Error dispatching owner order notification: {e}")
+        logger.error(f"Error dispatching owner order notification for Order #{order.id}: {e}")
         return False
 
 
@@ -198,7 +204,7 @@ Your delivery partner Damodar Vaishnav will deliver your order in 10-15 minutes.
 """
 
     try:
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <noreply@omsupermart.com>")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Om Super Mart <damodar4162@gmail.com>")
         msg = EmailMultiAlternatives(
             subject=subject,
             body=text_body,
@@ -208,6 +214,5 @@ Your delivery partner Damodar Vaishnav will deliver your order in 10-15 minutes.
         msg.send(fail_silently=True)
         return True
     except Exception as e:
-        print(f"Customer confirmation email error: {e}")
+        logger.error(f"Customer confirmation email error for Order #{order.id}: {e}")
         return False
-

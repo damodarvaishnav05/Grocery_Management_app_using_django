@@ -112,7 +112,25 @@ def checkout(request):
 
     else:
 
-        form = CheckoutForm()
+        initial_data = {
+            "full_name": request.user.get_full_name() or request.user.username,
+            "phone": getattr(request.user, "phone_number", "") or "",
+        }
+        last_order = Order.objects.filter(user=request.user).order_by("-created_at").first()
+        if last_order:
+            initial_data["address"] = last_order.address
+            initial_data["city"] = last_order.city
+            initial_data["state"] = last_order.state
+            initial_data["pincode"] = last_order.pincode
+        else:
+            session_loc = request.session.get("delivery_location", "")
+            if session_loc:
+                initial_data["address"] = session_loc
+                if "Indore" in session_loc:
+                    initial_data["city"] = "Indore"
+                    initial_data["state"] = "Madhya Pradesh"
+                    initial_data["pincode"] = "452001"
+        form = CheckoutForm(initial=initial_data)
 
     return render(
         request,

@@ -1,11 +1,14 @@
+import traceback
+import logging
+from datetime import date
 from django.shortcuts import render
+from django.contrib.auth import get_user_model
 from products.models import Product
 from categories.models import Category
-from django.contrib.auth import get_user_model
-from datetime import date
 
-
+logger = logging.getLogger("django.request")
 User = get_user_model()
+
 
 def home(request):
 
@@ -13,8 +16,8 @@ def home(request):
         try:
             from products.seed import seed_all_groceries
             seed_all_groceries()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Seed note: {e}")
 
     categories = Category.objects.filter(is_active=True)
     featured_products = Product.objects.filter(available=True)[:8]
@@ -38,3 +41,12 @@ def home(request):
         "home.html",
         context
     )
+
+
+def custom_500_handler(request):
+    logger.error("Internal Server Error (500) captured:\n" + traceback.format_exc())
+    return render(request, "500.html", status=500)
+
+
+def custom_404_handler(request, exception=None):
+    return render(request, "404.html", status=404)

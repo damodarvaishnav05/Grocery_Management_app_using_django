@@ -198,17 +198,13 @@ class LoginForm(AuthenticationForm):
             if user is None:
 
                 try:
-
-                    obj = CustomUser.objects.get(
-                        email=username
-                    )
-
-                    user = authenticate(
-                        username=obj.username,
-                        password=password
-                    )
-
-                except CustomUser.DoesNotExist:
+                    obj = CustomUser.objects.filter(email__iexact=username).first()
+                    if obj:
+                        user = authenticate(
+                            username=obj.username,
+                            password=password
+                        )
+                except Exception:
                     pass
 
             if user is None:
@@ -265,4 +261,3 @@ class ProfileForm(forms.ModelForm):
                 }
             ),
         }
-

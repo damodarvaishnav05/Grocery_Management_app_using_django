@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <!-- Custom CSS with Cache Buster -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5.5">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5.6">
 
     <style>
         /* Mobile-First Reset & Global Tweaks */
@@ -363,16 +363,25 @@
             <!-- ======================================================= -->
             <div class="container-fluid px-4 d-none d-lg-flex align-items-center justify-content-between gap-3">
                 <!-- Delivery Location -->
-                <button class="om-location-btn d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#locationModal" title="Change delivery location">
-                    <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
-                    <div class="text-start">
-                        <div class="om-location-label">Deliver to</div>
-                        <div class="om-location-city">
-                            <span id="headerLocationText">{{ delivery_location|default:"Indore, Madhya Pradesh 452001" }}</span>
-                            <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="om-location-btn d-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#locationModal" title="Change delivery location">
+                        <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+                        <div class="text-start">
+                            <div class="om-location-label d-flex align-items-center gap-1">
+                                <span>Deliver to</span>
+                                <span class="badge bg-success-subtle text-success py-0 px-1 rounded-pill" style="font-size: 0.65rem;">⚡ 10 MINS</span>
+                            </div>
+                            <div class="om-location-city">
+                                <span id="headerLocationText">{{ delivery_location|default:"Indore, Madhya Pradesh 452001" }}</span>
+                                <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
+                            </div>
                         </div>
-                    </div>
-                </button>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-sm text-nowrap" id="desktopQuickGpsBtn" onclick="detectLiveHeaderLocation(event)" title="Detect exact real-time GPS location">
+                        <i class="bi bi-crosshair"></i>
+                        <span id="desktopGpsBtnText">Live GPS</span>
+                    </button>
+                </div>
 
                 <!-- Search Bar with Barcode & Voice Assistant -->
                 <form class="om-search-bar flex-grow-1 mx-3" method="GET" action="{% url 'products:index' %}" role="search">
@@ -532,19 +541,23 @@
             <div class="d-lg-none w-100 py-1">
                 <!-- Row 1: Hamburger + ⚡ 10-MINS Delivery Location + Refer & Earn ₹50 + Profile -->
                 <div class="om-mobile-top-row mb-2">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-1">
                         <button class="om-mobile-hamburger-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#omMobileSidebar" aria-label="Open App Menu">
                             <i class="bi bi-list fs-5"></i>
                         </button>
 
                         <button class="om-mobile-location-btn" type="button" data-bs-toggle="modal" data-bs-target="#locationModal" title="Change delivery location">
                             <span class="om-express-badge">
-                                <i class="bi bi-lightning-charge-fill"></i> 10 MINS
+                                <i class="bi bi-lightning-charge-fill"></i> 10m
                             </span>
                             <span class="om-mobile-loc-text" id="mobileHeaderLocationText">
-                                {{ delivery_location|default:"Indore"|slice:":16" }}...
+                                {{ delivery_location|default:"Indore"|slice:":13" }}...
                             </span>
                             <i class="bi bi-chevron-down text-muted" style="font-size: 0.65rem;"></i>
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-circle p-0 d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; flex-shrink: 0;" id="mobileQuickGpsBtn" onclick="detectLiveHeaderLocation(event)" title="Detect exact real-time GPS location">
+                            <i class="bi bi-crosshair fs-6"></i>
                         </button>
                     </div>
 
@@ -1050,6 +1063,111 @@
         if (val) {
             selectCity(val);
         }
+    }
+
+    function showLocationToast(message, isSuccess = true) {
+        let toastContainer = document.getElementById('om-toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'om-toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 18px; right: 18px; z-index: 1090; max-width: 380px; width: calc(100% - 36px); pointer-events: none;';
+            document.body.appendChild(toastContainer);
+        }
+        const toast = document.createElement('div');
+        toast.className = `alert ${isSuccess ? 'alert-success border-success' : 'alert-danger border-danger'} shadow-lg rounded-4 p-3 mb-2 d-flex align-items-center gap-2 fade show`;
+        toast.style.cssText = 'pointer-events: auto; animation: slideDown 0.3s ease; font-size: 0.88rem;';
+        toast.innerHTML = `
+            <i class="bi ${isSuccess ? 'bi-check-circle-fill text-success fs-5' : 'bi-exclamation-triangle-fill text-danger fs-5'} flex-shrink-0"></i>
+            <div class="flex-grow-1">${message}</div>
+            <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()"></button>
+        `;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            if (toast && toast.parentElement) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 250);
+            }
+        }, 4000);
+    }
+
+    function detectLiveHeaderLocation(e) {
+        if (e) e.stopPropagation();
+        const dBtn = document.getElementById("desktopQuickGpsBtn");
+        const mBtn = document.getElementById("mobileQuickGpsBtn");
+
+        if (!navigator.geolocation) {
+            showLocationToast("Geolocation is not supported by your browser.", false);
+            return;
+        }
+
+        if (dBtn) {
+            dBtn.disabled = true;
+            dBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span><span>Locating...</span>';
+        }
+        if (mBtn) {
+            mBtn.disabled = true;
+            mBtn.innerHTML = '<span class="spinner-border spinner-border-sm text-success" style="width: 14px; height: 14px;"></span>';
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                try {
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                    const data = await resp.json();
+                    let areaName = "";
+                    if (data && data.address) {
+                        const a = data.address;
+                        const locality = a.suburb || a.neighbourhood || a.residential || a.road || "";
+                        const city = a.city || a.town || a.county || a.state_district || "";
+                        const pincode = a.postcode || "";
+                        const parts = [locality, city, pincode].filter(Boolean);
+                        areaName = parts.join(", ");
+                    }
+                    if (!areaName) {
+                        areaName = `Location (${lat.toFixed(3)}°, ${lng.toFixed(3)}°)`;
+                    }
+
+                    selectCity(areaName);
+                    showLocationToast(`<strong>Live Location Set!</strong><br>${areaName}<br><small class="text-success fw-bold">⚡ 10-Minute Doorstep Delivery Active</small>`, true);
+                } catch(err) {
+                    console.warn("Geocode error:", err);
+                    const fallbackName = `GPS Location (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`;
+                    selectCity(fallbackName);
+                    showLocationToast(`<strong>GPS Location Locked:</strong> ${fallbackName}`, true);
+                } finally {
+                    if (dBtn) {
+                        dBtn.disabled = false;
+                        dBtn.innerHTML = '<i class="bi bi-crosshair text-success"></i><span class="text-success">Live Set</span>';
+                    }
+                    if (mBtn) {
+                        mBtn.disabled = false;
+                        mBtn.innerHTML = '<i class="bi bi-check-lg text-success fs-6"></i>';
+                        setTimeout(() => {
+                            mBtn.innerHTML = '<i class="bi bi-crosshair fs-6"></i>';
+                        }, 2500);
+                    }
+                }
+            },
+            function(err) {
+                console.warn("Location access denied or timed out:", err);
+                if (dBtn) {
+                    dBtn.disabled = false;
+                    dBtn.innerHTML = '<i class="bi bi-crosshair"></i><span>Try Again</span>';
+                }
+                if (mBtn) {
+                    mBtn.disabled = false;
+                    mBtn.innerHTML = '<i class="bi bi-crosshair fs-6"></i>';
+                }
+                showLocationToast("Could not access GPS location. Please tap location to pick your city.", false);
+                const locModalEl = document.getElementById('locationModal');
+                if (locModalEl && typeof bootstrap !== 'undefined') {
+                    bootstrap.Modal.getOrCreateInstance(locModalEl).show();
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
     }
 
     function detectLiveModalLocation() {

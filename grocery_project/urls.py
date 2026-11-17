@@ -6,7 +6,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from .views import home
+from .views import home, custom_500_handler, custom_404_handler
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -43,3 +43,5 @@ urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
 
+handler500 = "grocery_project.views.custom_500_handler"
+handler404 = "grocery_project.views.custom_404_handler"
