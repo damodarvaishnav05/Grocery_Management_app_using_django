@@ -1,3 +1,5 @@
+import os
+import logging
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -10,6 +12,54 @@ from .forms import (
     RegisterForm,
     ProfileForm,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def is_google_auth_configured():
+    cid = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    sec = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+    if cid and sec and cid != "not-configured" and sec != "not-configured":
+        return True
+    try:
+        from allauth.socialaccount.models import SocialApp
+        app = SocialApp.objects.filter(provider="google").first()
+        if (
+            app
+            and app.client_id
+            and app.client_id != "not-configured"
+            and app.secret
+            and app.secret != "not-configured"
+        ):
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def google_login_dispatch(request):
+    """
+    Safely dispatches Google OAuth login.
+    If GOOGLE_CLIENT_ID is not configured in Render environment or DB,
+    gracefully warns the user without redirecting to Google's Error 401: invalid_client page.
+    """
+    if not is_google_auth_configured():
+        messages.info(
+            request,
+            "Google Sign-In is not yet configured on this server. Please enter your Username/Email and Password below."
+        )
+        return redirect("accounts:login")
+
+    try:
+        from allauth.socialaccount.providers.google.views import oauth2_login
+        return oauth2_login(request)
+    except Exception as e:
+        logger.warning(f"Error invoking allauth google oauth2_login: {e}")
+        messages.warning(
+            request,
+            "Google Sign-In could not be started. Please use your Username/Email and Password."
+        )
+        return redirect("accounts:login")
 
 
 # =========================================================
@@ -78,7 +128,8 @@ def register_view(request):
         request,
         "accounts/register.html",
         {
-            "form": form
+            "form": form,
+            "is_google_configured": is_google_auth_configured(),
         }
     )
 
@@ -117,7 +168,8 @@ def login_view(request):
         request,
         "accounts/login.html",
         {
-            "form": form
+            "form": form,
+            "is_google_configured": is_google_auth_configured(),
         }
     )
 

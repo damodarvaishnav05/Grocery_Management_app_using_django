@@ -630,14 +630,15 @@ body {
 
                             <!-- GOOGLE LOGIN -->
                             {% load socialaccount %}
-                            <div class="google-login-wrapper">
-                                <form method="post" action="{% provider_login_url 'google' %}" class="w-100 d-flex justify-content-center m-0 p-0">
+                            <div class="google-login-wrapper flex-column align-items-center">
+                                <form method="post" action="{% provider_login_url 'google' %}" class="w-100 d-flex justify-content-center m-0 p-0" id="googleLoginForm">
                                     {% csrf_token %}
                                     <button
                                         type="submit"
                                         class="google-login-btn border-0 shadow-sm"
                                         style="cursor: pointer; font-family: inherit;"
                                         aria-label="Continue with Google"
+                                        onclick="return checkGoogleLogin(event);"
                                     >
                                         <img
                                             src="https://developers.google.com/identity/images/g-logo.png"
@@ -648,6 +649,9 @@ body {
                                         <span>Continue with Google</span>
                                     </button>
                                 </form>
+                                <div id="googleNotice" class="alert alert-warning py-2 px-3 small mt-3 rounded-3 d-none text-center" style="max-width: 320px; font-size: 0.82rem;">
+                                    <i class="bi bi-info-circle-fill me-1"></i> Google Sign-in requires configuration in Render dashboard. Please log in using your Username/Email &amp; Password above.
+                                </div>
                             </div>
                             
 
@@ -677,5 +681,26 @@ body {
     </div>
 
 </section>
+
+<script>
+function checkGoogleLogin(e) {
+    const isConfigured = {{ is_google_configured|yesno:"true,false" }};
+    if (!isConfigured) {
+        e.preventDefault();
+        const notice = document.getElementById("googleNotice");
+        if (notice) {
+            notice.classList.remove("d-none");
+            notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        const userField = document.getElementById("{{ form.username.id_for_label }}");
+        if (userField) {
+            userField.focus();
+            userField.classList.add("border-success");
+        }
+        return false;
+    }
+    return true;
+}
+</script>
 
 {% endblock %}
