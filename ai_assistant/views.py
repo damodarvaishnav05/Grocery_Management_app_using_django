@@ -1,14 +1,137 @@
-from django.shortcuts import render
+import json
+import logging
+import os
+import re
+import urllib.request
+from decimal import Decimal
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
 from products.models import Product
 from categories.models import Category
+from cart.models import Cart
+from cart.scanner import find_best_product_match
+
+logger = logging.getLogger(__name__)
+
+# Built-in recipe knowledge base for instant 1-click recipe ordering
+RECIPES_DATABASE = {
+    "paneer butter masala": {
+        "dish_name": "Restaurant-Style Paneer Butter Masala",
+        "prep_time": "20 Mins",
+        "servings": "3 - 4 Servings",
+        "cuisine": "North Indian",
+        "summary": "Rich, creamy cottage cheese curry simmered in a velvety spiced tomato, butter, and cashew gravy.",
+        "steps": [
+            "Melt 2 tbsp Amul butter in a pan, sauté finely chopped onions until translucent and golden.",
+            "Add ginger-garlic paste and pureed tomatoes. Simmer on medium flame until butter separates.",
+            "Stir in garam masala, kasoori methi, and fresh cream for that luxurious restaurant texture.",
+            "Gently fold in fresh Paneer cubes, simmer for 3 minutes, and serve hot with rotis or rice."
+        ],
+        "ingredients": ["paneer", "amul butter", "tomato", "onion", "ginger", "milk", "fortune sunflower oil"]
+    },
+    "masala chai": {
+        "dish_name": "Kadak Adrak Masala Chai & Evening Nashta",
+        "prep_time": "8 Mins",
+        "servings": "2 - 3 Cups",
+        "cuisine": "Everyday Indian",
+        "summary": "Invigorating spiced milk tea infused with crushed fresh ginger, served alongside tea-time snacks.",
+        "steps": [
+            "Bring 1.5 cups water to a rolling boil with crushed fresh ginger and cardamom.",
+            "Add 2 teaspoons Tata Tea Gold leaves, simmer for 2 minutes until deep amber color develops.",
+            "Pour in 1 cup fresh Amul milk, bring to a boil twice, strain into cups, and enjoy with Parle-G or biscuits."
+        ],
+        "ingredients": ["tata tea gold", "amul taaza milk", "ginger", "sugar", "kurkure masala", "lays magic masala"]
+    },
+    "maggi noodles feast": {
+        "dish_name": "Street-Style Cheesy Butter Maggi",
+        "prep_time": "7 Mins",
+        "servings": "1 - 2 Servings",
+        "cuisine": "Quick Snack",
+        "summary": "Indulgent 2-minute instant noodles tossed with sautéed fresh veggies, melting butter, and secret spices.",
+        "steps": [
+            "In a hot pan, melt 1 tbsp Amul butter and lightly sauté diced tomatoes and green chillies.",
+            "Pour in 1.5 cups of boiling water and mix in the Maggi Tastemaker thoroughly.",
+            "Break in the Maggi noodle cake, cook for 2 minutes on high flame, and serve steaming hot."
+        ],
+        "ingredients": ["maggi noodles", "amul butter", "tomato", "onion", "maaza mango drink"]
+    },
+    "dal tadka": {
+        "dish_name": "Dhaba-Style Yellow Dal Tadka & Jeera Rice",
+        "prep_time": "22 Mins",
+        "servings": "4 Servings",
+        "cuisine": "Homestyle Indian",
+        "summary": "Comforting yellow lentils tempered with crackling cumin seeds, garlic, onions, and golden ghee/oil.",
+        "steps": [
+            "Pressure cook washed dal with turmeric, salt, and water for 3 to 4 whistles until soft.",
+            "In a small pan, heat cooking oil, crackle cumin seeds, sliced garlic cloves, and chopped onions.",
+            "Toss in diced juicy tomatoes and red chilli powder. Fry until aromatic.",
+            "Pour the sizzling tadka over the cooked dal, stir well, and garnish with fresh coriander."
+        ],
+        "ingredients": ["fortune sunflower oil", "tomato", "onion", "ginger", "aashirvaad atta"]
+    },
+    "fruit salad bowl": {
+        "dish_name": "Vitamin Booster Fresh Fruit Bowl",
+        "prep_time": "5 Mins",
+        "servings": "2 Servings",
+        "cuisine": "Healthy & Clean",
+        "summary": "Hand-picked farm apples, bananas, sweet oranges, and seasonal fruits drizzled with honey and lime.",
+        "steps": [
+            "Wash and dice fresh apples, peel and slice sweet bananas into a clean bowl.",
+            "Separate sweet orange segments and toss gently together.",
+            "Drizzle with raw honey or a pinch of chaat masala for a refreshing antioxidant punch."
+        ],
+        "ingredients": ["apple", "banana", "orange", "maaza mango drink"]
+    },
+    "quick breakfast combo": {
+        "dish_name": "10-Minute Power Breakfast (Oats & Coffee)",
+        "prep_time": "6 Mins",
+        "servings": "1 - 2 Servings",
+        "cuisine": "Breakfast Essentials",
+        "summary": "Quick nourishing rolled oats in warm milk paired with aromatic Nescafe Classic coffee.",
+        "steps": [
+            "Simmer rolled oats in 1 cup warm Amul milk for 3 minutes until thick and creamy.",
+            "Froth 1 tsp Nescafe Classic with hot milk and brown sugar for a barista-style morning coffee.",
+            "Top your oats bowl with sliced bananas or apple chunks."
+        ],
+        "ingredients": ["nescafe classic", "amul taaza milk", "amul butter", "apple"]
+    }
+}
+
+
+def match_recipe_from_query(query):
+    """Detects if query matches any known recipes or cooking keywords"""
+    q = query.lower().strip()
+
+    # Direct match or alias check
+    if any(k in q for k in ["paneer", "butter masala", "shahi paneer", "kadai paneer"]):
+        return RECIPES_DATABASE["paneer butter masala"]
+    elif any(k in q for k in ["tea", "chai", "evening nashta", "adrak chai", "tea time"]):
+        return RECIPES_DATABASE["masala chai"]
+    elif any(k in q for k in ["maggi", "noodles", "instant noodle", "magi"]):
+        return RECIPES_DATABASE["maggi noodles feast"]
+    elif any(k in q for k in ["dal", "tadka", "dal fry", "dal chawal", "lentil"]):
+        return RECIPES_DATABASE["dal tadka"]
+    elif any(k in q for k in ["fruit bowl", "fruit salad", "fruits", "fruit"]):
+        return RECIPES_DATABASE["fruit salad bowl"]
+    elif any(k in q for k in ["coffee", "oats", "morning breakfast", "breakfast combo"]):
+        return RECIPES_DATABASE["quick breakfast combo"]
+
+    # If user explicitly asks "recipe for ...", "how to cook ...", "make ..."
+    if any(q.startswith(prefix) for prefix in ["recipe for", "how to make", "how to cook", "make", "cook"]):
+        # Fallback to paneer butter masala or first available recipe as smart demonstration
+        return RECIPES_DATABASE["paneer butter masala"]
+
+    return None
 
 
 def get_ai_response(question):
     q = question.lower().strip()
 
-    # ==========================================
-    # 1. WEIGHT LOSS & CALORIE MANAGEMENT
-    # ==========================================
     if any(k in q for k in ["weight loss", "lose weight", "diet food", "burn fat", "low calorie"]):
         return {
             "title": "🥗 Weight Loss & Calorie-Smart Grocery Guide",
@@ -24,10 +147,6 @@ def get_ai_response(question):
             "avoid": ["Sugary beverages & sodas", "Ultra-processed fried snacks", "Refined white flour (maida)", "Excess cooking oils"],
             "suggested_query": "apple"
         }
-
-    # ==========================================
-    # 2. HIGH PROTEIN & MUSCLE BUILDING
-    # ==========================================
     elif any(k in q for k in ["protein", "muscle", "gym", "bodybuilding", "workout food"]):
         return {
             "title": "💪 High-Protein Nutrition Powerhouses",
@@ -43,10 +162,6 @@ def get_ai_response(question):
             "tip": "Distribute protein evenly across 3 to 4 meals every day for optimal muscle protein synthesis.",
             "suggested_query": "milk"
         }
-
-    # ==========================================
-    # 3. DIABETES & BLOOD SUGAR CARE
-    # ==========================================
     elif any(k in q for k in ["diabetes", "blood sugar", "diabetic", "glycemic"]):
         return {
             "title": "🩺 Diabetes-Friendly & Low-GI Grocery Picks",
@@ -55,17 +170,13 @@ def get_ai_response(question):
             "points": [
                 ("Low GI Grains", "Steel-cut oats, barley, quinoa, whole wheat, and ragi."),
                 ("Non-Starchy Vegetables", "Bitter gourd (karela), methi (fenugreek leaves), spinach, okra (bhindi), cucumber, and cauliflower."),
-                ("Smart Fruits (Portion Controlled)", "Guava, berries, amla (Indian gooseberry), jamun, and green apples."),
+                ("Smart Fruits", "Guava, berries, amla (Indian gooseberry), jamun, and green apples."),
                 ("Healthy Fats", "Extra virgin olive oil, cold-pressed mustard oil, soaked almonds, and flaxseeds."),
                 ("Herbal Allies", "Fenugreek seeds, cinnamon stick tea, and ginger.")
             ],
-            "avoid": ["Fruit juices & carbonated soft drinks", "White bread, white rice & refined pasta", "Packaged sweets & honey syrups"],
+            "avoid": ["Fruit juices & carbonated soft drinks", "White bread, white rice & refined pasta", "Packaged sweets & syrups"],
             "suggested_query": "vegetable"
         }
-
-    # ==========================================
-    # 4. HEART HEALTH & CHOLESTEROL
-    # ==========================================
     elif any(k in q for k in ["heart", "cholesterol", "blood pressure", "cardio", "bp"]):
         return {
             "title": "❤️ Heart Health & Cholesterol Management",
@@ -73,91 +184,27 @@ def get_ai_response(question):
             "summary": "Support cardiovascular vitality with foods rich in soluble fiber, Omega-3 fatty acids, and potassium.",
             "points": [
                 ("Soluble Fiber Champions", "Oats, barley, beans, and lentils help bind cholesterol in the digestive tract."),
-                ("Omega-3 & Healthy Fats", "Flaxseed oil, walnuts, chia seeds, and avocado."),
-                ("Potassium-Rich Produce", "Bananas, sweet potatoes, tomatoes, and tender coconut water (helps balance sodium)."),
+                ("Omega-3 & Healthy Fats", "Flaxseed oil, walnuts, chia seeds, and sunflower oil."),
+                ("Potassium-Rich Produce", "Bananas, sweet potatoes, tomatoes, and tender coconut water."),
                 ("Antioxidant Boosters", "Pomegranates, dark berries, garlic cloves, and beetroot.")
             ],
             "tip": "Cut down on sodium intake and avoid trans-fats found in commercial fried foods and hydrogenated oils.",
-            "suggested_query": "oats"
+            "suggested_query": "oil"
         }
-
-    # ==========================================
-    # 5. IMMUNITY BOOSTING
-    # ==========================================
-    elif any(k in q for k in ["immunity", "immune", "cold", "flu", "vitamin c", "antioxidant"]):
-        return {
-            "title": "🛡️ Immunity Boosting Superfoods",
-            "category": "Vitality & Wellness",
-            "summary": "Fortify your body's immune defense with vitamins C, D, A, Zinc, and natural antimicrobials.",
-            "points": [
-                ("Vitamin C Stars", "Amla, oranges, lemons, kiwis, guavas, and bell peppers."),
-                ("Spices & Roots", "Fresh ginger, raw turmeric, garlic, black pepper, and cloves."),
-                ("Herbal Infusions", "Tulsi leaves, green tea, and warm water with honey."),
-                ("Gut Health", "Probiotic curd, yogurt, and fermented foods (70% of immunity resides in your gut!)."),
-                ("Zinc & Selenium", "Pumpkin seeds, almonds, and sunflower seeds.")
-            ],
-            "suggested_query": "orange"
-        }
-
-    # ==========================================
-    # 6. QUICK BREAKFAST IDEAS
-    # ==========================================
-    elif any(k in q for k in ["breakfast", "morning", "fast meal", "quick food"]):
-        return {
-            "title": "🍳 Quick & Energizing Healthy Breakfast Ideas",
-            "category": "Recipes & Meal Prep",
-            "summary": "5 to 10 minute wholesome breakfast recipes made with Om Super Mart groceries:",
-            "points": [
-                ("Power Oatmeal Bowl", "Cook rolled oats in warm milk or almond milk, top with sliced banana, chia seeds, and a drizzle of honey."),
-                ("Avocado & Boiled Egg Toast", "Whole grain bread toasted with mashed avocado, lime juice, chili flakes, and sliced boiled eggs."),
-                ("Protein Smoothie", "Blend 1 banana, a spoonful of peanut butter, 1 glass milk, and a handful of spinach (you won't taste the greens!)."),
-                ("Vegetable Poha or Upma", "Flattened rice sautéed with mustard seeds, curry leaves, crunchy peanuts, peas, and carrots."),
-                ("Paneer Bhurji with Multigrain Roti", "Scrambled cottage cheese tossed with diced tomatoes, onions, coriander, and light spices.")
-            ],
-            "suggested_query": "bread"
-        }
-
-    # ==========================================
-    # 7. GROCERY STORAGE & FRESHNESS TIPS
-    # ==========================================
-    elif any(k in q for k in ["store", "fresh", "preserve", "spoil", "shelf life", "keep fresh"]):
-        return {
-            "title": "🌿 Kitchen Secret: Keep Produce Fresh 2x Longer",
-            "category": "Smart Kitchen Tips",
-            "summary": "Simple, scientifically proven storage techniques to prevent food waste and keep groceries fresh:",
-            "points": [
-                ("Leafy Greens (Spinach, Coriander)", "Wash, thoroughly dry in a salad spinner or towel, wrap in paper towels, and store in an airtight container in the crisper drawer."),
-                ("Tomatoes & Bananas", "Keep at room temperature! Refrigerator cold breaks down tomato cell walls making them mealy."),
-                ("Apples & Citrus", "Store in the fridge crisper away from greens (apples emit ethylene gas which accelerates ripening of other produce)."),
-                ("Potatoes & Onions", "Store in a cool, dark, ventilated basket. Never store potatoes and onions together as they cause each other to sprout."),
-                ("Bread", "Keep at room temperature in a bread box or paper bag; freeze sliced loaves for long term; never refrigerate (refrigeration stales bread faster)."),
-                ("Herbs (Mint, Basil)", "Trim stems and place upright in a small glass with 1 inch of water like a bouquet.")
-            ],
-            "suggested_query": "vegetables"
-        }
-
-    # ==========================================
-    # 8. SHOPPING CART, DELIVERY & ORDERS
-    # ==========================================
-    elif any(k in q for k in ["delivery", "order", "shipping", "track", "cancel", "how long", "time"]):
+    elif any(k in q for k in ["delivery", "order", "shipping", "track", "how long", "time"]):
         return {
             "title": "🚚 Express Delivery & Order Information",
             "category": "Store Support",
             "summary": "Everything you need to know about Om Super Mart deliveries and tracking:",
             "points": [
                 ("Ultra-Fast 10-Min Delivery", "Fresh produce and essentials delivered to your doorstep in 10 to 15 minutes across covered zones."),
-                ("Real-time Status Tracking", "Track your order status live (Pending -> Confirmed -> Shipped -> Delivered) in the 'My Orders' tab."),
+                ("Real-time Status Tracking", "Track your order status live with interactive GPS map in the 'My Orders' tab."),
                 ("Free Delivery Threshold", "Enjoy 100% Free Express Delivery on orders above ₹199."),
-                ("Hassle-Free Cancellation", "Cancel pending or confirmed orders instantly from 'My Orders' before dispatch with immediate inventory and refund processing."),
-                ("PDF Invoices", "Download official GST/itemized invoices for all past orders with one click.")
+                ("Secure 4-Digit Delivery PIN", "Share your delivery PIN with our partner to safely receive your groceries.")
             ],
-            "suggested_query": "apple"
+            "suggested_query": "milk"
         }
-
-    # ==========================================
-    # 9. COUPONS & DISCOUNTS
-    # ==========================================
-    elif any(k in q for k in ["coupon", "discount", "offer", "promo", "voucher", "save money", "code"]):
+    elif any(k in q for k in ["coupon", "discount", "offer", "promo", "code"]):
         from datetime import date
         today_code = f"OMSUPER{date.today().strftime('%d%m')}"
         return {
@@ -166,95 +213,80 @@ def get_ai_response(question):
             "summary": "Maximize your grocery savings every day on Om Super Mart:",
             "points": [
                 (f"Today's Active Coupon: {today_code}", f"Apply code '{today_code}' at checkout to unlock an instant 10% discount on your order!"),
-                ("First Order Bonus", "New customers get free delivery and welcome vouchers automatically credited to their account."),
-                ("Combos & Bundles", "Explore weekly vegetable combos and breakfast bundles in the Products catalog for up to 25% savings."),
-                ("Easy Removal & Reapply", "You can easily apply or remove coupon codes on the Shopping Cart page.")
+                ("First Order Bonus", "New customers get free delivery automatically credited to their account."),
+                ("Combos & Bundles", "Explore weekly vegetable combos and breakfast bundles in the Products catalog.")
             ],
-            "suggested_query": "fruits"
+            "suggested_query": "fortune"
         }
-
-    # ==========================================
-    # 10. PAYMENTS & RAZORPAY
-    # ==========================================
-    elif any(k in q for k in ["payment", "pay", "razorpay", "upi", "card", "cod", "cash"]):
-        return {
-            "title": "💳 Payment Options & Security",
-            "category": "Checkout Support",
-            "summary": "Multiple convenient and bank-grade secure payment methods:",
-            "points": [
-                ("UPI", "Instant payments with Google Pay, PhonePe, Paytm, and BHIM."),
-                ("Credit & Debit Cards", "Visa, MasterCard, RuPay, and American Express with 3D-Secure 2FA."),
-                ("Net Banking", "Direct payment supported across all major banks."),
-                ("Cash on Delivery (COD)", "Pay with cash or scan QR code upon doorstep delivery."),
-                ("SSL Encrypted", "All transactions are 256-bit encrypted via Razorpay certified gateway.")
-            ],
-            "suggested_query": "milk"
-        }
-
-    # ==========================================
-    # 11. FRUITS & VEGETABLES
-    # ==========================================
-    elif any(k in q for k in ["fruit", "vegetable", "veggie", "organic", "greens", "produce"]):
-        return {
-            "title": "🍎 Farm-Fresh Fruits & Vegetables Guide",
-            "category": "Product Discovery",
-            "summary": "Hand-picked from certified local farms daily with zero artificial ripening agents:",
-            "points": [
-                ("Fresh Fruits", "Apples, Cavendish Bananas, Alphonso Mangoes, Pomegranates, Papayas, Sweet Oranges, and Strawberries."),
-                ("Daily Cooking Veggies", "Farm Potatoes, Red Onions, Juicy Tomatoes, Fresh Ginger, and Green Chillies."),
-                ("Nutritious Greens", "Baby Spinach (Palak), Coriander, Mint, and Methi leaves harvested every morning."),
-                ("Crunchy Salad Staples", "English Cucumbers, Hybrid Carrots, Iceberg Lettuce, and Bell Peppers.")
-            ],
-            "suggested_query": "apple"
-        }
-
-    # ==========================================
-    # 12. DAIRY & BAKERY
-    # ==========================================
-    elif any(k in q for k in ["dairy", "milk", "cheese", "paneer", "bread", "bakery", "egg"]):
-        return {
-            "title": "🥛 Farm Fresh Dairy, Artisan Bakery & Eggs",
-            "category": "Dairy & Bakery",
-            "summary": "Cold-chain transported daily essentials delivered fresh every morning:",
-            "points": [
-                ("Pasteurized Milk", "Full cream, toned, double toned, and lactose-free dairy milk delivered before sunrise."),
-                ("Pure Malai Paneer", "Freshly prepared, ultra-soft paneer perfect for curries and protein bowls."),
-                ("Whole Wheat & Multigrain Bread", "Freshly baked artisan breads, brown bread, and burger buns."),
-                ("Farm Fresh Eggs", "White and brown free-range eggs rich in Vitamin B12 and Omega-3.")
-            ],
-            "suggested_query": "milk"
-        }
-
-    # ==========================================
-    # DEFAULT / GENERAL WELCOME
-    # ==========================================
     else:
         return {
             "title": "🤖 Welcome to Om Super Mart AI Grocery Assistant",
             "category": "General Guide",
-            "summary": f"You asked: \"{question}\". I am trained to give you immediate expert guidance on groceries, nutrition, recipes, and store assistance.",
+            "summary": f"You asked: \"{question}\". I am trained to give you immediate expert guidance on recipes, grocery checklists, nutrition, and store assistance.",
             "points": [
-                ("Health & Dietary Plans", "Ask for 'foods for weight loss', 'protein rich diet', 'diabetes friendly groceries', or 'heart health'."),
-                ("Meal Ideas & Cooking", "Ask for 'quick breakfast ideas', 'healthy snacks', or '15 minute meals'."),
-                ("Produce & Freshness", "Ask for 'how to store vegetables fresh', 'fresh fruits recommendations', or 'pantry checklist'."),
-                ("Store Assistance", "Ask about 'delivery time', 'active coupons', 'payment methods', or 'how to track orders'.")
+                ("1-Click Recipe-to-Cart", "Ask for 'Paneer Butter Masala', 'Masala Chai', 'Dal Tadka', or 'Cheesy Maggi' to get ingredients added directly to your cart."),
+                ("Health & Dietary Plans", "Ask for 'foods for weight loss', 'protein rich diet', or 'diabetes friendly groceries'."),
+                ("Produce & Freshness", "Ask for 'fresh fruits recommendations' or 'how to store veggies'."),
+                ("Store Assistance", "Ask about 'delivery time', 'active coupons', or 'payment options'.")
             ],
-            "tip": "Click any of the quick suggestion chips above to explore instant guidance!",
-            "suggested_query": ""
+            "tip": "Try searching for a recipe below (e.g. 'Paneer Butter Masala') to see 1-click cart addition in action!",
+            "suggested_query": "paneer"
         }
 
 
 def index(request):
     answer = None
+    recipe_data = None
     user_query = ""
     matching_products = []
 
     if request.method == "POST":
         user_query = request.POST.get("question", "").strip()
         if user_query:
+            # Check for recipe match first
+            matched_recipe = match_recipe_from_query(user_query)
+            if matched_recipe:
+                catalog_products = list(Product.objects.filter(available=True).select_related("category"))
+                matched_items = []
+                total_recipe_price = Decimal("0.00")
+
+                for ing in matched_recipe["ingredients"]:
+                    best_prod, score = find_best_product_match(ing, catalog_products)
+                    if best_prod:
+                        matched_items.append({
+                            "ingredient_name": ing.title(),
+                            "product": best_prod,
+                            "price": best_prod.final_price,
+                            "in_stock": best_prod.stock > 0,
+                            "score": score,
+                        })
+                        total_recipe_price += Decimal(str(best_prod.final_price))
+                    else:
+                        matched_items.append({
+                            "ingredient_name": ing.title(),
+                            "product": None,
+                            "price": Decimal("0.00"),
+                            "in_stock": False,
+                            "score": 0,
+                        })
+
+                recipe_data = {
+                    "dish_name": matched_recipe["dish_name"],
+                    "prep_time": matched_recipe["prep_time"],
+                    "servings": matched_recipe["servings"],
+                    "cuisine": matched_recipe["cuisine"],
+                    "summary": matched_recipe["summary"],
+                    "steps": matched_recipe["steps"],
+                    "items": matched_items,
+                    "total_price": total_recipe_price,
+                    "available_items_count": sum(1 for i in matched_items if i["product"] and i["in_stock"]),
+                    "total_items_count": len(matched_items),
+                }
+
+            # Also provide the AI contextual guidance
             answer = get_ai_response(user_query)
 
-            # Look up related products in database if query has a suggested keyword
+            # Look up related products for the catalog carousel
             suggested_term = answer.get("suggested_query")
             if suggested_term:
                 matching_products = Product.objects.filter(
@@ -264,15 +296,53 @@ def index(request):
             if not matching_products:
                 matching_products = Product.objects.filter(available=True)[:4]
 
-    categories = Category.objects.filter(is_active=True)[:6]
+    categories = Category.objects.filter(is_active=True)[:8]
 
     return render(
         request,
         "ai_assistant/index.html",
         {
             "answer": answer,
+            "recipe_data": recipe_data,
             "user_query": user_query,
             "matching_products": matching_products,
             "categories": categories,
         }
     )
+
+
+@login_required
+def add_recipe_to_cart(request):
+    """
+    1-Click bulk recipe addition.
+    Takes a list of product IDs matched for a recipe and adds them into the customer's cart.
+    """
+    if request.method == "POST":
+        product_ids = request.POST.getlist("product_ids")
+        dish_name = request.POST.get("dish_name", "Recipe")
+        added_count = 0
+
+        for pid in product_ids:
+            try:
+                prod = Product.objects.get(id=int(pid), available=True)
+                if prod.stock > 0:
+                    cart_item, created = Cart.objects.get_or_create(user=request.user, product=prod)
+                    if not created:
+                        if cart_item.quantity < prod.stock:
+                            cart_item.quantity += 1
+                            cart_item.save()
+                    added_count += 1
+            except (Product.DoesNotExist, ValueError):
+                continue
+
+        if added_count > 0:
+            messages.success(
+                request,
+                f"⚡ Added {added_count} fresh ingredients for '{dish_name}' to your cart! Ready for 10-minute delivery."
+            )
+            return redirect("cart:index")
+        else:
+            messages.warning(request, "Selected ingredients are currently out of stock.")
+            return redirect("ai_assistant:index")
+
+    return redirect("ai_assistant:index")

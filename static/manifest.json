@@ -1,0 +1,42 @@
+{
+  "name": "Om Super Mart - 10-Minute Grocery Delivery",
+  "short_name": "Om Super Mart",
+  "description": "Fresh farm vegetables, dairy, snacks, and daily essentials delivered to your doorstep in 10 minutes.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#15803d",
+  "icons": [
+    {
+      "src": "/static/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Track Orders",
+      "url": "/orders/",
+      "description": "Track active grocery deliveries in real time"
+    },
+    {
+      "name": "Shopping Cart",
+      "url": "/cart/",
+      "description": "View and checkout cart items"
+    },
+    {
+      "name": "Smart Recipe AI",
+      "url": "/ai-assistant/",
+      "description": "Cook any dish with 1-click recipe ingredients"
+    }
+  ]
+}

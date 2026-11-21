@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}AI Grocery Assistant | Om Super Mart{% endblock %}
+{% block title %}AI Recipe-to-Cart & Grocery Guide | Om Super Mart{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -12,47 +12,44 @@
             <i class="bi bi-robot fs-1"></i>
         </div>
         <h1 class="display-6 fw-bold text-success-emphasis mb-2">
-            Om Super Mart AI Shopping & Nutrition Guide
+            AI Recipe-to-Cart &amp; Nutrition Guide
         </h1>
-        <p class="text-muted lead mx-auto" style="max-width: 650px;">
-            Ask for dietary advice, quick 10-minute recipes, grocery storage secrets, and real-time store help.
+        <p class="text-muted lead mx-auto" style="max-width: 680px;">
+            Name any dish to get step-by-step cooking steps and <strong>add all fresh ingredients directly to your cart in 1 click!</strong>
         </p>
     </div>
 
-    <!-- SUGGESTION CHIPS -->
+    <!-- RECIPE & TOPIC SUGGESTION CHIPS -->
     <div class="row justify-content-center mb-4">
         <div class="col-lg-10">
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white" style="overflow: hidden; max-width: 100%;">
-                <small class="text-uppercase fw-bold text-muted mb-2 d-block">
-                    <i class="bi bi-stars text-warning me-1"></i> Quick Topics to Ask
-                </small>
-                <div class="mobile-scroll-container pb-1" id="suggestion-chips" style="display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 8px; scrollbar-width: none; width: 100%;">
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Suggest foods for weight loss">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-uppercase fw-bold text-muted">
+                        <i class="bi bi-fire text-danger me-1"></i> Trending 1-Click Dishes to Cook
+                    </small>
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1 small">Instant Cart</span>
+                </div>
+                <div class="mobile-scroll-container pb-2" id="suggestion-chips" style="display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 8px; scrollbar-width: none; width: 100%;">
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn fw-bold" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="Paneer Butter Masala">
+                        🧀 Paneer Butter Masala
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn fw-bold" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="Kadak Masala Chai & Evening Nashta">
+                        ☕ Masala Chai &amp; Snacks
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn fw-bold" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="Cheesy Butter Maggi Noodles">
+                        🍜 Cheesy Butter Maggi
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn fw-bold" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="Dhaba Yellow Dal Tadka">
+                        🍲 Dal Tadka &amp; Atta
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success chip-btn fw-bold" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="Fresh Fruit Salad Bowl">
+                        🍎 Fresh Fruit Bowl
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="Suggest foods for weight loss">
                         🥗 Weight Loss Foods
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="What are high protein foods?">
+                    <button type="button" class="btn btn-sm btn-outline-secondary chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 7px 16px;" data-query="What are high protein foods?">
                         💪 High Protein Picks
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Healthy quick breakfast ideas">
-                        🍳 10-Min Breakfasts
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Best diabetes friendly groceries">
-                        🩺 Diabetes-Friendly
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="How to keep vegetables fresh longer?">
-                        🌿 Keep Produce Fresh 2x Longer
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="Immunity boosting superfoods">
-                        🛡️ Immunity Boosters
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="What are today's active coupon codes?">
-                        🎉 Today's Coupons
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="How does 10-minute delivery work?">
-                        🚚 Express Delivery Info
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-success chip-btn" style="white-space: nowrap; flex-shrink: 0; border-radius: 999px; padding: 6px 14px;" data-query="What payment options are available?">
-                        💳 Payment Methods
                     </button>
                 </div>
             </div>
@@ -68,26 +65,139 @@
                         {% csrf_token %}
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-light border-end-0 text-success">
-                                <i class="bi bi-chat-heart fs-4"></i>
+                                <i class="bi bi-magic fs-4"></i>
                             </span>
                             <input
                                 type="text"
                                 name="question"
                                 id="ai-input"
                                 class="form-control border-start-0 border-end-0 shadow-none ps-2"
-                                placeholder="Ask anything... (e.g. 'high protein breakfast' or 'how to store spinach')"
+                                placeholder="What do you want to cook or ask? (e.g. 'Paneer Butter Masala' or 'Weight loss diet')"
                                 value="{{ user_query }}"
                                 required
                             >
                             <button class="btn btn-success px-4 fw-bold" type="submit">
-                                <i class="bi bi-send-fill me-1"></i> Ask AI
+                                <i class="bi bi-search me-1"></i> Cook &amp; Ask
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- AI RESPONSE CARD -->
+            <!-- 1-CLICK RECIPE TO CART CARD (IF RECIPE DETECTED) -->
+            {% if recipe_data %}
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 animate-fade-in" style="border: 2px solid #16a34a !important;">
+                <div class="card-header bg-success text-white py-4 px-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="badge bg-warning text-dark fw-bold rounded-pill mb-1">
+                                ⚡ 1-Click Recipe-to-Cart
+                            </span>
+                            <h3 class="mb-0 fw-bold">{{ recipe_data.dish_name }}</h3>
+                            <small class="text-white-50">{{ recipe_data.summary }}</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold">
+                                ⏱️ {{ recipe_data.prep_time }}
+                            </span>
+                            <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold">
+                                👥 {{ recipe_data.servings }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5 bg-white">
+
+                    <!-- STEP-BY-STEP COOKING -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="bi bi-journal-text text-success me-2"></i> How to Cook:
+                        </h5>
+                        <div class="d-flex flex-column gap-2">
+                            {% for step in recipe_data.steps %}
+                            <div class="p-3 bg-light rounded-3 d-flex align-items-start gap-3">
+                                <span class="badge bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 26px; height: 26px; font-size: 0.85rem; flex-shrink: 0;">
+                                    {{ forloop.counter }}
+                                </span>
+                                <span class="text-secondary small">{{ step }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- INGREDIENTS CHECKLIST & 1-CLICK ADD TO CART FORM -->
+                    <div class="pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-basket-fill text-success me-2"></i> Required Grocery Ingredients:
+                                </h5>
+                                <small class="text-muted">
+                                    {{ recipe_data.available_items_count }} of {{ recipe_data.total_items_count }} ingredients matched in stock
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="text-muted small d-block">Estimated Ingredients Cost:</span>
+                                <strong class="fs-4 text-success">₹{{ recipe_data.total_price }}</strong>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{% url 'ai_assistant:add_recipe_to_cart' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="dish_name" value="{{ recipe_data.dish_name }}">
+
+                            <div class="row g-3 mb-4">
+                                {% for item in recipe_data.items %}
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-4 border d-flex align-items-center justify-content-between {% if item.in_stock %}bg-white border-success-subtle{% else %}bg-light opacity-75{% endif %}">
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if item.product and item.product.image %}
+                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="rounded-3 border" style="width: 50px; height: 50px; object-fit: contain; background: #fafafa;">
+                                            {% else %}
+                                                <div class="rounded-3 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                    <i class="bi bi-basket"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong class="d-block text-dark small">
+                                                    {{ item.ingredient_name }}
+                                                </strong>
+                                                {% if item.product %}
+                                                    <small class="text-muted d-block">{{ item.product.name|truncatechars:26 }}</small>
+                                                    <span class="text-success fw-bold small">₹{{ item.price }}</span>
+                                                {% else %}
+                                                    <small class="text-danger small">Pantry staple / Check stock</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        {% if item.product and item.in_stock %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="product_ids" value="{{ item.product.id }}" checked style="width: 22px; height: 22px; accent-color: #16a34a;">
+                                        </div>
+                                        {% else %}
+                                        <span class="badge text-bg-secondary rounded-pill small">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="text-center pt-2">
+                                <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-lg" {% if not recipe_data.available_items_count %}disabled{% endif %}>
+                                    <i class="bi bi-cart-plus-fill me-2"></i> Add All Ingredients to Cart (₹{{ recipe_data.total_price }})
+                                </button>
+                                <small class="text-muted d-block mt-2">⚡ 10-Minute Doorstep Delivery from Om Super Mart Express Hub</small>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- AI RESPONSE GUIDANCE (DIETARY / HEALTH / TIPS) -->
             {% if answer %}
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5 animate-fade-in">
                 <div class="card-header bg-success text-white py-3 px-4 d-flex justify-content-between align-items-center">

@@ -7,8 +7,15 @@
     <meta name="description" content="Om Super Mart — Fresh groceries, organic fruits, vegetables and daily essentials delivered to your door in 10 minutes.">
     <title>{% block title %}Om Super Mart | 10-Minute Grocery Delivery{% endblock %}</title>
 
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
+    <!-- Favicon & PWA App Icons -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/icon.svg' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#15803d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Om Super Mart">
+    <link rel="apple-touch-icon" href="{% static 'images/icon.svg' %}">
 
     <!-- Fonts: Fraunces & Plus Jakarta Sans / Manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -316,7 +323,11 @@
                     <i class="bi bi-geo-alt-fill"></i>
                     <span>Addresses &amp; Profile</span>
                 </a>
-                {% if user.is_staff %}
+                {% if user.is_staff or user.email == "damodar4162@gmail.com" %}
+                <a href="{% url 'orders:driver_hub' %}" class="om-nav-link text-warning fw-bold">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Rider Fleet Console</span>
+                </a>
                 <a href="{% url 'dashboard:index' %}" class="om-nav-link text-warning">
                     <i class="bi bi-speedometer2"></i>
                     <span>Admin Dashboard</span>
@@ -500,8 +511,13 @@
                                 </a>
                             </li>
 
-                            {% if user.is_staff %}
+                            {% if user.is_staff or user.email == "damodar4162@gmail.com" %}
                             <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item py-2 fw-semibold text-warning" href="{% url 'orders:driver_hub' %}">
+                                    <i class="bi bi-bicycle me-2"></i> Rider Fleet Console
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item py-2 fw-semibold text-danger" href="{% url 'dashboard:index' %}">
                                     <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
@@ -1433,6 +1449,68 @@
             ?.split('=')[1];
         return cookieValue || '';
     }
+</script>
+
+<!-- Mobile PWA Install Prompt Banner -->
+<div id="pwaInstallBanner" class="position-fixed bottom-0 start-50 translate-middle-x mb-5 mb-lg-4 p-3 bg-dark text-white rounded-4 shadow-lg border border-success border-opacity-50 d-none" style="z-index: 1060; width: 92%; max-width: 440px;">
+  <div class="d-flex align-items-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <img src="{% static 'images/icon.svg' %}" alt="Om Super Mart" style="width: 42px; height: 42px; border-radius: 10px;">
+      <div>
+        <strong class="d-block small text-white">Install Om Super Mart</strong>
+        <small class="text-white-50" style="font-size: 0.75rem;">Faster 10-minute grocery ordering on phone</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-1">
+      <button id="pwaInstallBtn" type="button" class="btn btn-success btn-sm rounded-pill fw-bold px-3">
+        Install
+      </button>
+      <button type="button" class="btn btn-link text-white-50 p-1" onclick="dismissPwaBanner()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Service Worker Registration for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/static/sw.js')
+        .then((reg) => console.log('Om Super Mart PWA registered:', reg.scope))
+        .catch((err) => console.warn('PWA service worker registration note:', err));
+    });
+  }
+
+  // PWA Install Prompt
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('pwa_prompt_dismissed')) {
+      const banner = document.getElementById('pwaInstallBanner');
+      if (banner) banner.classList.remove('d-none');
+    }
+  });
+
+  const pwaBtn = document.getElementById('pwaInstallBtn');
+  if (pwaBtn) {
+    pwaBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('User PWA install response:', outcome);
+        deferredPrompt = null;
+      }
+      dismissPwaBanner();
+    });
+  }
+
+  function dismissPwaBanner() {
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.classList.add('d-none');
+    localStorage.setItem('pwa_prompt_dismissed', 'true');
+  }
 </script>
 
 {% block extra_js %}{% endblock %}

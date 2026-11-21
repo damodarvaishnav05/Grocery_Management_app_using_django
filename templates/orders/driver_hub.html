@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Rider Fleet Console | Om Super Mart{% endblock %}
+
+{% block extra_head %}
+<style>
+  .rider-hub-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #f8fafc;
+    border-radius: 18px;
+  }
+  .order-item-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .order-item-card:hover {
+    border-color: #10b981;
+    transform: translateY(-2px);
+  }
+  .badge-pulse {
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mx-auto" style="max-width: 820px;">
+
+    <!-- TOP FLEET HEADER -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4 text-white" style="background: linear-gradient(135deg, #0c831f 0%, #15803d 100%);">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-4 bg-white bg-opacity-20 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; font-size: 28px;">
+            🛵
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge text-bg-warning fw-bold px-2 py-1 rounded-pill">
+                Fleet Dispatch Console
+              </span>
+              <span class="badge text-bg-dark text-white rounded-pill">Damodar Vaishnav</span>
+            </div>
+            <h4 class="fw-bold mb-0">Om Super Mart Express Hub</h4>
+            <small class="text-white-50">10-Minute Doorstep Fulfillment Engine</small>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-light btn-sm rounded-pill fw-bold" onclick="location.reload();">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS COUNTER -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="rider-hub-card p-3 text-center">
+          <span class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Active Deliveries</span>
+          <h3 class="fw-bolder text-warning mb-0 mt-1">{{ active_count }}</h3>
+          <small class="text-muted" style="font-size: 0.75rem;">₹{{ total_active_val }} to deliver</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="rider-hub-card p-3 text-center">
+          <span class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Completed</span>
+          <h3 class="fw-bolder text-success mb-0 mt-1">{{ completed_count }}</h3>
+          <small class="text-muted" style="font-size: 0.75rem;">₹{{ total_delivered_val }} collected</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="rider-hub-card p-3 text-center">
+          <span class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Avg Speed</span>
+          <h3 class="fw-bolder text-info mb-0 mt-1">11<span class="fs-6 fw-normal">m</span></h3>
+          <small class="text-muted" style="font-size: 0.75rem;">Per delivery</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="rider-hub-card p-3 text-center">
+          <span class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem;">Fleet Status</span>
+          <h3 class="fw-bolder text-success mb-0 mt-1"><i class="bi bi-broadcast"></i></h3>
+          <small class="text-success fw-bold" style="font-size: 0.75rem;">Online &bull; Ready</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <ul class="nav nav-pills mb-4 nav-fill gap-2" id="fleetTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active rounded-pill fw-bold py-2.5" id="active-tab" data-bs-toggle="tab" data-bs-target="#activeDeliveries" type="button" role="tab">
+          ⚡ Active Orders ({{ active_count }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill fw-bold py-2.5" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#deliveredOrders" type="button" role="tab">
+          ✅ Delivered History ({{ completed_count }})
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="fleetTabContent">
+
+      <!-- ACTIVE DELIVERIES TAB -->
+      <div class="tab-pane fade show active" id="activeDeliveries" role="tabpanel">
+        {% if active_orders %}
+          <div class="d-flex flex-column gap-3">
+            {% for item in active_orders %}
+            <div class="order-item-card p-4 text-white">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge text-bg-warning fw-bold px-2 py-1 rounded-pill">
+                      Order #{{ item.order.id }}
+                    </span>
+                    <span class="badge {% if item.order.status == 'Shipped' %}bg-info{% else %}bg-primary{% endif %} rounded-pill">
+                      {{ item.order.status }}
+                    </span>
+                    <small class="text-muted">{{ item.order.created_at|timesince }} ago</small>
+                  </div>
+                  <h5 class="fw-bold mb-0 text-white">{{ item.order.full_name }}</h5>
+                </div>
+                <div class="text-end">
+                  <span class="fs-4 fw-bolder text-success">₹{{ item.order.total_amount }}</span>
+                  <small class="text-muted d-block">{{ item.order.items.count }} items</small>
+                </div>
+              </div>
+
+              <!-- DESTINATION & PIN -->
+              <div class="bg-dark bg-opacity-50 p-3 rounded-3 mb-3 border border-secondary border-opacity-25">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                  <small class="text-muted text-uppercase fw-bold">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> Delivery Address
+                  </small>
+                  <span class="badge text-bg-success px-2 py-1 rounded-pill">
+                    PIN: <strong class="font-monospace fs-6">{{ item.tracking.delivery_pin }}</strong>
+                  </span>
+                </div>
+                <div class="fw-medium text-light small mb-2">
+                  {{ item.order.address }}, {{ item.order.city }} - {{ item.order.pincode }}
+                </div>
+                <div class="text-muted small">
+                  📞 Phone: <a href="tel:{{ item.order.phone }}" class="text-success fw-bold text-decoration-none">{{ item.order.phone }}</a>
+                </div>
+              </div>
+
+              <!-- ITEMS PREVIEW -->
+              <div class="mb-3 small text-muted">
+                <strong class="text-light">Packing:</strong>
+                {% for oi in item.order.items.all|slice:":4" %}
+                  <span class="badge bg-secondary bg-opacity-50 text-light me-1 mb-1">{{ oi.product.name }} (x{{ oi.quantity }})</span>
+                {% endfor %}
+                {% if item.order.items.count > 4 %}
+                  <span class="badge bg-secondary bg-opacity-25 text-muted">+{{ item.order.items.count|add:"-4" }} more</span>
+                {% endif %}
+              </div>
+
+              <!-- ACTION BUTTONS -->
+              <div class="row g-2">
+                <div class="col-12 col-md-6">
+                  <a href="{{ item.partner_portal_url }}" class="btn btn-warning w-100 rounded-pill fw-bold shadow-sm">
+                    <i class="bi bi-broadcast me-1"></i> Open Live GPS & Verify PIN
+                  </a>
+                </div>
+                <div class="col-6 col-md-3">
+                  <a href="{{ item.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light w-100 rounded-pill fw-semibold">
+                    <i class="bi bi-compass me-1"></i> Maps
+                  </a>
+                </div>
+                <div class="col-6 col-md-3">
+                  <a href="{{ item.whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success w-100 rounded-pill fw-semibold">
+                    <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rider-hub-card p-5 text-center">
+            <div class="fs-1 mb-2">🎉</div>
+            <h5 class="fw-bold text-white mb-1">All Orders Delivered!</h5>
+            <p class="text-muted small mb-0">No pending orders in the queue. New 10-minute orders will appear here automatically.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- DELIVERED ORDERS TAB -->
+      <div class="tab-pane fade" id="deliveredOrders" role="tabpanel">
+        {% if completed_orders %}
+          <div class="d-flex flex-column gap-3">
+            {% for ord in completed_orders %}
+            <div class="order-item-card p-3 text-white">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge text-bg-success rounded-pill fw-bold">Order #{{ ord.id }}</span>
+                    <span class="badge bg-secondary rounded-pill">Delivered</span>
+                    <small class="text-muted">{{ ord.created_at|date:"d M, h:i A" }}</small>
+                  </div>
+                  <strong class="text-light d-block small">{{ ord.full_name }} &bull; {{ ord.city }}</strong>
+                </div>
+                <div class="text-end">
+                  <span class="fw-bold text-success">₹{{ ord.total_amount }}</span>
+                  <a href="{% url 'orders:detail' ord.id %}" class="btn btn-sm btn-outline-light rounded-pill ms-2">
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rider-hub-card p-5 text-center">
+            <p class="text-muted mb-0">No completed orders yet today.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Auto-refresh active delivery queue every 30 seconds
+  setInterval(function() {
+    const activeTab = document.querySelector('#active-tab.active');
+    if (activeTab) {
+      location.reload();
+    }
+  }, 30000);
+</script>
+{% endblock %}

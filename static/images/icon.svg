@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c831f"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+
+  <!-- Subtle Inner Border Glow -->
+  <rect x="8" y="8" width="496" height="496" rx="104" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="6"/>
+
+  <!-- Centered Shopping Basket / Cart Graphic -->
+  <g filter="url(#shadow)" transform="translate(40, 20)">
+    <!-- Cart Body Basket -->
+    <path d="M 120 180 L 312 180 C 324 180 334 190 332 202 L 310 320 C 308 332 298 340 286 340 L 146 340 C 134 340 124 332 122 320 L 100 202 C 98 190 108 180 120 180 Z" fill="#ffffff"/>
+    
+    <!-- Basket Grid Lines -->
+    <line x1="150" y1="200" x2="160" y2="320" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+    <line x1="216" y1="200" x2="216" y2="320" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+    <line x1="282" y1="200" x2="272" y2="320" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+    <line x1="112" y1="250" x2="320" y2="250" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+    <line x1="126" y1="290" x2="306" y2="290" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Handle Arch -->
+    <path d="M 140 180 C 140 100 292 100 292 180" fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
+
+    <!-- Fresh Green Organic Leaf on Basket Handle -->
+    <path d="M 270 90 C 270 60 320 60 320 90 C 320 120 270 120 270 90 Z" fill="url(#leafGrad)"/>
+    <path d="M 270 90 Q 295 90 320 90" stroke="#15803d" stroke-width="3" fill="none"/>
+  </g>
+
+  <!-- 10-Minute Express Delivery Lightning Badge -->
+  <g transform="translate(340, 50)" filter="url(#shadow)">
+    <circle cx="50" cy="50" r="46" fill="#facc15" stroke="#ffffff" stroke-width="4"/>
+    <!-- Lightning Bolt -->
+    <path d="M 52 24 L 32 54 L 48 54 L 42 78 L 68 46 L 52 46 Z" fill="#b45309"/>
+  </g>
+
+  <!-- Brand Typography "OM" at bottom -->
+  <text x="256" y="445" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" letter-spacing="4">OM SUPER MART</text>
+</svg>

@@ -111,13 +111,18 @@
 
     <!-- CUSTOMER & DESTINATION CARD -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-      <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h6 class="fw-bold text-uppercase text-muted small mb-0">
           <i class="bi bi-geo-alt-fill text-danger me-1"></i> Customer & Delivery Destination
         </h6>
-        <a href="tel:{{ order.phone }}" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
-          <i class="bi bi-telephone-fill me-1"></i> Call Customer
-        </a>
+        <div class="d-flex gap-2">
+          <a href="https://wa.me/{{ order.phone|cut:' '|cut:'+'|cut:'-' }}?text=Hi%20{{ order.full_name|urlencode }},%20I%20am%20Damodar%20Vaishnav,%20your%20Om%20Super%20Mart%20delivery%20partner.%20I%20am%20arriving%20with%20your%20Order%20%23{{ order.id }}." target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
+            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+          </a>
+          <a href="tel:{{ order.phone }}" class="btn btn-sm btn-success rounded-pill px-3 fw-bold">
+            <i class="bi bi-telephone-fill me-1"></i> Call Customer
+          </a>
+        </div>
       </div>
 
       <div>

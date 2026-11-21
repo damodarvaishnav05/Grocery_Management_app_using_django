@@ -35,6 +35,9 @@
             <a href="{% url 'orders:download_invoice' order.id %}" class="btn btn-outline-success rounded-pill fw-semibold">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF Invoice
             </a>
+            <a href="https://api.whatsapp.com/send?text=%F0%9F%9B%92%20*Om%20Super%20Mart%20-%20Order%20%23{{ order.id }}*%0A%F0%9F%92%B5%20Amount:%20%E2%82%B9{{ order.total_amount }}%0A%F0%9F%94%90%20PIN:%20{{ order.get_tracking.delivery_pin }}%0A%F0%9F%9B%B5%20Track:%20https://om-super-mart.onrender.com{% url 'orders:track' order.id %}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success rounded-pill fw-semibold">
+                <i class="bi bi-whatsapp me-1"></i> WhatsApp
+            </a>
             {% if order.status in "Pending Confirmed" %}
             <a
                 href="{% url 'orders:cancel' order.id %}"
@@ -132,6 +135,21 @@
         <!-- RIGHT: DELIVERY & BILL SUMMARY -->
         <div class="col-lg-4">
 
+            {% if order.status != "Delivered" and order.status != "Cancelled" %}
+            <!-- DELIVERY PIN BADGE -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-success bg-opacity-10 border border-success border-opacity-25 text-center">
+                <small class="text-uppercase text-success fw-bold d-block mb-1">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Delivery PIN
+                </small>
+                <span class="fs-2 fw-bolder text-success font-monospace" style="letter-spacing: 4px;">
+                    {{ order.get_tracking.delivery_pin }}
+                </span>
+                <small class="text-muted d-block mt-1">
+                    Share with delivery rider upon arrival.
+                </small>
+            </div>
+            {% endif %}
+
             <!-- ADDRESS CARD -->
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
                 <h6 class="fw-bold text-dark mb-3">
@@ -148,7 +166,7 @@
             </div>
 
             <!-- PAYMENT SUMMARY -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
                 <h6 class="fw-bold text-dark mb-3">
                     <i class="bi bi-receipt text-success me-1"></i> Billing Summary
                 </h6>
@@ -165,6 +183,14 @@
                     <span class="fw-bold text-dark">Grand Total</span>
                     <h4 class="fw-bold text-success mb-0">₹{{ order.total_amount }}</h4>
                 </div>
+            </div>
+
+            <!-- WHATSAPP SUPPORT -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+                <small class="text-muted d-block mb-2">Need help with this order?</small>
+                <a href="https://wa.me/919022054562?text=Hi%20Om%20Super%20Mart,%20I%20need%20assistance%20with%20Order%20%23{{ order.id }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success btn-sm rounded-pill fw-bold">
+                    <i class="bi bi-whatsapp me-1"></i> Chat on WhatsApp (+91 90220 54562)
+                </a>
             </div>
 
         </div>

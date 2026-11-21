@@ -64,6 +64,11 @@ urlpatterns = [
         name="set_user_location_api"
     ),
     path(
+        "driver/",
+        views.driver_hub,
+        name="driver_hub"
+    ),
+    path(
         "delivery-partner/<int:order_id>/",
         views.delivery_partner_portal,
         name="delivery_partner_portal"

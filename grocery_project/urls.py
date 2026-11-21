@@ -6,12 +6,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from django.views.generic import TemplateView
 from .views import home, custom_500_handler, custom_404_handler
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('', home, name='home'),
+    path('offline/', TemplateView.as_view(template_name='offline.html'), name='offline'),
 
     path('accounts/', include('accounts.urls')),
     path('categories/', include('categories.urls')),

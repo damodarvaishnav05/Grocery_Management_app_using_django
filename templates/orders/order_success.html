@@ -39,6 +39,19 @@
                         </span>
                     </div>
 
+                    <!-- SECURE DELIVERY OTP CARD -->
+                    <div class="p-3 bg-success bg-opacity-10 border border-2 border-dashed border-success rounded-4 mb-4 text-center">
+                        <small class="text-uppercase text-success fw-bold d-block mb-1">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Secure Doorstep Delivery PIN
+                        </small>
+                        <span class="fs-1 fw-bolder text-success font-monospace" style="letter-spacing: 6px;">
+                            {{ order.get_tracking.delivery_pin }}
+                        </span>
+                        <small class="text-muted d-block mt-1">
+                            Share this 4-digit PIN with our delivery partner upon arrival to verify and receive your package safely.
+                        </small>
+                    </div>
+
                     <!-- ORDER TIMELINE -->
                     <div class="order-timeline mb-4">
                         <div class="timeline-step completed">
@@ -86,16 +99,35 @@
                         </div>
                     </div>
 
+                    <!-- WHATSAPP SHARING & NOTIFICATION ROW -->
+                    <div class="card border border-success border-opacity-25 rounded-4 p-3 mb-4" style="background: #f0fdf4;">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-whatsapp fs-3 text-success"></i>
+                                <div>
+                                    <strong class="d-block text-dark small">Get Order Updates on WhatsApp</strong>
+                                    <span class="text-muted" style="font-size: 0.8rem;">Send bill and live track link to your WhatsApp</span>
+                                </div>
+                            </div>
+                            <a href="https://api.whatsapp.com/send?text=%F0%9F%9B%92%20*Om%20Super%20Mart%20-%20Order%20%23{{ order.id }}%20Confirmed!*%0A%E2%9A%A1%20*10-Minute%20Doorstep%20Delivery*%0A%F0%9F%93%8D%20Deliver%20To:%20{{ order.address|urlencode }},%20{{ order.city|urlencode }}%0A%F0%9F%92%B5%20Total%20Amount:%20%E2%82%B9{{ order.total_amount }}%0A%F0%9F%94%90%20Delivery%20PIN:%20*{{ order.get_tracking.delivery_pin }}*%0A%F0%9F%9B%B5%20Track%20Live:%20https://om-super-mart.onrender.com{% url 'orders:track' order.id %}" target="_blank" rel="noopener noreferrer" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">
+                                <i class="bi bi-whatsapp me-1"></i> Send to WhatsApp
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- ACTION BUTTONS -->
-                    <div class="d-flex flex-wrap gap-3 justify-content-center pt-2">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center pt-2">
                         <a href="{% url 'orders:track' order.id %}" class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow">
                             <i class="bi bi-geo-alt-fill me-1"></i> Track Live Delivery (Real-Time ETA)
                         </a>
-                        <a href="{% url 'orders:download_invoice' order.id %}" class="btn btn-outline-success rounded-pill px-4 fw-semibold d-flex align-items-center">
+                        <a href="{% url 'orders:download_invoice' order.id %}" class="btn btn-outline-success rounded-pill px-3 fw-semibold d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf me-1"></i> Download Invoice
                         </a>
-                        <a href="{% url 'orders:my_orders' %}" class="btn btn-light border rounded-pill px-4 fw-semibold d-flex align-items-center">
-                            <i class="bi bi-bag-check me-1"></i> Order History
+                        <a href="https://wa.me/919022054562?text=Hi%20Om%20Super%20Mart,%20I%20need%20help%20with%20Order%20%23{{ order.id }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark rounded-pill px-3 fw-semibold d-flex align-items-center">
+                            <i class="bi bi-headset me-1"></i> WhatsApp Support
+                        </a>
+                        <a href="{% url 'orders:my_orders' %}" class="btn btn-light border rounded-pill px-3 fw-semibold d-flex align-items-center">
+                            <i class="bi bi-bag-check me-1"></i> My Orders
                         </a>
                     </div>
 

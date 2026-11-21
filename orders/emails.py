@@ -29,6 +29,9 @@ def send_owner_new_order_email(order, payment_method="Online Payment"):
     encoded_destination = urllib.parse.quote_plus(full_address)
     google_maps_url = f"https://www.google.com/maps/dir/?api=1&destination={encoded_destination}"
 
+    clean_phone = "".join(c for c in order.phone if c.isdigit())
+    whatsapp_customer_url = f"https://wa.me/{clean_phone}?text=Hi%20{urllib.parse.quote(order.full_name)},%20your%20Om%20Super%20Mart%20order%20%23{order.id}%20is%20being%20packed%20and%20will%20arrive%20in%2010-15%20minutes!"
+
     tracking = order.get_tracking()
     base_url = get_site_base_url()
     rider_portal_url = f"{base_url}/orders/delivery-partner/{order.id}/?token={tracking.partner_access_token}"
@@ -124,8 +127,11 @@ Om Super Mart Express Fleet
       <a href="{google_maps_url}" class="btn-maps" target="_blank">
         🧭 Open in Google Maps (Start Navigation)
       </a>
-      <a href="{rider_portal_url}" class="btn-portal" target="_blank">
+      <a href="{rider_portal_url}" class="btn-portal" style="margin-bottom: 10px;" target="_blank">
         🛵 Open Delivery Partner Portal (Share Live GPS)
+      </a>
+      <a href="{whatsapp_customer_url}" style="display: block; text-align: center; background: #25D366; color: #ffffff; text-decoration: none; font-weight: 700; padding: 12px 20px; border-radius: 999px; font-size: 14px;" target="_blank">
+        💬 Chat / Call Customer on WhatsApp
       </a>
     </div>
 
@@ -185,6 +191,9 @@ def send_customer_order_confirmation(order, payment_method="Online Payment"):
 
     base_url = get_site_base_url()
     tracking_url = f"{base_url}/orders/track/{order.id}/"
+    clean_phone = "".join(c for c in order.phone if c.isdigit())
+    whatsapp_customer_url = f"https://wa.me/{clean_phone}?text=Hi%20{urllib.parse.quote(order.full_name)},%20your%20Om%20Super%20Mart%20order%20%23{order.id}%20is%20being%20packed%20and%20will%20arrive%20in%2010-15%20minutes!"
+
     tracking = order.get_tracking()
 
     subject = f"🎉 Order #{order.id} Confirmed — Om Super Mart 10-Min Delivery"

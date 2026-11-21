@@ -876,3 +876,67 @@ def update_rider_live_location_api(request, order_id):
     return JsonResponse({"status": "error", "message": "POST request with GPS coordinates required."}, status=400)
 
 
+def driver_hub(request):
+    """
+    Dedicated Mobile Delivery Partner Hub / Fleet Console for Damodar Vaishnav & store riders.
+    Lists all active dispatch orders with instant Navigation, WhatsApp customer chat, and PIN verification.
+    """
+    owner_email = getattr(settings, "OWNER_NOTIFICATION_EMAIL", "damodar4162@gmail.com")
+    is_owner_or_staff = (
+        request.user.is_authenticated and (request.user.is_staff or getattr(request.user, "email", "") == owner_email)
+    )
+
+    # Allow query token access (e.g. ?rider_token=om_rider_fleet) or staff/owner login
+    rider_token = request.GET.get("rider_token", "").strip()
+    valid_fleet_token = "om_rider_fleet"
+
+    if not is_owner_or_staff and rider_token != valid_fleet_token:
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('accounts:login')}?next={request.path}")
+        return render(request, "orders/partner_unauthorized.html", {}, status=403)
+
+    active_orders = (
+        Order.objects.filter(status__in=[Order.PENDING, Order.CONFIRMED, Order.SHIPPED])
+        .select_related("user")
+        .prefetch_related("items__product")
+        .order_by("-created_at")
+    )
+    completed_orders = (
+        Order.objects.filter(status=Order.DELIVERED)
+        .select_related("user")
+        .prefetch_related("items__product")
+        .order_by("-created_at")[:15]
+    )
+
+    enriched_active = []
+    for ord in active_orders:
+        trk = ord.get_tracking()
+        encoded_dest = urllib.parse.quote_plus(f"{ord.address}, {ord.city}, {ord.state} - {ord.pincode}")
+        clean_phone = "".join(c for c in ord.phone if c.isdigit())
+        enriched_active.append({
+            "order": ord,
+            "tracking": trk,
+            "telemetry": trk.get_live_telemetry(),
+            "google_maps_url": f"https://www.google.com/maps/dir/?api=1&destination={encoded_dest}",
+            "whatsapp_url": f"https://wa.me/{clean_phone}?text=Hi%20{urllib.parse.quote(ord.full_name)},%20I%20am%20Damodar%20from%20Om%20Super%20Mart.%20I%20am%20heading%20to%20your%20address%20with%20Order%20%23{ord.id}.",
+            "partner_portal_url": reverse("orders:delivery_partner_portal", args=[ord.id]) + f"?token={trk.partner_access_token}",
+        })
+
+    total_active_val = sum(o.total_amount for o in active_orders)
+    total_delivered_val = sum(o.total_amount for o in completed_orders)
+
+    return render(
+        request,
+        "orders/driver_hub.html",
+        {
+            "active_orders": enriched_active,
+            "completed_orders": completed_orders,
+            "total_active_val": total_active_val,
+            "total_delivered_val": total_delivered_val,
+            "active_count": len(enriched_active),
+            "completed_count": completed_orders.count(),
+        }
+    )
+
+
+
